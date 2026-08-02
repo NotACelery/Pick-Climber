@@ -39,6 +39,8 @@ public final class CommonEvents {
             // es la preferida, la interacción completa de la principal se prueba
             // primero. Si coloca/usa algo, el pipeline termina; si devuelve PASS,
             // Minecraft continúa y dispara este evento para la secundaria.
+            // En bloques con menú, ClimbingHandSelector también devuelve null
+            // salvo que el jugador mantenga Shift, preservando el uso vanilla.
             return;
         }
 
@@ -59,9 +61,9 @@ public final class CommonEvents {
             return;
         }
 
-        // Se conserva temporalmente el comportamiento antiguo solo cuando la
-        // propia mano principal es el ancla. La eliminación total del detach por
-        // clic izquierdo sigue siendo una tarea separada del backlog.
+        // Comportamiento intencional: intentar minar con el mismo pico que está
+        // sosteniendo al jugador retira la herramienta del ancla. La otra mano
+        // sigue pudiendo minar y atacar sin producir este detach.
         event.setCanceled(true);
         if (event.getEntity() instanceof ServerPlayer serverPlayer) {
             ClimbManager.detachServer(serverPlayer, false);

@@ -1,4 +1,4 @@
-# Pick Climber — Beta experimental 0.1.13
+# Pick Climber — Beta experimental 0.1.14
 
 Mod para **Minecraft 1.21.1**, **NeoForge 21.1.235** y **Java 21**.
 
@@ -13,6 +13,17 @@ Convierte cualquier herramienta incluida en `#minecraft:pickaxes` en una herrami
 - Movimiento horizontal y diagonal entre puntos de apoyo hasta 1,5 bloques.
 - 15 puntos de durabilidad por enganche o impulso exitoso, respetando `Unbreaking`.
 - Pick Climber I–III mejora el impulso y el wall jump.
+
+## Bloques interactivos vanilla
+
+La beta 0.1.14 distingue entre usar un bloque con menú y convertir su cara en un punto de apoyo:
+
+- **Clic derecho normal** sobre horno, mesa de crafteo, cofre u otro bloque que declare un menú: conserva la interacción vanilla.
+- **Shift + clic derecho** con una picota disponible: intenta engancharse a la cara vertical válida sin abrir la interfaz.
+- Un intento inválido no consume durabilidad ni inicia cooldown.
+- El indicador de alcance usa la misma regla: sobre un bloque con menú solo aparece al mantener Shift.
+
+La detección utiliza el `MenuProvider` del propio bloque. No existe una lista hardcodeada de hornos, cofres o mesas.
 
 ## Prioridad de manos y mano principal libre
 
@@ -31,7 +42,7 @@ Mientras la mano secundaria sostiene al jugador, la principal puede:
 - interactuar con bloques;
 - usar otro pico disponible para crear un nuevo punto de apoyo.
 
-El clic izquierdo todavía libera sin impulso cuando el propio pico de la mano principal es el ancla. Su eliminación definitiva está pendiente.
+El clic izquierdo con el mismo pico que mantiene el ancla provoca un desenganche pasivo. Es intencional: al intentar minar o atacar con esa herramienta, el pico deja de sostener al jugador. Minar con la mano libre no cancela el anclaje.
 
 ## Transferencia del ancla con `F`
 
@@ -46,25 +57,18 @@ El intercambio vanilla de manos conserva el anclaje cuando el mismo pico pasa a 
 
 La transferencia se detecta por el UUID persistente del pico, no por el material ni por el slot. Si el pico activo deja de estar equipado en ambas manos, el enganche termina de forma pasiva y sin impulso.
 
-## Cooldown y pose
+## Balance de Pick Climber
 
-Cada pico mantiene un cooldown individual de 20 ticks.
+Pick Climber continúa siendo el único encantamiento del mod con niveles I–III.
 
-El cooldown comienza inmediatamente cuando el servidor confirma un enganche o impulso. Su overlay baja de forma continua hasta cero aunque el pico continúe clavado. Soltarlo, cambiar al otro pico o transferirlo con `F` no reinicia ni prolonga el temporizador.
+Valores de la beta 0.1.14:
 
-Mientras un pico mantiene el anclaje, su modelo de primera persona entra suavemente a una pose adelantada durante 4 ticks y permanece congelado. La otra mano sigue usando su render normal.
-
-## Limpieza de grietas
-
-La beta 0.1.13 refuerza la limpieza del overlay visual:
-
-- el servidor recuerda la dimensión original del bloque ancla;
-- un cambio de dimensión limpia la grieta en el nivel antiguo;
-- al desconectarse, el cliente elimina directamente el overlay antes de destruir su `ClientLevel`;
-- un timeout de sincronización también limpia la grieta local;
-- cambiar de punto elimina inmediatamente la grieta anterior.
-
-## Impulso y encantamiento Pick Climber
+```text
+weight: 6
+anvil_cost: 1
+min_cost: 5 + 8 por nivel adicional
+max_cost: 25 + 8 por nivel adicional
+```
 
 | Nivel | Altura adicional aproximada |
 |---|---:|
@@ -75,13 +79,23 @@ La beta 0.1.13 refuerza la limpieza del overlay visual:
 
 El encantamiento también mejora el wall jump en aproximadamente 0,5 bloques por nivel.
 
+## Cooldown, pose y limpieza
+
+Cada pico mantiene un cooldown individual de 20 ticks. Comienza inmediatamente cuando el servidor confirma un enganche o impulso y continúa bajando aunque el pico siga clavado.
+
+Mientras un pico mantiene el anclaje, su modelo de primera persona entra suavemente a una pose adelantada durante 4 ticks y permanece congelado. La otra mano sigue usando su render normal.
+
+Las grietas sintéticas se limpian al cambiar de punto, soltarse, cambiar de dimensión, perder el pico, romper el bloque o desconectarse.
+
 ## Controles vigentes
 
 - **Clic derecho** sobre una cara vertical válida: impulso o enganche.
+- **Clic derecho normal en bloque con menú**: interacción vanilla.
+- **Shift + clic derecho en bloque con menú**: intento de anclaje.
 - **Espacio**, después de soltarlo y volver a pulsarlo: wall jump.
 - **F**: intercambia manos sin perder el anclaje.
-- **Clic izquierdo con ancla secundaria**: minería o ataque vanilla.
-- **Clic izquierdo con ancla principal**: todavía libera sin impulso durante esta fase.
+- **Clic izquierdo con ancla secundaria**: minería o ataque vanilla con la principal.
+- **Clic izquierdo con el mismo pico activo**: desenganche pasivo sin impulso.
 
 ## Compilar en Windows
 
@@ -90,10 +104,20 @@ El encantamiento también mejora el wall jump en aproximadamente 0,5 bloques por
 3. El JAR aparecerá en:
 
 ```text
-build/libs/pickclimber-1.21.1-0.1.13-beta.jar
+build/libs/pickclimber-1.21.1-0.1.14-beta.jar
 ```
 
 Retira versiones anteriores antes de instalar esta beta.
+
+## Diseño futuro obligatorio
+
+La especificación de `Strong Grip`, `Sturdy Latch`, nieve, hielo, anclajes de techo, doble Shift y balanceo está documentada en:
+
+```text
+docs/README-STRONG-GRIP.md
+```
+
+No está implementada todavía.
 
 ## Identidad visual
 

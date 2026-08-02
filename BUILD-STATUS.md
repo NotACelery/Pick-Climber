@@ -1,27 +1,27 @@
 # Estado de compilación
 
-Versión preparada: `0.1.13-beta`
+Versión preparada: `0.1.14-beta`
 
 Objetivo: Minecraft 1.21.1, NeoForge 21.1.235 y Java 21.
 
 Cambios funcionales:
 
-- Prioridad secundaria y mano principal libre conservadas desde 0.1.12.
-- Transferencia del pico activo mediante el intercambio vanilla de manos (`F`).
-- Validación estricta por UUID para diferenciar transferencia de pérdida/cambio de slot.
-- Limpieza cliente de grietas durante logout, detach y timeout.
-- Limpieza servidor en la dimensión original del anclaje.
-- Payload de anclaje ampliado con `anchorBlock` y `crackId`; protocolo 8.
+- Los bloques que declaran un menú conservan el clic derecho normal.
+- `Shift + clic derecho` habilita el intento de anclaje sobre esos bloques.
+- El selector de mano y el indicador visual comparten exactamente la misma regla.
+- Se mantiene el detach intencional al usar el mismo pico que sostiene el ancla.
+- Rebalance data-driven de Pick Climber: `weight: 6`, `anvil_cost: 1`, costes 5/8 y 25/8.
+- No hay cambios de protocolo de red ni de estados físicos.
 
 Validación realizada en este entorno:
 
-- `ServerClimbState` y `ClientClimbState` compilaron con Java 21 contra el JAR merged de Minecraft/NeoForge 21.1.235.
-- `AnchorSyncPayload` compiló contra las mismas clases usando un stub mínimo exclusivamente para `ByteBuf`.
-- `ClimbManager` compiló contra los artefactos exactos de 21.1.235 y las clases conocidas del proyecto; los stubs externos se limitaron a logging/JOML ausentes del artefacto merged.
-- `ClientEvents`, `CommonEvents` y `ClimbingHandSelector` compilaron con los contratos oficiales de eventos y stubs mínimos del event bus externo.
-- Los JSON y el manifiesto de archivos fueron validados.
+- `ClimbingHandSelector.java` compiló con Java 21 contra las clases ya compiladas del proyecto y los artefactos exactos de Minecraft/NeoForge 21.1.235 incluidos en la fuente recibida.
+- La llamada a `BlockState#getMenuProvider` fue verificada contra los mappings/artefactos de 1.21.1.
+- El JSON del encantamiento y el resto de JSON del proyecto fueron validados sintácticamente.
+- El manifiesto de archivos fue regenerado y sus hashes fueron comprobados.
+- La lógica de red, física, cooldown, transferencia y render no fue modificada.
 
-La ejecución completa de Gradle no puede repetirse aquí porque las dependencias externas del plugin no están disponibles offline. Compila localmente mediante:
+No se ejecutó una build completa de Gradle en este entorno. Compila localmente mediante:
 
 ```text
 build-beta.bat
@@ -30,5 +30,5 @@ build-beta.bat
 Resultado esperado:
 
 ```text
-build/libs/pickclimber-1.21.1-0.1.13-beta.jar
+build/libs/pickclimber-1.21.1-0.1.14-beta.jar
 ```

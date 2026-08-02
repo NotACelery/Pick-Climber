@@ -1,52 +1,44 @@
-# Checklist 0.1.13-beta — manos, transferencia y limpieza de grietas
+# Checklist 0.1.14-beta — bloques interactivos y balance del encantamiento
 
-## Prioridad secundaria y mano principal libre
+## Bloques con menú vanilla
 
-- [ ] Con dos picos disponibles, el primer enganche utiliza la mano secundaria.
-- [ ] Si la secundaria está en cooldown, la principal puede enganchar.
-- [ ] Con ancla secundaria, la principal mina bloques sin soltarse.
-- [ ] Con ancla secundaria, atacar entidades no cancela el anclaje.
-- [ ] Colocar bloques, usar comida, cubos y objetos conserva el resultado vanilla.
-- [ ] Una interacción principal exitosa impide que la secundaria consuma el mismo clic.
-- [ ] Si la principal devuelve `PASS`, la secundaria puede intentar el enganche.
-- [ ] Otro pico disponible en la principal puede reemplazar el ancla secundaria.
+- [ ] Clic derecho normal con una picota sobre una mesa de crafteo abre su interfaz y no engancha.
+- [ ] Clic derecho normal sobre horno, ahumador y alto horno abre su interfaz y no engancha.
+- [ ] Clic derecho normal sobre cofre, cofre atrapado, barril y cofre de Ender abre su interfaz y no engancha.
+- [ ] `Shift + clic derecho` sobre una cara vertical válida de esos bloques crea el anclaje sin abrir el menú.
+- [ ] `Shift + clic derecho` sobre una cara inválida no gasta durabilidad ni inicia cooldown.
+- [ ] Sin Shift, el indicador de alcance no aparece sobre un bloque con menú.
+- [ ] Con Shift, el indicador aparece cuando la cara, distancia, cooldown y colisión permiten el anclaje.
+- [ ] Probar con el pico únicamente en la mano principal.
+- [ ] Probar con el pico únicamente en la mano secundaria.
+- [ ] Probar con dos picos disponibles: la secundaria conserva prioridad para el anclaje.
+- [ ] Probar con un bloque de construcción en la principal y el pico anclado en la secundaria: `Shift + clic derecho` coloca sobre el bloque interactivo y no secuestra el clic.
 
-## Transferencia con F
+## Detach intencional por clic izquierdo
 
-- [ ] Ancla principal + `F`: el mismo pico pasa a secundaria sin soltar al jugador.
-- [ ] Ancla secundaria + `F`: el mismo pico pasa a principal sin soltar al jugador.
-- [ ] Probar la transferencia con la otra mano vacía.
-- [ ] Probar la transferencia con dos picos distintos.
-- [ ] No se consumen otros 15 puntos de durabilidad.
-- [ ] El cooldown no se reinicia ni se prolonga.
-- [ ] No se repiten sonido ni grietas.
-- [ ] El punto de apoyo y la posición del jugador no cambian.
-- [ ] La pose clavada pasa a la nueva mano.
-- [ ] La mano anterior recupera inmediatamente el render normal.
-- [ ] Repetir `F` varias veces no duplica UUID ni estado.
+- [ ] Ancla secundaria + minar con la principal: el jugador sigue sujeto.
+- [ ] Ancla secundaria + atacar con la principal: el jugador sigue sujeto.
+- [ ] Ancla principal + clic izquierdo: termina el anclaje sin impulso.
+- [ ] Transferir con `F` a la secundaria permite volver a minar con la principal sin soltarse.
+- [ ] El detach limpia pose, gravedad y grietas correctamente.
 
-## Cambio de slot y pérdida del pico
+## Balance de Pick Climber
 
-- [ ] Cambiar el slot de un pico activo en la principal termina el anclaje sin impulso.
-- [ ] Soltar o destruir el pico activo termina el anclaje sin impulso.
-- [ ] Un pico distinto no hereda el UUID ni el estado activo.
-- [ ] Volver a equipar el pico anterior no restaura automáticamente un anclaje terminado.
+- [ ] Pick Climber sigue teniendo niveles I, II y III.
+- [ ] Aparece con mayor frecuencia relativa por `weight: 6`.
+- [ ] La mesa respeta coste mínimo base 5 y aumento 8 por nivel.
+- [ ] El JSON carga sin errores de datapack.
+- [ ] Combinar libros en yunque refleja `anvil_cost: 1`.
+- [ ] Aplicar Pick Climber a una picota previamente encantada resulta más viable que en 0.1.13.
+- [ ] Las alturas de impulso y wall jump no cambiaron con el rebalance.
 
-## Hotfix de grietas
+## Regresión 0.1.13
 
-- [ ] Engancharse, salir del mundo y volver: la grieta no permanece.
-- [ ] En multijugador, los demás jugadores ven desaparecer la grieta al desconectarse el escalador.
-- [ ] Cambiar de dimensión elimina la grieta en la dimensión anterior.
-- [ ] Un timeout cliente no deja grietas huérfanas.
-- [ ] Cambiar de punto limpia el bloque anterior inmediatamente.
-- [ ] Wall jump, rotura del bloque y pérdida del pico siguen limpiando la grieta.
-
-## Regresión física y visual
-
+- [ ] La secundaria sigue teniendo prioridad entre picos disponibles.
+- [ ] `F` transfiere el mismo pico sin durabilidad, sonido, cooldown ni movimiento adicional.
+- [ ] El cooldown individual sigue bajando desde el instante del uso.
+- [ ] Enganche desde reposo, caída y ápice sigue funcionando.
 - [ ] Impulso solo después de un salto real.
-- [ ] Enganche desde reposo, caída y ápice.
 - [ ] No reaparece el wall jump automático.
-- [ ] Cooldowns independientes y descendentes desde el instante del uso.
-- [ ] Desgaste de 15 y `Unbreaking` correctos.
-- [ ] Pose fija correcta en ambas manos.
-- [ ] Probar en supervivencia, creativo y con alta latencia si es posible.
+- [ ] Las grietas se limpian al cambiar de punto, dimensión o desconectarse.
+- [ ] La pose clavada sigue correcta en ambas manos.

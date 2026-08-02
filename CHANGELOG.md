@@ -1,3 +1,15 @@
+## 0.1.14-beta
+
+- Los bloques que declaran un `MenuProvider` conservan el clic derecho vanilla mientras el jugador no mantenga Shift.
+- `Shift + clic derecho` permite intentar el enganche sobre hornos, mesas de crafteo, cofres y otros bloques con menú sin abrir su interfaz.
+- La regla se aplica antes de seleccionar la mano y también al indicador de alcance, evitando mostrar un anclaje que el clic normal no ejecutará.
+- No se utilizan listas hardcodeadas de bloques interactivos.
+- Un intento inválido continúa sin consumir durabilidad ni iniciar cooldown.
+- Se conserva como comportamiento intencional el detach pasivo al intentar minar o atacar con el mismo pico que sostiene el ancla.
+- Rebalance de Pick Climber: `weight` 4 → 6, `anvil_cost` 4 → 1, coste mínimo base 10 → 5 y progresión 12 → 8.
+- El coste máximo pasa a base 25 y progresión 8 por nivel adicional.
+- No modifica impulso, wall jump, física, red, transferencia con `F`, pose ni limpieza de grietas.
+
 ## 0.1.13-beta
 
 - Completa la transferencia del anclaje al intercambiar manos con `F`.

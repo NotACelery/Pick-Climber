@@ -62,8 +62,8 @@ public final class ClientEvents {
             return;
         }
 
-        // Compatibilidad temporal con la mecánica previa: únicamente un pico
-        // anclado en la principal sigue soltándose mediante clic izquierdo.
+        // Regla intencional: usar para minar/atacar el mismo pico clavado en la
+        // principal lo retira del ancla. La mano libre no es interceptada.
         event.setSwingHand(false);
         event.setCanceled(true);
         ClimbManager.detachClient(player, false);

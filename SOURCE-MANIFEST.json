@@ -1,5 +1,5 @@
 {
-  "version": "0.1.13-beta",
+  "version": "0.1.14-beta",
   "files": [
     {
       "path": ".gitignore",
@@ -8,38 +8,38 @@
     },
     {
       "path": "BETA-TEST-CHECKLIST.md",
-      "size": 2641,
-      "sha256": "164685adda72a6bc9d7c3ae315d5e10ca93ebd43b2419a0176765e4b6044035e"
+      "size": 2639,
+      "sha256": "03882425a63e2f2def98686847d63ba5ce5339870dd7c8990d6903ec97a2c7a5"
     },
     {
       "path": "BUILD-STATUS.md",
-      "size": 1509,
-      "sha256": "7cbe13a6bdb7a8a5527114ee59d283533dc231f2795a19135ed91e25f9c0915b"
+      "size": 1380,
+      "sha256": "792fefd28b63052a02cdb86bdf99c4d21e0758de430ad05803710f5a7d6d02e4"
     },
     {
       "path": "CHANGELOG.md",
-      "size": 8352,
-      "sha256": "a3d838085f16b9da9a7fb475d8817ced580427d9583a4502ee2af9660092f081"
+      "size": 9341,
+      "sha256": "9e3af6c2bd138d332200202d9ac6b898f480718b3e1d46e08fee8e43b3641487"
     },
     {
       "path": "README.md",
-      "size": 4174,
-      "sha256": "2f64329aa8b860955659d9100f1b161ca32c7aa4b3ef65f117786443f4f44775"
+      "size": 5107,
+      "sha256": "a265bf61070e935dc7653843e99afb3acb2d94f7c856016ac5ae6272c7c16101"
     },
     {
       "path": "TODO.md",
-      "size": 4756,
-      "sha256": "74222ad529786a40fcda650c2a88c6293c9a6371b4740e4416c2980e2bfc88e4"
+      "size": 9368,
+      "sha256": "d926c508396e7ed7673ddcb3ac612c7e3d290b768f87db37b225ec12bd3caa64"
     },
     {
       "path": "build-beta.bat",
       "size": 5931,
-      "sha256": "e693d58534a0a48e01510b4ce973149403fd77db215184076bb7cc96b1468fad"
+      "sha256": "571af16b10dc0cc93beaf7afa4152779daf1f4a8e08cfe815b418b72e85bf5ab"
     },
     {
       "path": "build-beta.sh",
       "size": 737,
-      "sha256": "e59e8c148bf41ad3cbe0414e82fdc2f0756e8e1a2dc73d3d68c2b39dd378aa64"
+      "sha256": "2a82e897514129012a46b7eb010ee938af1f29a3c5e1f7288f52c764fb127934"
     },
     {
       "path": "build.gradle",
@@ -47,9 +47,14 @@
       "sha256": "6403a52fd6eb8b5f74becdbec729f91fe5f0793ebe3d492015846fe3a2d52e3c"
     },
     {
+      "path": "docs/README-STRONG-GRIP.md",
+      "size": 26483,
+      "sha256": "70f410267cddd9b431e62a5c13e6436ffe09d024f55fac244e05e2e38223f887"
+    },
+    {
       "path": "gradle.properties",
       "size": 448,
-      "sha256": "25c637e49800c57d8a2b2a2f0c1da6508573f7acd97f04d641e6c05f98e304e6"
+      "sha256": "4b89eedad039e0db4220d2ef77f3f588c53ca2b5984117be8e0f12c2a79b3281"
     },
     {
       "path": "settings.gradle",
@@ -63,8 +68,8 @@
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/client/ClientEvents.java",
-      "size": 5876,
-      "sha256": "560fdde7258472bde9474803ac50cd39539e2f66a9d017da82f760814eff9b14"
+      "size": 5875,
+      "sha256": "3eee0a9e6b16607f4d61028e95156dbbcc4875dd1380d99ee2e1141a93ade9fc"
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/client/ClientModEvents.java",
@@ -93,8 +98,8 @@
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/climb/ClimbingHandSelector.java",
-      "size": 970,
-      "sha256": "cb7d4deb13e17d6007ef675f1d7d35a66be8a63c16552f3aedd7179743a81fc9"
+      "size": 2229,
+      "sha256": "2e7bd9ec620838c1610025a486ce4fadefdf238da748451748619f6045f7b8db"
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/climb/ModEnchantments.java",
@@ -113,8 +118,8 @@
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/event/CommonEvents.java",
-      "size": 3960,
-      "sha256": "3021ffd6a2cd9906c7318121d2797f3fc50bb989906dfd96979f8124749ac066"
+      "size": 4118,
+      "sha256": "88bbfe62daa9e1dc297933b981b710ca1ec498504a6d147520c8505142fb180f"
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/network/AnchorSyncPayload.java",
@@ -158,8 +163,8 @@
     },
     {
       "path": "src/main/resources/data/pickclimber/enchantment/pick_climber.json",
-      "size": 405,
-      "sha256": "cbf78dfc55492ebed0d4c6a56e10beb5450d0cffdd1fc9a7295c7f7ddfabbc53"
+      "size": 402,
+      "sha256": "d67e16432a6b5f9f4bac2e3f1522e54456cb9e589753352b2de88e603ab7a66d"
     },
     {
       "path": "src/main/resources/pack.mcmeta",
