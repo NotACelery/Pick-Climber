@@ -41,3 +41,8 @@
 - Eternal Starlight.
 - Herramientas híbridas y mazas que funcionen como pico.
 - Tag `pickclimber:climbing_tools` y lista configurable de exclusiones.
+
+## Ajustes visuales posteriores
+
+- Ajustar el valor exacto de la pose clavada después de pruebas in-game.
+- Evaluar una pose equivalente en tercera persona.

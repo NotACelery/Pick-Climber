@@ -38,6 +38,10 @@ public final class ClimbManager {
     private static final double BOOST_HEIGHT_PER_ENCHANTMENT_LEVEL = 0.5D;
     private static final double WALL_JUMP_HEIGHT_PER_ENCHANTMENT_LEVEL = 0.5D;
 
+    /** Punto estable de la animación vanilla donde el pico está más adelantado. */
+    private static final float PINNED_SWING_PROGRESS = 0.5F;
+    private static final float PINNED_POSE_RAMP_TICKS = 4.0F;
+
     private static final double MAX_HIT_DISTANCE_SQR = 25.0D;
     private static final double MAX_ANCHOR_MOVE_SQR = 2.25D; // 1,5 bloques reales.
     private static final double MAX_DRIFT_DISTANCE_SQR = 16.0D;
@@ -128,6 +132,29 @@ public final class ClimbManager {
                 player.level().getGameTime(),
                 ANCHOR_COOLDOWN_TICKS
         );
+    }
+
+    /**
+     * Devuelve el progreso de golpe fijo usado para representar el pico clavado.
+     * Un valor negativo indica que este stack no es el pico activo del cliente.
+     * La entrada se anima durante unos pocos ticks y luego queda completamente
+     * congelada, sin depender de la animación vanilla que continúa avanzando.
+     */
+    public static float pinnedPoseProgress(Player player, ItemStack stack, float partialTick) {
+        if (!player.level().isClientSide()) {
+            return -1.0F;
+        }
+
+        ClientClimbState state = CLIENT_STATES.get(player.getUUID());
+        if (state == null || !ToolIdentity.matches(stack, state.toolId())) {
+            return -1.0F;
+        }
+
+        float age = (float) (player.level().getGameTime() - state.poseStartedGameTime()) + partialTick;
+        float blend = Mth.clamp(age / PINNED_POSE_RAMP_TICKS, 0.0F, 1.0F);
+        // Curva suave: entra rápido, pero evita un salto visual seco desde idle.
+        blend = 1.0F - (1.0F - blend) * (1.0F - blend);
+        return PINNED_SWING_PROGRESS * blend;
     }
 
     /**
@@ -592,7 +619,7 @@ public final class ClimbManager {
     }
 
     public static void applyClientSync(Player player, AnchorSyncPayload payload) {
-        CLIENT_STATES.remove(player.getUUID());
+        ClientClimbState previousState = CLIENT_STATES.remove(player.getUUID());
 
         if (!payload.attached()) {
             ItemStack releasedTool = findToolById(player, payload.toolId());
@@ -639,13 +666,21 @@ public final class ClimbManager {
             }
         }
 
+        long now = player.level().getGameTime();
+        long poseStartedGameTime = payload.newAnchor()
+                || previousState == null
+                || !previousState.toolId().equals(payload.toolId())
+                ? now
+                : previousState.poseStartedGameTime();
+
         ClientClimbState next = new ClientClimbState(
                 target,
                 hand,
                 payload.toolId(),
                 payload.restoreNoGravity(),
                 payload.restoreFlying(),
-                player.level().getGameTime()
+                now,
+                poseStartedGameTime
         );
 
         CLIENT_STATES.put(player.getUUID(), next);

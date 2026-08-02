@@ -1,6 +1,6 @@
 # Estado de compilación
 
-Versión preparada: `0.1.10-beta`
+Versión preparada: `0.1.11-beta`
 
 Objetivo: Minecraft 1.21.1, NeoForge 21.1.235 y Java 21.
 
@@ -15,5 +15,8 @@ build-beta.bat
 Resultado esperado:
 
 ```text
-build/libs/pickclimber-1.21.1-0.1.10-beta.jar
+build/libs/pickclimber-1.21.1-0.1.11-beta.jar
 ```
+
+
+Validación adicional 0.1.11: `PinnedPickaxeRenderer`, `ClimbManager` y `ClientClimbState` compilaron con Java 21 contra las clases de NeoForge 21.1.235 mediante verificación aislada.

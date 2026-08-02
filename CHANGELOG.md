@@ -1,3 +1,15 @@
+## 0.1.11-beta
+
+- Añade un render dedicado de primera persona para el pico que mantiene el anclaje.
+- La herramienta entra durante 4 ticks a una pose adelantada equivalente al golpe vanilla y queda congelada allí.
+- Solo se cancela y redibuja la mano que sostiene el pico activo; la otra mano conserva su render vanilla.
+- La pose se refleja correctamente para mano izquierda y derecha usando el brazo real del jugador.
+- Cambiar de pico reinicia la entrada visual únicamente para el nuevo pico activo.
+- Soltarse restaura inmediatamente la pose idle normal.
+- El cooldown sigue bajando desde el instante del enganche y permanece independiente de la pose.
+- Reemplaza el gato placeholder por el nuevo icono oficial de Pick Climber.
+- No modifica impulso, enganche, durabilidad, cooldown ni física estable de la 0.1.6.
+
 ## 0.1.10-beta
 
 - Corrige la interpretación visual del cooldown durante un enganche.

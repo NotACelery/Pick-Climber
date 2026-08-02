@@ -11,6 +11,7 @@ public record ClientClimbState(
         UUID toolId,
         boolean restoreNoGravity,
         boolean restoreFlying,
-        long lastSyncGameTime
+        long lastSyncGameTime,
+        long poseStartedGameTime
 ) {
 }

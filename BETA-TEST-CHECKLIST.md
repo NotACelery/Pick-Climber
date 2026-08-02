@@ -1,32 +1,29 @@
-# Checklist de pruebas — 0.1.10-beta
+# Checklist 0.1.11-beta — pose del pico clavado
 
-## Cooldown en tiempo real
+## Pose principal
 
-- [ ] Al engancharse, el overlay aparece lleno y comienza a bajar inmediatamente.
-- [ ] El overlay llega a cero después de 20 ticks aunque el pico siga clavado.
-- [ ] Soltarse antes de 20 ticks conserva solo la fracción restante, sin reiniciarla.
-- [ ] Soltarse después de 20 ticks no crea un cooldown nuevo.
-- [ ] Cambiar del pico A al B no reinicia el cooldown de A y B inicia el suyo al engancharse.
-- [ ] Alternar dos picos no permite spam de enganches: cada uso exitoso tiene sus propios 20 ticks.
+- [ ] Enganchar con el pico de la mano principal inicia una entrada visual corta.
+- [ ] Tras aproximadamente 4 ticks, el pico queda congelado hacia adelante.
+- [ ] El pico no termina la animación ni vuelve a idle mientras siga enganchado.
+- [ ] Saltar o desengancharse restaura inmediatamente la pose normal.
 
+## Dos manos
 
-## Cooldown al enganchar
+- [ ] Enganchar con el segundo pico mueve la pose fija exclusivamente al nuevo pico activo.
+- [ ] La mano anterior vuelve a idle sin deformaciones ni transformaciones acumuladas.
+- [ ] La pose de la mano izquierda aparece reflejada correctamente.
+- [ ] La mano no activa conserva sus animaciones vanilla normales.
 
-- [ ] Sacar dos picos nuevos: ninguno presenta overlay.
-- [ ] Engancharse con el pico A: A queda visualmente cubierto al 100 %.
-- [ ] Soltarse antes de 20 ticks: A muestra solo la fracción restante y termina normalmente.
-- [ ] Permanecer enganchado más de 20 ticks: al soltarse, A queda disponible inmediatamente.
-- [ ] Cambiar de A a B antes de 20 ticks: B queda cubierto al 100 % y A continúa con el tiempo restante, sin reiniciarse.
-- [ ] Cambiar de A a B después de 20 ticks: A queda disponible al instante y B pasa a ser el activo.
-- [ ] Hacer un wall jump rápido y pulsar clic derecho durante el ascenso: el mismo pico sigue bloqueado durante el tiempo restante y no produce un impulso accidental.
-- [ ] Cuando termine el cooldown y el jugador esté cayendo o cerca del ápice, el pico puede volver a engancharse.
-- [ ] Dos picos del mismo material conservan UUID, overlays y cooldowns independientes.
+## Cooldown y física
 
-## Regresión funcional
+- [ ] El overlay de cooldown comienza al engancharse y baja mientras el pico sigue clavado.
+- [ ] La pose fija continúa aunque el cooldown visual llegue a cero.
+- [ ] Impulso, enganche, wall jump y rescate durante caídas se comportan igual que en 0.1.10.
+- [ ] No reaparece el salto automático corregido en 0.1.6.
 
-- [ ] Desde reposo, clic derecho engancha y no impulsa.
-- [ ] Durante un salto real, clic derecho produce el impulso esperado.
-- [ ] Durante una caída, clic derecho sirve como rescate.
-- [ ] No reaparece el desenganche automático corregido en 0.1.6.
-- [ ] Grietas, sonido y desgaste de 15 funcionan.
-- [ ] Unbreaking sigue afectando el desgaste.
+## Compatibilidad visual
+
+- [ ] Probar pico vanilla sin encantamiento.
+- [ ] Probar pico encantado con glint.
+- [ ] Probar mano principal configurada como izquierda en las opciones de skin.
+- [ ] Probar con FOV normal y FOV alto.

@@ -1,5 +1,5 @@
 {
-  "version": "0.1.10-beta",
+  "version": "0.1.11-beta",
   "files": [
     {
       "path": ".gitignore",
@@ -8,38 +8,38 @@
     },
     {
       "path": "BETA-TEST-CHECKLIST.md",
-      "size": 1889,
-      "sha256": "ddd710cb177b0ebbb47ceed31fc7f8daea28eb3363c673b5b6149dc8d4645d86"
+      "size": 1281,
+      "sha256": "f9d2b094bfb00e0ed8711ade0d3ada7c0f4e081772f6307380458b8d92501430"
     },
     {
       "path": "BUILD-STATUS.md",
-      "size": 719,
-      "sha256": "7b0af7d86583d06ea7a652a9bf8dd1f75db80cb1941b1e29cf216cf506ea0d46"
+      "size": 906,
+      "sha256": "3b00121c89d7912c60afcbde475e1b17bdf2ac8e719fdd0c22b753bb7bd551ba"
     },
     {
       "path": "CHANGELOG.md",
-      "size": 5468,
-      "sha256": "90850888351c6f0d047adf9febece8f6506a8f8f0bf2ad465f9bc62204a70f39"
+      "size": 6291,
+      "sha256": "3ed656240c3ea023179d028ac4226903e4b7acc40377ce5dbed020c20487e959"
     },
     {
       "path": "README.md",
-      "size": 2388,
-      "sha256": "07f83df18f07584ce509aa9debb5c3195feb1ea8814a510118e4760f415ba5b7"
+      "size": 2446,
+      "sha256": "1f4bd8024328a0368c96175b26737296018783251d64396f0d7ae697ee9b3264"
     },
     {
       "path": "TODO.md",
-      "size": 2136,
-      "sha256": "23a59bee705264d03e7852322f9bdaf6d3c4ef2588b5798172e0354f5e37a26d"
+      "size": 2295,
+      "sha256": "a4daaaeba91f6ca472e626eca0f01b339119cb95b7b498b6dc713c1a565f497e"
     },
     {
       "path": "build-beta.bat",
-      "size": 5930,
-      "sha256": "0f6e1b30addfa8be551da7792f13a9f2e43518bc0125ce42f7f4fc24ebf82def"
+      "size": 5931,
+      "sha256": "e693d58534a0a48e01510b4ce973149403fd77db215184076bb7cc96b1468fad"
     },
     {
       "path": "build-beta.sh",
-      "size": 736,
-      "sha256": "109ec5f32f7721f9084198597b869053c28d5e45bdb610f87ec9f2ee547cade0"
+      "size": 737,
+      "sha256": "e59e8c148bf41ad3cbe0414e82fdc2f0756e8e1a2dc73d3d68c2b39dd378aa64"
     },
     {
       "path": "build.gradle",
@@ -49,7 +49,7 @@
     {
       "path": "gradle.properties",
       "size": 448,
-      "sha256": "3dacff248d492946dfed7a95a2e001b99d13b7630a3edc33c1a5b25f984e8150"
+      "sha256": "605ee2dd4ac3eed484b7f7a713dfc16babf4ab8466fba3b4fb70d22c5499d776"
     },
     {
       "path": "settings.gradle",
@@ -77,14 +77,19 @@
       "sha256": "b2e6abbfdb927acc2c7bd2a9cf1249d7f37cdd55637c774e89ec521ff3562122"
     },
     {
+      "path": "src/main/java/dev/maicra/pickclimber/client/PinnedPickaxeRenderer.java",
+      "size": 4166,
+      "sha256": "87f345c978bd310eba970f33d1cc1b2cba7a0f5ed9511e2de7a26e571e4dad28"
+    },
+    {
       "path": "src/main/java/dev/maicra/pickclimber/climb/ClientClimbState.java",
-      "size": 365,
-      "sha256": "c954ae10c4a5e3011719905ece8721819cce3309bf98de02ab36916e12806f10"
+      "size": 399,
+      "sha256": "61ff306e096c147b1186ce51993a2c032520a122da14e0885aa1f86606936cad"
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/climb/ClimbManager.java",
-      "size": 34330,
-      "sha256": "aa5f196a2aca21e3f416d3735a9b1e66840d8f299f6da21511df79cbcaadadce"
+      "size": 35951,
+      "sha256": "57935db3dc0eb5467831396ae657abca24cd97269b440385329d230ee28d5df9"
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/climb/ModEnchantments.java",
@@ -158,8 +163,8 @@
     },
     {
       "path": "src/main/resources/pickclimber_logo.png",
-      "size": 92134,
-      "sha256": "28cb424fe0297a410d8d2474abd1112689ec46e5a05695a52a78e4321bc6633a"
+      "size": 217821,
+      "sha256": "4d1ed88532bfc0478fb17a3b0391b649980879c133a0ad966c0bbef4a36004f0"
     },
     {
       "path": "src/main/templates/META-INF/neoforge.mods.toml",
