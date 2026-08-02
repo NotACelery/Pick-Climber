@@ -31,6 +31,8 @@ import org.slf4j.Logger;
 public final class ClimbManager {
     private static final Logger LOGGER = LogUtils.getLogger();
     public static final int DURABILITY_COST = 15;
+    private static final int CEILING_DURABILITY_COST = 20;
+    private static final int CEILING_DURABILITY_INTERVAL_TICKS = 20;
     private static final int BRAKING_DURABILITY_PER_BLOCK = 10;
     public static final int CRACK_STAGE = 5;
     public static final int ANCHOR_COOLDOWN_TICKS = 20;
@@ -209,12 +211,17 @@ public final class ClimbManager {
         }
 
         Direction face = hit.getDirection();
-        if (face.getAxis() == Direction.Axis.Y) {
+        if (face == Direction.UP) {
             return false;
         }
 
         ItemStack stack = player.getItemInHand(hand);
         if (!isPickaxe(stack)) {
+            return false;
+        }
+
+        boolean ceilingAttempt = face == Direction.DOWN;
+        if (ceilingAttempt && !ModEnchantments.hasStrongGrip(player.level(), stack)) {
             return false;
         }
 
@@ -247,6 +254,10 @@ public final class ClimbManager {
 
         BlockState state = player.level().getBlockState(hit.getBlockPos());
         if (!hasValidAnchorFace(player, state, hit.getBlockPos(), face)) {
+            return false;
+        }
+        if (ceilingAttempt && AnchorSurfaceClassifier.classify(state) == AnchorSurface.UNSTABLE
+                && !ModEnchantments.hasSturdyLatch(player.level(), stack)) {
             return false;
         }
 
@@ -284,7 +295,8 @@ public final class ClimbManager {
                 && !isAttached(player)
                 && airborne
                 && rising
-                && realJumpAuthorized;
+                && realJumpAuthorized
+                && hit.getDirection().getAxis() != Direction.Axis.Y;
 
         LOGGER.info(
                 "[PickClimber] action={} player={} hand={} onGround={} flying={} deltaY={} jumpAuthorized={} attached={} target={}",
@@ -386,14 +398,15 @@ public final class ClimbManager {
         }
         AnchorSurface surface = AnchorSurfaceClassifier.classify(anchorState);
         boolean reinforcedLatch = ModEnchantments.hasSturdyLatch(level, stack);
-        AnchorMotion initialMotion = initialMotion(surface, player, reinforcedLatch);
+        boolean ceilingAnchor = hit.getDirection() == Direction.DOWN;
+        AnchorMotion initialMotion = initialMotion(surface, player, reinforcedLatch, ceilingAnchor);
 
         EquipmentSlot slot = hand == InteractionHand.MAIN_HAND
                 ? EquipmentSlot.MAINHAND
                 : EquipmentSlot.OFFHAND;
 
         stack.hurtAndBreak(
-                DURABILITY_COST,
+                ceilingAnchor ? CEILING_DURABILITY_COST : DURABILITY_COST,
                 level,
                 player,
                 brokenItem -> player.onEquippedItemBroken(brokenItem, slot)
@@ -461,7 +474,7 @@ public final class ClimbManager {
                 player.level().getGameTime(),
                 surface,
                 initialMotion,
-                initialSlideVelocity(surface, player, reinforcedLatch),
+                initialSlideVelocity(surface, player, reinforcedLatch, ceilingAnchor),
                 cooldownTicksFor(surface, reinforcedLatch),
                 0.0F,
                 0.0F,
@@ -542,6 +555,14 @@ public final class ClimbManager {
             boolean failedImmediately = player.level().getGameTime() - state.attachedAtGameTime()
                     <= FAILED_ATTACH_GRACE_TICKS;
             detachServerInternal(player, false, failedImmediately);
+            return;
+        }
+
+        if (state.anchorFace() == Direction.DOWN
+                && player.level().getGameTime() - state.attachedAtGameTime() > 0
+                && (player.level().getGameTime() - state.attachedAtGameTime()) % CEILING_DURABILITY_INTERVAL_TICKS == 0
+                && !damageEquippedTool(player, state.toolId(), 1)) {
+            detachServerInternal(player, false, false);
             return;
         }
 
@@ -643,6 +664,9 @@ public final class ClimbManager {
         }
 
         BlockState blockState = player.level().getBlockState(state.anchorBlock());
+        if (state.anchorFace() == Direction.DOWN) {
+            return hasValidCeilingAnchor(player, blockState, state.anchorBlock(), held);
+        }
         return hasValidAnchorFace(player, blockState, state.anchorBlock(), state.anchorFace());
     }
 
@@ -662,11 +686,32 @@ public final class ClimbManager {
                 || AnchorSurfaceClassifier.classify(state) == AnchorSurface.UNSTABLE;
     }
 
+    private static boolean hasValidCeilingAnchor(
+            Player player,
+            BlockState state,
+            BlockPos position,
+            ItemStack tool
+    ) {
+        AnchorSurface surface = AnchorSurfaceClassifier.classify(state);
+        if (!ModEnchantments.hasStrongGrip(player.level(), tool)
+                || surface == AnchorSurface.UNCLIMBABLE
+                || (surface == AnchorSurface.UNSTABLE
+                && !ModEnchantments.hasSturdyLatch(player.level(), tool))) {
+            return false;
+        }
+        return state.isFaceSturdy(player.level(), position, Direction.DOWN)
+                || surface == AnchorSurface.UNSTABLE;
+    }
+
     private static AnchorMotion initialMotion(
             AnchorSurface surface,
             ServerPlayer player,
-            boolean reinforcedLatch
+            boolean reinforcedLatch,
+            boolean ceilingAnchor
     ) {
+        if (ceilingAnchor) {
+            return AnchorMotion.FIXED;
+        }
         if (player.getDeltaMovement().y < BRAKING_START_SPEED
                 && player.fallDistance > BRAKING_MIN_FALL_DISTANCE) {
             return AnchorMotion.BRAKING;
@@ -679,9 +724,10 @@ public final class ClimbManager {
     private static double initialSlideVelocity(
             AnchorSurface surface,
             ServerPlayer player,
-            boolean reinforcedLatch
+            boolean reinforcedLatch,
+            boolean ceilingAnchor
     ) {
-        return initialMotion(surface, player, reinforcedLatch) == AnchorMotion.BRAKING
+        return initialMotion(surface, player, reinforcedLatch, ceilingAnchor) == AnchorMotion.BRAKING
                 ? player.getDeltaMovement().y
                 : surface == AnchorSurface.UNSTABLE ? UNSTABLE_SLIDE_SPEED : 0.0D;
     }
@@ -1194,6 +1240,15 @@ public final class ClimbManager {
             case NORTH -> {
                 targetX = Mth.clamp(location.x, block.getX() + 0.04D, block.getX() + 0.96D);
                 targetZ = block.getZ() - wallOffset;
+            }
+            case DOWN -> {
+                targetX = Mth.clamp(location.x, block.getX() + 0.04D, block.getX() + 0.96D);
+                targetZ = Mth.clamp(location.z, block.getZ() + 0.04D, block.getZ() + 0.96D);
+                return new Vec3(
+                        targetX,
+                        block.getY() - player.getBbHeight() - 0.08D,
+                        targetZ
+                );
             }
             default -> {
                 // Las caras superior e inferior ya fueron rechazadas.

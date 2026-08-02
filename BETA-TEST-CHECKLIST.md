@@ -1,4 +1,4 @@
-# Checklist 0.1.21-beta — doble picota, cambio de punto y regresiones
+# Checklist 0.1.22-beta — Strong Grip, techo y regresiones
 
 ## Tags de superficies
 
@@ -54,6 +54,15 @@
 - [ ] Sin Sturdy Latch, arena, grava, concreto en polvo y nieve descienden a `0.128` bloques/tick.
 - [ ] Con dos picotas con UUID distintos o copiados, cada bloque de BRAKING cobra el tramo adicional a ambas herramientas.
 - [ ] Mientras una picota está anclada, la otra crea un nuevo punto a hasta 1.5 bloques sin soltar la actual; ambas conservan cooldown individual.
+
+## Strong Grip I — anclaje estático de techo
+
+- [ ] Strong Grip I no puede combinarse con Pick Climber en mesa, libro ni yunque; ambos sí admiten Sturdy Latch.
+- [ ] Sin Strong Grip, un clic en la cara inferior no crea ancla ni cobra coste.
+- [ ] Con Strong Grip, un techo firme crea un ancla estática bajo el bloque y cobra 20 de durabilidad una sola vez.
+- [ ] Tras 20 ticks completos suspendido cobra 1 adicional; `F` conserva el contador y no cobra de nuevo.
+- [ ] Un techo inestable requiere Strong Grip + Sturdy Latch; sin Sturdy Latch se rechaza sin coste.
+- [ ] Romper el pico activo o el bloque del techo limpia grietas, restaura gravedad y suelta sin impulso artificial.
 
 ## Regresión 0.1.14 — bloques con menú vanilla
 

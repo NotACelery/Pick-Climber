@@ -2,7 +2,6 @@
   "replace": false,
   "values": [
     "pickclimber:pick_climber",
-    "pickclimber:sturdy_latch",
     "pickclimber:strong_grip"
   ]
 }

@@ -135,15 +135,14 @@ Pendiente validar junto con Strong Grip el presupuesto final de yunque y la excl
 
 > Especificación completa: [`docs/README-STRONG-GRIP.md`](docs/README-STRONG-GRIP.md)
 
-Implementar en una fase posterior, después de superficies, frenado y `Sturdy Latch`:
+### Completado en 0.1.22
 
-- `Strong Grip` de nivel único.
-- Incompatibilidad entre `Pick Climber` y `Strong Grip`.
-- Enganche a la cara inferior de bloques firmes.
-- Coste de 20 de durabilidad por cada anclaje nuevo de techo.
-- Coste de 1 de durabilidad por cada segundo completo colgado.
-- Compatibilidad de `Sturdy Latch` con ambas especializaciones.
-- Techos de nieve y otros materiales inestables requieren `Strong Grip + Sturdy Latch`.
+- `Strong Grip I` data-driven y exclusivo con `Pick Climber` mediante tag de exclusividad.
+- Enganche estático en cara inferior de techos firmes; los techos inestables exigen también `Sturdy Latch I`.
+- Coste de 20 por anclaje de techo y 1 de durabilidad por cada 20 ticks completos, respetando Unbreaking y `F`.
+
+Pendiente en fases posteriores:
+
 - Pose elevada del brazo y pico en primera y tercera persona.
 - Balanceo restringido mediante movimiento, con autoridad del servidor.
 - Maniobras avanzadas con dos picotas `Strong Grip`.

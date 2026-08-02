@@ -96,6 +96,12 @@
 
 # Changelog
 
+## 0.1.22-beta
+
+- Añade Strong Grip I, exclusivo con Pick Climber y compatible con Sturdy Latch.
+- Permite anclaje estático en techos firmes; un techo inestable exige Strong Grip + Sturdy Latch.
+- Cada anclaje de techo cuesta 20 de durabilidad y permanecer suspendido cobra 1 cada 20 ticks.
+
 ## 0.1.21-beta
 
 - Corrige el desgaste adicional con dos picotas al separar UUIDs duplicados antes del frenado dual.

@@ -18,6 +18,10 @@ public final class ModEnchantments {
             Registries.ENCHANTMENT,
             ResourceLocation.fromNamespaceAndPath(PickClimber.MOD_ID, "sturdy_latch")
     );
+    public static final ResourceKey<Enchantment> STRONG_GRIP = ResourceKey.create(
+            Registries.ENCHANTMENT,
+            ResourceLocation.fromNamespaceAndPath(PickClimber.MOD_ID, "strong_grip")
+    );
 
     private ModEnchantments() {
     }
@@ -28,6 +32,10 @@ public final class ModEnchantments {
 
     public static boolean hasSturdyLatch(Level level, ItemStack stack) {
         return getLevel(level, stack, STURDY_LATCH) > 0;
+    }
+
+    public static boolean hasStrongGrip(Level level, ItemStack stack) {
+        return getLevel(level, stack, STRONG_GRIP) > 0;
     }
 
     private static int getLevel(Level level, ItemStack stack, ResourceKey<Enchantment> enchantment) {
