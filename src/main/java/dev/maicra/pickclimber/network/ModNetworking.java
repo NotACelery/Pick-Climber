@@ -12,7 +12,7 @@ public final class ModNetworking {
     }
 
     public static void registerPayloads(RegisterPayloadHandlersEvent event) {
-        PayloadRegistrar registrar = event.registrar("8");
+        PayloadRegistrar registrar = event.registrar("10");
 
         registrar.playToClient(
                 AnchorSyncPayload.TYPE,
@@ -31,6 +31,12 @@ public final class ModNetworking {
                 DetachRequestPayload.STREAM_CODEC,
                 ModNetworking::handleDetachRequest
         );
+
+        registrar.playToServer(
+                SlideInputPayload.TYPE,
+                SlideInputPayload.STREAM_CODEC,
+                ModNetworking::handleSlideInput
+        );
     }
 
     private static void handleAnchorSync(AnchorSyncPayload payload, IPayloadContext context) {
@@ -46,6 +52,12 @@ public final class ModNetworking {
     private static void handleDetachRequest(DetachRequestPayload payload, IPayloadContext context) {
         if (context.player() instanceof ServerPlayer serverPlayer) {
             ClimbManager.detachServer(serverPlayer, payload.jump());
+        }
+    }
+
+    private static void handleSlideInput(SlideInputPayload payload, IPayloadContext context) {
+        if (context.player() instanceof ServerPlayer serverPlayer) {
+            ClimbManager.updateSlideInput(serverPlayer, payload);
         }
     }
 }

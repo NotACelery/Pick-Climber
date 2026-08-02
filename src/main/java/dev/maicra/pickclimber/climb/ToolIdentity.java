@@ -13,6 +13,8 @@ public final class ToolIdentity {
     private static final String ROOT_KEY = "pickclimber";
     private static final String TOOL_ID_KEY = "anchor_tool_id";
     private static final String COOLDOWN_UNTIL_KEY = "cooldown_until";
+    private static final String COOLDOWN_DURATION_KEY = "cooldown_duration";
+    private static final int DEFAULT_COOLDOWN_TICKS = 20;
 
     private ToolIdentity() {
     }
@@ -82,7 +84,8 @@ public final class ToolIdentity {
         return until > gameTime;
     }
 
-    public static float cooldownFraction(ItemStack stack, long gameTime, int duration) {
+    public static float cooldownFraction(ItemStack stack, long gameTime) {
+        int duration = cooldownDuration(stack);
         if (duration <= 0) {
             return 0.0F;
         }
@@ -99,6 +102,12 @@ public final class ToolIdentity {
     }
 
     public static void startCooldown(ItemStack stack, long until) {
+        // Un detach solo conoce los ticks restantes; conserva la duración
+        // original para que un anclaje inestable siga mostrando 40 ticks.
+        startCooldown(stack, until, cooldownDuration(stack));
+    }
+
+    public static void startCooldown(ItemStack stack, long until, int duration) {
         if (stack.isEmpty()) {
             return;
         }
@@ -106,8 +115,16 @@ public final class ToolIdentity {
         CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> {
             CompoundTag root = tag.getCompound(ROOT_KEY);
             root.putLong(COOLDOWN_UNTIL_KEY, until);
+            root.putInt(COOLDOWN_DURATION_KEY, Math.max(1, duration));
             tag.put(ROOT_KEY, root);
         });
+    }
+
+    public static int cooldownDuration(ItemStack stack) {
+        CompoundTag root = root(stack);
+        return root.contains(COOLDOWN_DURATION_KEY)
+                ? Math.max(1, root.getInt(COOLDOWN_DURATION_KEY))
+                : DEFAULT_COOLDOWN_TICKS;
     }
 
     public static void clearCooldown(ItemStack stack) {
@@ -118,6 +135,7 @@ public final class ToolIdentity {
         CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> {
             CompoundTag root = tag.getCompound(ROOT_KEY);
             root.remove(COOLDOWN_UNTIL_KEY);
+            root.remove(COOLDOWN_DURATION_KEY);
             tag.put(ROOT_KEY, root);
         });
     }
