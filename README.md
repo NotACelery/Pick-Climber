@@ -1,4 +1,4 @@
-# Pick Climber — Beta experimental 0.1.17
+# Pick Climber — Beta experimental 0.1.21
 
 Mod para **Minecraft 1.21.1**, **NeoForge 21.1.235** y **Java 21**.
 
@@ -101,7 +101,11 @@ El frenado solo se activa si el jugador ya descendió más de 5 bloques (`fallDi
 
 Durante el frenado o descenso, `W/A/S/D` permite desplazarse por el plano de la pared a la mitad de la velocidad vertical actual. En `BRAKING`, la primera dirección lateral queda fijada como trayectoria diagonal. La intención de cámara y movimiento llega al servidor cada tick, mientras las correcciones de posición conservan la rotación local. El punto de anclaje y sus grietas siguen el contacto exacto del clic; al llegar a una superficie firme o al suelo, el descenso termina. Un enganche iniciado en una superficie inestable usa 40 ticks de cooldown. Una caída que activa `BRAKING` también aplica 20 ticks de esfuerzo al otro pico equipado para evitar anular el frenado alternando manos.
 
-Todavía no existe desgaste proporcional ni `Sturdy Latch`.
+`Sturdy Latch I` convierte una superficie inestable en un anclaje firme: en caída leve queda fijo al engancharse; en caída fuerte conserva primero todo el frenado y queda fijo al terminar. También convierte su cooldown inicial de 40 a 20 ticks, igual que una superficie firme.
+
+El frenado cobra 15 de durabilidad inicial. Si hay dos picotas equipadas, ambas participan, pagan ese coste y el frenado aplica dos pasos por tick, reduciendo aproximadamente a la mitad el recorrido. Por cada bloque vertical completo realmente deslizado durante `BRAKING`, cada pico participante recibe 10 de desgaste adicional; Unbreaking sigue interviniendo en cada cobro. Sin Sturdy Latch, el descenso controlado por bloques inestables es 60 % más rápido (`0.128` bloques/tick).
+
+Mientras una picota sostiene el ancla, la otra puede crear un nuevo punto dentro de 1.5 bloques del punto actual. Las dos herramientas mantienen UUID y cooldown propios; si dos copias llegan con el mismo UUID, el servidor separa la identidad de la segunda antes de cobrar o anclar.
 
 ## Controles vigentes
 
@@ -120,7 +124,7 @@ Todavía no existe desgaste proporcional ni `Sturdy Latch`.
 3. El JAR aparecerá en:
 
 ```text
-build/libs/pickclimber-1.21.1-0.1.17-beta.jar
+build/libs/pickclimber-1.21.1-0.1.21-beta.jar
 ```
 
 Retira versiones anteriores antes de instalar esta beta.

@@ -14,16 +14,28 @@ public final class ModEnchantments {
             Registries.ENCHANTMENT,
             ResourceLocation.fromNamespaceAndPath(PickClimber.MOD_ID, "pick_climber")
     );
+    public static final ResourceKey<Enchantment> STURDY_LATCH = ResourceKey.create(
+            Registries.ENCHANTMENT,
+            ResourceLocation.fromNamespaceAndPath(PickClimber.MOD_ID, "sturdy_latch")
+    );
 
     private ModEnchantments() {
     }
 
     public static int getPickClimberLevel(Level level, ItemStack stack) {
+        return getLevel(level, stack, PICK_CLIMBER);
+    }
+
+    public static boolean hasSturdyLatch(Level level, ItemStack stack) {
+        return getLevel(level, stack, STURDY_LATCH) > 0;
+    }
+
+    private static int getLevel(Level level, ItemStack stack, ResourceKey<Enchantment> enchantment) {
         if (stack.isEmpty()) {
             return 0;
         }
 
         var enchantments = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
-        return stack.getEnchantmentLevel(enchantments.getOrThrow(PICK_CLIMBER));
+        return stack.getEnchantmentLevel(enchantments.getOrThrow(enchantment));
     }
 }

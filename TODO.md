@@ -103,33 +103,33 @@ Reglas previstas:
 - El servidor conserva autoridad total sobre posición, velocidad y daño de caída.
 - Balance cerrado actual: frenado solo tras más de 5 bloques de caída descendida y velocidad menor que `-0.40`; arrastre `0.75`, recuperación `0.035` y recorrido físico máximo `0.60` bloques/tick.
 
-### Diseño futuro — frenado con dos picotas
+### Completado en 0.1.19 — frenado con dos picotas
 
-- Si ambas manos sostienen picotas válidas al engancharse durante una caída que activa `BRAKING`, el diseño futuro podrá crear un agarre dual temporal.
-- El agarre dual debe reducir aproximadamente a la mitad la distancia de deslizamiento necesaria para absorber la misma caída; representa el doble de puntos de apoyo, no vuelo ni inmunidad.
+- Si ambas manos sostienen picotas válidas al engancharse durante una caída que activa `BRAKING`, ambas reciben el coste base de 15 y participan temporalmente en el frenado.
+- El agarre dual aplica dos pasos de frenado por tick y reduce aproximadamente a la mitad la distancia necesaria para absorber la misma caída; representa el doble de puntos de apoyo, no vuelo ni inmunidad.
 - El cooldown de esfuerzo se comparte entre las dos picotas equipadas para impedir alternar clics y anular el frenado.
-- Al terminar el frenado, la picota secundaria conserva el anclaje y la principal se libera para construir o crear el siguiente punto. Con una sola picota, esa misma herramienta permanece anclada.
-- Esta fase necesita estado dual servidor-autoritativo, costes y transición visual propios; no está implementada todavía.
+- Cada bloque vertical completo recorrido en `BRAKING` añade 10 de desgaste a cada pico participante.
+- Si el segundo pico se rompe o deja de estar equipado, el ancla principal continúa con frenado simple y no se cobra a una herramienta de reemplazo.
+- Dos picotas con UUID duplicado se desambigüan al enganchar para que ambas conserven coste, cooldown y desgaste propios.
 
 ## Durabilidad proporcional al rescate
 
-- Mantener 15 puntos como coste base del enganche.
-- Añadir desgaste según la velocidad vertical absorbida.
-- Considerar también tiempo o distancia de deslizamiento.
-- Aplicar el desgaste adicional progresivamente para permitir que el pico se rompa durante el frenado.
-- `Unbreaking` debe afectar tanto al coste base como al desgaste adicional.
+- Completado en 0.1.19: 15 puntos como coste base del enganche de frenado y 10 adicionales por cada bloque vertical completo realmente deslizado.
+- El desgaste adicional se aplica progresivamente, por lo que la rotura del pico activo termina el anclaje de forma segura.
+- `Unbreaking` afecta tanto al coste base como al desgaste adicional mediante `hurtAndBreak`.
 - Evaluar desgaste periódico durante el descenso sostenido sobre bloques inestables.
 
 ## Sturdy Latch
 
-- Encantamiento de nivel único.
-- Sin él, arena, grava, concreto en polvo y nieve mantienen el descenso controlado.
-- Con él, el jugador puede quedar completamente fijo después de terminar el frenado inicial.
-- No elimina el deslizamiento causado por engancharse a gran velocidad.
-- No elimina el desgaste proporcional a la caída.
-- Será compatible con `Pick Climber` y con `Strong Grip`.
+### Completado en 0.1.18
 
-Pendiente definir rareza, costes concretos y fuentes de obtención respetando la restricción de yunque anterior.
+- Encantamiento data-driven `Sturdy Latch I`, compatible con todas las picotas actuales.
+- Sin él, arena, grava, concreto en polvo y nieve mantienen el descenso controlado.
+- Con él, una caída leve queda fija al engancharse; una caída fuerte completa primero `BRAKING` y luego queda fija.
+- No elimina el frenado ni el futuro desgaste proporcional; reduce el cooldown inicial inestable de 40 a 20 ticks.
+- Valores actuales: `weight 3`, `anvil_cost 1`, coste mínimo 12 y máximo 42.
+
+Pendiente validar junto con Strong Grip el presupuesto final de yunque y la exclusividad entre especializaciones.
 
 ## Diseño obligatorio posterior: Strong Grip y movimiento de techo
 

@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 public final class ClimbManager {
     private static final Logger LOGGER = LogUtils.getLogger();
     public static final int DURABILITY_COST = 15;
+    private static final int BRAKING_DURABILITY_PER_BLOCK = 10;
     public static final int CRACK_STAGE = 5;
     public static final int ANCHOR_COOLDOWN_TICKS = 20;
     public static final int UNSTABLE_ANCHOR_COOLDOWN_TICKS = 40;
@@ -59,7 +60,7 @@ public final class ClimbManager {
     private static final double BRAKING_STOP_SPEED = -0.08D;
     private static final double BRAKING_DRAG = 0.75D;
     private static final double BRAKING_RECOVERY = 0.035D;
-    private static final double UNSTABLE_SLIDE_SPEED = -0.08D;
+    private static final double UNSTABLE_SLIDE_SPEED = -0.128D;
     /** Evita atravesar o saltarse bloques al absorber una caída extrema. */
     private static final double MAX_BRAKING_MOVE_PER_TICK = 0.60D;
     private static final double CONTACT_BLOCK_EPSILON = 1.0E-3D;
@@ -217,13 +218,26 @@ public final class ClimbManager {
             return false;
         }
 
+        boolean duplicatedActiveIdentity = hasDuplicatedActiveIdentity(player, hand, stack);
+        if (duplicatedActiveIdentity && !player.level().isClientSide()) {
+            // La identidad pertenece al ItemStack, no a la mano. Dos stacks
+            // simultáneos con el mismo UUID son una copia y el candidato debe
+            // recuperar identidad/cooldown individuales antes de validarse.
+            ToolIdentity.assign(stack, UUID.randomUUID());
+            ToolIdentity.clearCooldown(stack);
+        }
+
         // Un pico enganchado está ocupado aunque su cooldown interno pueda
         // haber terminado mientras permanecía clavado en la pared.
-        if (isActiveTool(player, stack)) {
+        // Solo la mano que sostiene el ancla está ocupada. Si otra picota
+        // heredó por copia el mismo UUID, sigue siendo una herramienta distinta
+        // y debe poder crear el siguiente punto.
+        if (isActiveTool(player, stack) && activeHand(player) == hand) {
             return false;
         }
 
-        if (ToolIdentity.isCoolingDown(stack, player.level().getGameTime())) {
+        if (!duplicatedActiveIdentity
+                && ToolIdentity.isCoolingDown(stack, player.level().getGameTime())) {
             return false;
         }
 
@@ -239,7 +253,8 @@ public final class ClimbManager {
         // El indicador y el clic comparten exactamente la misma regla de 1,5
         // bloques. Antes el icono dependía solo del alcance vanilla de interacción.
         Vec3 target = calculateTargetPosition(player, hit);
-        if (player.position().distanceToSqr(target) > MAX_ANCHOR_MOVE_SQR) {
+        Vec3 movementOrigin = currentAttachmentTarget(player);
+        if (movementOrigin.distanceToSqr(target) > MAX_ANCHOR_MOVE_SQR) {
             return false;
         }
 
@@ -360,8 +375,18 @@ public final class ClimbManager {
         BlockState anchorState = level.getBlockState(hit.getBlockPos());
         ItemStack stack = player.getItemInHand(hand);
         UUID toolId = ToolIdentity.ensure(stack);
+        if (previous != null
+                && previous.activeHand() != hand
+                && previous.toolId().equals(toolId)) {
+            // Dos ItemStack distintos nunca comparten identidad de ancla. Esto
+            // puede ocurrir al duplicar una picota con NBT; sin separarlos, el
+            // segundo pico parece el activo y recibe el desgaste equivocado.
+            toolId = UUID.randomUUID();
+            ToolIdentity.assign(stack, toolId);
+        }
         AnchorSurface surface = AnchorSurfaceClassifier.classify(anchorState);
-        AnchorMotion initialMotion = initialMotion(surface, player);
+        boolean reinforcedLatch = ModEnchantments.hasSturdyLatch(level, stack);
+        AnchorMotion initialMotion = initialMotion(surface, player, reinforcedLatch);
 
         EquipmentSlot slot = hand == InteractionHand.MAIN_HAND
                 ? EquipmentSlot.MAINHAND
@@ -378,6 +403,33 @@ public final class ClimbManager {
         // reemplaza un anclaje anterior ni se genera movimiento artificial.
         if (stack.isEmpty()) {
             return false;
+        }
+
+        UUID brakingSupportToolId = null;
+        if (initialMotion == AnchorMotion.BRAKING) {
+            InteractionHand supportHand = hand == InteractionHand.MAIN_HAND
+                    ? InteractionHand.OFF_HAND
+                    : InteractionHand.MAIN_HAND;
+            ItemStack supportStack = player.getItemInHand(supportHand);
+            if (isPickaxe(supportStack)) {
+                brakingSupportToolId = ToolIdentity.ensure(supportStack);
+                if (brakingSupportToolId.equals(toolId)) {
+                    brakingSupportToolId = UUID.randomUUID();
+                    ToolIdentity.assign(supportStack, brakingSupportToolId);
+                }
+                EquipmentSlot supportSlot = supportHand == InteractionHand.MAIN_HAND
+                        ? EquipmentSlot.MAINHAND
+                        : EquipmentSlot.OFFHAND;
+                supportStack.hurtAndBreak(
+                        DURABILITY_COST,
+                        level,
+                        player,
+                        brokenItem -> player.onEquippedItemBroken(brokenItem, supportSlot)
+                );
+                if (supportStack.isEmpty()) {
+                    brakingSupportToolId = null;
+                }
+            }
         }
 
         boolean restoreNoGravity = previous == null
@@ -409,8 +461,8 @@ public final class ClimbManager {
                 player.level().getGameTime(),
                 surface,
                 initialMotion,
-                initialSlideVelocity(surface, player),
-                cooldownTicksFor(surface),
+                initialSlideVelocity(surface, player, reinforcedLatch),
+                cooldownTicksFor(surface, reinforcedLatch),
                 0.0F,
                 0.0F,
                 // La cara golpeada vive justo en un borde entero. Se desplaza
@@ -421,7 +473,11 @@ public final class ClimbManager {
                         hit.getDirection().getStepY() * CONTACT_BLOCK_EPSILON,
                         hit.getDirection().getStepZ() * CONTACT_BLOCK_EPSILON
                 ),
-                Vec3.ZERO
+                Vec3.ZERO,
+                reinforcedLatch,
+                brakingSupportToolId,
+                0.0D,
+                0
         );
 
         SERVER_STATES.put(player.getUUID(), next);
@@ -606,24 +662,32 @@ public final class ClimbManager {
                 || AnchorSurfaceClassifier.classify(state) == AnchorSurface.UNSTABLE;
     }
 
-    private static AnchorMotion initialMotion(AnchorSurface surface, ServerPlayer player) {
+    private static AnchorMotion initialMotion(
+            AnchorSurface surface,
+            ServerPlayer player,
+            boolean reinforcedLatch
+    ) {
         if (player.getDeltaMovement().y < BRAKING_START_SPEED
                 && player.fallDistance > BRAKING_MIN_FALL_DISTANCE) {
             return AnchorMotion.BRAKING;
         }
-        return surface == AnchorSurface.UNSTABLE
+        return surface == AnchorSurface.UNSTABLE && !reinforcedLatch
                 ? AnchorMotion.UNSTABLE_SLIDING
                 : AnchorMotion.FIXED;
     }
 
-    private static double initialSlideVelocity(AnchorSurface surface, ServerPlayer player) {
-        return initialMotion(surface, player) == AnchorMotion.BRAKING
+    private static double initialSlideVelocity(
+            AnchorSurface surface,
+            ServerPlayer player,
+            boolean reinforcedLatch
+    ) {
+        return initialMotion(surface, player, reinforcedLatch) == AnchorMotion.BRAKING
                 ? player.getDeltaMovement().y
                 : surface == AnchorSurface.UNSTABLE ? UNSTABLE_SLIDE_SPEED : 0.0D;
     }
 
-    private static int cooldownTicksFor(AnchorSurface surface) {
-        return surface == AnchorSurface.UNSTABLE
+    private static int cooldownTicksFor(AnchorSurface surface, boolean reinforcedLatch) {
+        return surface == AnchorSurface.UNSTABLE && !reinforcedLatch
                 ? UNSTABLE_ANCHOR_COOLDOWN_TICKS
                 : ANCHOR_COOLDOWN_TICKS;
     }
@@ -636,13 +700,24 @@ public final class ClimbManager {
         if (player.level().getGameTime() <= state.attachedAtGameTime()) {
             return state;
         }
+        if (state.motion() == AnchorMotion.BRAKING
+                && state.brakingSupportToolId() != null
+                && !hasBrakingSupport(player, state)) {
+            // El segundo pico dejó de estar equipado o se rompió: el ancla
+            // principal continúa de forma segura, pero ya no recibe el doble
+            // frenado ni desgaste sobre una herramienta ajena.
+            state = state.withoutBrakingSupport();
+        }
 
         AnchorMotion nextMotion = state.motion();
         double nextVelocity = state.slideVelocity();
         if (state.motion() == AnchorMotion.BRAKING) {
-            nextVelocity = Math.min(0.0D, nextVelocity * BRAKING_DRAG + BRAKING_RECOVERY);
+            int brakingSteps = hasBrakingSupport(player, state) ? 2 : 1;
+            for (int step = 0; step < brakingSteps; step++) {
+                nextVelocity = Math.min(0.0D, nextVelocity * BRAKING_DRAG + BRAKING_RECOVERY);
+            }
             if (nextVelocity > BRAKING_STOP_SPEED) {
-                if (state.surface() == AnchorSurface.UNSTABLE) {
+                if (state.surface() == AnchorSurface.UNSTABLE && !state.reinforcedLatch()) {
                     nextMotion = AnchorMotion.UNSTABLE_SLIDING;
                     nextVelocity = UNSTABLE_SLIDE_SPEED;
                 } else {
@@ -705,11 +780,102 @@ public final class ClimbManager {
                 nextMotion,
                 nextVelocity
         );
+        if (state.motion() == AnchorMotion.BRAKING) {
+            double brakingDistance = state.brakingDistance() + Math.abs(movementVelocity);
+            int crossedBlocks = (int) Math.floor(brakingDistance) - state.chargedBrakingBlocks();
+            next = next.withBrakingProgress(brakingDistance, state.chargedBrakingBlocks());
+            if (crossedBlocks > 0) {
+                next = applyBrakingWear(player, next, crossedBlocks * BRAKING_DURABILITY_PER_BLOCK);
+                if (next == null) {
+                    return null;
+                }
+                next = next.withBrakingProgress(brakingDistance, (int) Math.floor(brakingDistance));
+            }
+        }
         if (!state.anchorBlock().equals(nextAnchorBlock)) {
             clearAnchorVisuals(player, state);
             showCracks(player.serverLevel(), next);
         }
         return next;
+    }
+
+    /** Dos picos reducen a la mitad aproximada el tiempo y recorrido de frenado. */
+    private static boolean hasBrakingSupport(ServerPlayer player, ServerClimbState state) {
+        UUID supportToolId = state.brakingSupportToolId();
+        return supportToolId != null && findEquippedToolById(player, supportToolId) != ItemStack.EMPTY;
+    }
+
+    /** Cobra el desgaste adicional solo por bloques realmente recorridos al frenar. */
+    private static ServerClimbState applyBrakingWear(
+            ServerPlayer player,
+            ServerClimbState state,
+            int amount
+    ) {
+        if (!damageEquippedTool(player, state.toolId(), amount)) {
+            return null;
+        }
+
+        UUID supportToolId = state.brakingSupportToolId();
+        if (supportToolId == null || damageEquippedTool(player, supportToolId, amount)) {
+            return state;
+        }
+        return state.withoutBrakingSupport();
+    }
+
+    private static boolean damageEquippedTool(ServerPlayer player, UUID toolId, int amount) {
+        ItemStack stack = findEquippedToolById(player, toolId);
+        if (stack.isEmpty()) {
+            return false;
+        }
+        InteractionHand hand = ToolIdentity.matches(player.getMainHandItem(), toolId)
+                ? InteractionHand.MAIN_HAND
+                : InteractionHand.OFF_HAND;
+        EquipmentSlot slot = hand == InteractionHand.MAIN_HAND
+                ? EquipmentSlot.MAINHAND
+                : EquipmentSlot.OFFHAND;
+        stack.hurtAndBreak(
+                amount,
+                player.serverLevel(),
+                player,
+                brokenItem -> player.onEquippedItemBroken(brokenItem, slot)
+        );
+        return !stack.isEmpty();
+    }
+
+    private static ItemStack findEquippedToolById(ServerPlayer player, UUID toolId) {
+        if (ToolIdentity.matches(player.getMainHandItem(), toolId)) {
+            return player.getMainHandItem();
+        }
+        if (ToolIdentity.matches(player.getOffhandItem(), toolId)) {
+            return player.getOffhandItem();
+        }
+        return ItemStack.EMPTY;
+    }
+
+    private static boolean hasDuplicatedActiveIdentity(
+            Player player,
+            InteractionHand candidateHand,
+            ItemStack candidate
+    ) {
+        InteractionHand currentActiveHand = activeHand(player);
+        if (currentActiveHand == null
+                || currentActiveHand == candidateHand
+                || !isActiveTool(player, candidate)) {
+            return false;
+        }
+        return ToolIdentity.get(candidate)
+                .map(id -> ToolIdentity.matches(player.getItemInHand(currentActiveHand), id))
+                .orElse(false);
+    }
+
+    /** Usa el punto anclado como posición real mientras el servidor lo mantiene fijo. */
+    private static Vec3 currentAttachmentTarget(Player player) {
+        if (player.level().isClientSide()) {
+            ClientClimbState state = CLIENT_STATES.get(player.getUUID());
+            return state == null ? player.position() : state.targetPosition();
+        }
+        ServerClimbState state = SERVER_STATES.get(player.getUUID());
+        return state == null ? player.position() : state.targetPosition();
     }
 
     private static Vec3 lateralSlideMovement(ServerPlayer player, ServerClimbState state, double speed) {

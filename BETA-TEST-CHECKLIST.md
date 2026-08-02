@@ -1,4 +1,4 @@
-# Checklist 0.1.17-beta — superficies, deslizamiento y regresiones
+# Checklist 0.1.21-beta — doble picota, cambio de punto y regresiones
 
 ## Tags de superficies
 
@@ -34,6 +34,26 @@
 - [ ] Saltar desde el suelo y engancharse tras una caída corta no activa `BRAKING`.
 - [ ] Más de 5 bloques de descenso y velocidad menor que `-0.40` activa `BRAKING`; medir la distancia con una caída de 30 bloques.
 - [ ] Con dos picos equipados, una caída que frena aplica 20 ticks de cooldown al pico no activo y no permite anular el desliz con un segundo clic.
+
+## Sturdy Latch I
+
+- [ ] Aparece como encantamiento de nivel único para picotas y puede aplicarse mediante libro/yunque.
+- [ ] En arena, grava, concreto en polvo, bloque/capa de nieve y nieve en polvo, una caída leve queda fija con Sturdy Latch.
+- [ ] En esos mismos materiales, una caída fuerte conserva el frenado y queda fija solo al terminar.
+- [ ] Sin Sturdy Latch, los mismos casos continúan en descenso controlado.
+- [ ] Sturdy Latch reduce el cooldown inicial de una superficie inestable a 20 ticks, igual que una superficie firme.
+- [ ] Sin Sturdy Latch, el mismo anclaje inestable conserva 40 ticks; ambos casos rechazan intentos inválidos sin coste.
+
+## Desgaste de frenado y doble picota
+
+- [ ] Una caída que activa `BRAKING` con una picota cobra 15 iniciales y 10 más por cada bloque vertical completo recorrido.
+- [ ] La misma caída con dos picotas equipadas cobra ambos importes a las dos herramientas y termina aproximadamente en la mitad del recorrido.
+- [ ] Unbreaking puede evitar tanto el coste inicial como cada tramo adicional de 10.
+- [ ] Si se rompe el pico activo durante el frenado, el anclaje termina sin conservar gravedad o grietas.
+- [ ] Si el pico de apoyo se rompe o se retira, el pico activo continúa sin cobrar a una herramienta distinta.
+- [ ] Sin Sturdy Latch, arena, grava, concreto en polvo y nieve descienden a `0.128` bloques/tick.
+- [ ] Con dos picotas con UUID distintos o copiados, cada bloque de BRAKING cobra el tramo adicional a ambas herramientas.
+- [ ] Mientras una picota está anclada, la otra crea un nuevo punto a hasta 1.5 bloques sin soltar la actual; ambas conservan cooldown individual.
 
 ## Regresión 0.1.14 — bloques con menú vanilla
 

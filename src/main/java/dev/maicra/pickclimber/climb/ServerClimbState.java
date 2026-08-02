@@ -27,7 +27,11 @@ public record ServerClimbState(
         float lateralForward,
         float lateralStrafe,
         Vec3 contactOffset,
-        Vec3 committedBrakeDirection
+        Vec3 committedBrakeDirection,
+        boolean reinforcedLatch,
+        UUID brakingSupportToolId,
+        double brakingDistance,
+        int chargedBrakingBlocks
 ) {
     public ServerClimbState withActiveHand(InteractionHand hand) {
         return new ServerClimbState(
@@ -48,7 +52,11 @@ public record ServerClimbState(
                 lateralForward,
                 lateralStrafe,
                 contactOffset,
-                committedBrakeDirection
+                committedBrakeDirection,
+                reinforcedLatch,
+                brakingSupportToolId,
+                brakingDistance,
+                chargedBrakingBlocks
         );
     }
 
@@ -81,7 +89,11 @@ public record ServerClimbState(
                 lateralForward,
                 lateralStrafe,
                 contactOffset,
-                committedBrakeDirection
+                committedBrakeDirection,
+                reinforcedLatch,
+                brakingSupportToolId,
+                brakingDistance,
+                chargedBrakingBlocks
         );
     }
 
@@ -104,7 +116,11 @@ public record ServerClimbState(
                 nextForward,
                 nextStrafe,
                 contactOffset,
-                committedBrakeDirection
+                committedBrakeDirection,
+                reinforcedLatch,
+                brakingSupportToolId,
+                brakingDistance,
+                chargedBrakingBlocks
         );
     }
 
@@ -113,7 +129,28 @@ public record ServerClimbState(
                 anchorDimension, anchorBlock, anchorFace, targetPosition, activeHand,
                 toolId, crackId, restoreNoGravity, restoreFlying, attachedAtGameTime,
                 surface, motion, slideVelocity, cooldownTicks, lateralForward, lateralStrafe,
-                contactOffset, direction
+                contactOffset, direction, reinforcedLatch, brakingSupportToolId,
+                brakingDistance, chargedBrakingBlocks
+        );
+    }
+
+    public ServerClimbState withBrakingProgress(double distance, int chargedBlocks) {
+        return new ServerClimbState(
+                anchorDimension, anchorBlock, anchorFace, targetPosition, activeHand,
+                toolId, crackId, restoreNoGravity, restoreFlying, attachedAtGameTime,
+                surface, motion, slideVelocity, cooldownTicks, lateralForward, lateralStrafe,
+                contactOffset, committedBrakeDirection, reinforcedLatch, brakingSupportToolId,
+                distance, chargedBlocks
+        );
+    }
+
+    public ServerClimbState withoutBrakingSupport() {
+        return new ServerClimbState(
+                anchorDimension, anchorBlock, anchorFace, targetPosition, activeHand,
+                toolId, crackId, restoreNoGravity, restoreFlying, attachedAtGameTime,
+                surface, motion, slideVelocity, cooldownTicks, lateralForward, lateralStrafe,
+                contactOffset, committedBrakeDirection, reinforcedLatch, null,
+                brakingDistance, chargedBrakingBlocks
         );
     }
 }

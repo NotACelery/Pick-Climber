@@ -1,6 +1,6 @@
 # Estado de compilación
 
-Versión preparada: `0.1.17-beta`
+Versión preparada: `0.1.21-beta`
 
 Objetivo: Minecraft 1.21.1, NeoForge 21.1.235 y Java 21.
 
@@ -12,12 +12,16 @@ Cambios funcionales:
 - Desplazamiento lateral a media velocidad de descenso con input cliente validado por servidor y transición inmediata de grietas/superficie.
 - Frenado definitivo: `fallDistance > 5`, velocidad `< -0.40`, arrastre `0.75`, recuperación `0.035` y movimiento máximo `0.60` bloques/tick.
 - La caída de frenado fija la primera dirección diagonal y aplica 20 ticks de esfuerzo al otro pico equipado.
+- Sturdy Latch I fija superficies inestables tras el frenado y reduce su cooldown inicial de 40 a 20 ticks.
+- BRAKING cobra 15 de base y 10 por bloque vertical completo; dos picotas duplican la deceleración y comparten desgaste.
+- El descenso sin Sturdy Latch en superficie inestable usa `-0.128` bloques/tick, 60 % más rápido que antes.
+- UUIDs duplicados entre dos picotas equipadas se separan antes del agarre dual o cambio de punto, conservando el desgaste y cooldown por herramienta.
 - Protocolo 10: sincroniza el cooldown inicial variable y la intención de movimiento/cámara sin delegar física al cliente.
 
 Validación realizada en este entorno:
 
 - `cmd /c build-beta.bat` terminó con `BUILD SUCCESSFUL` usando Java 21.
-- El JAR generado corresponde a la versión 0.1.17-beta.
+- El JAR generado corresponde a la versión 0.1.21-beta.
 - La lógica de tags, frenado y descenso compila contra NeoForge 21.1.235.
 - Las pruebas físicas dentro de Minecraft siguen pendientes.
 
@@ -28,5 +32,5 @@ build-beta.bat
 Resultado esperado:
 
 ```text
-build/libs/pickclimber-1.21.1-0.1.17-beta.jar
+build/libs/pickclimber-1.21.1-0.1.21-beta.jar
 ```

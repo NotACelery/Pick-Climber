@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "pickclimber:pick_climber"
+    "pickclimber:pick_climber",
+    "pickclimber:sturdy_latch"
   ]
 }

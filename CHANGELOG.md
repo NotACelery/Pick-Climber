@@ -96,6 +96,28 @@
 
 # Changelog
 
+## 0.1.21-beta
+
+- Corrige el desgaste adicional con dos picotas al separar UUIDs duplicados antes del frenado dual.
+- Restaura el cambio de punto con la otra mano hasta 1.5 bloques mientras una picota sigue anclada.
+
+## 0.1.20-beta
+
+- Sturdy Latch I reduce el cooldown inicial de una superficie inestable de 40 a 20 ticks, igual que una superficie firme.
+
+## 0.1.19-beta
+
+- Añade desgaste proporcional al rescate: 15 de base y 10 adicionales por cada bloque vertical completo de `BRAKING`.
+- Dos picotas equipadas participan en el frenado, reciben los mismos costes y absorben la caída aproximadamente al doble de velocidad.
+- Aumenta 60 % la velocidad del descenso controlado en superficies inestables sin Sturdy Latch.
+
+## 0.1.18-beta
+
+- Añade `Sturdy Latch I` como encantamiento data-driven para `#minecraft:pickaxes`.
+- En superficies inestables, fija el anclaje tras frenado; en caída leve lo fija de inmediato.
+- Sin Sturdy Latch, arena, grava, concreto en polvo y nieve mantienen el descenso controlado.
+- Conserva el cooldown de 40 ticks de las superficies inestables y no altera Strong Grip, techos ni desgaste proporcional.
+
 ## 0.1.17-beta
 
 - Corrige la cámara bloqueada durante frenado o descenso: las correcciones de posición conservan la rotación local.
