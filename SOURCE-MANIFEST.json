@@ -1,0 +1,160 @@
+{
+  "version": "0.1.6-beta",
+  "files": [
+    {
+      "path": ".gitignore",
+      "size": 156,
+      "sha256": "892d7bede26aacf7ef9923e786c3e97d92a6358c20ed86ca801d02109fb8c686"
+    },
+    {
+      "path": "BETA-TEST-CHECKLIST.md",
+      "size": 2607,
+      "sha256": "4225aaea8775fdaf7d8863c980cc3e101e0aac0cf17714c2f428cf5fbf6a444f"
+    },
+    {
+      "path": "BUILD-STATUS.md",
+      "size": 554,
+      "sha256": "d73f0d9be0c85d9f05b4291796ec7618bd1dc839acaa8d7e3bfab945c69f98dd"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "size": 2982,
+      "sha256": "5151a8e56dbc6d6e6d952d8dd0ba0f3c75215a6d40f2e13c7967cee2301fcdb9"
+    },
+    {
+      "path": "README.md",
+      "size": 3874,
+      "sha256": "8292da84d0f4c72fa923e4a12153b84d1614884d6d662ae905b942483657db90"
+    },
+    {
+      "path": "TODO.md",
+      "size": 1699,
+      "sha256": "0037f7f1fb271e67d576af1d81b709e83e640746b793622fa4e384525838d99d"
+    },
+    {
+      "path": "build-beta.bat",
+      "size": 5930,
+      "sha256": "0f6e1b30addfa8be551da7792f13a9f2e43518bc0125ce42f7f4fc24ebf82def"
+    },
+    {
+      "path": "build-beta.sh",
+      "size": 736,
+      "sha256": "109ec5f32f7721f9084198597b869053c28d5e45bdb610f87ec9f2ee547cade0"
+    },
+    {
+      "path": "build.gradle",
+      "size": 1768,
+      "sha256": "6403a52fd6eb8b5f74becdbec729f91fe5f0793ebe3d492015846fe3a2d52e3c"
+    },
+    {
+      "path": "gradle.properties",
+      "size": 447,
+      "sha256": "85ff7985100d10ef3e471d6c9bc244a8e04b6ba4460cb9853ccbbab8359e86b0"
+    },
+    {
+      "path": "settings.gradle",
+      "size": 197,
+      "sha256": "09bc6cb9bec936ff33d1798611ed8c781a59ef7879946bb8296f958b6490ee61"
+    },
+    {
+      "path": "src/main/java/dev/maicra/pickclimber/PickClimber.java",
+      "size": 466,
+      "sha256": "8715c72e4c7867d68364b10002fd3f9cc0dfe87e97862ddffa0d72cf61a07bf7"
+    },
+    {
+      "path": "src/main/java/dev/maicra/pickclimber/client/ClientEvents.java",
+      "size": 7021,
+      "sha256": "98c43b56a996b3b3c14c65470565be0e409b39d2ea191177de42548ed394fb27"
+    },
+    {
+      "path": "src/main/java/dev/maicra/pickclimber/climb/ClientClimbState.java",
+      "size": 320,
+      "sha256": "5476af0de4baa201b5f0044e72fe4ba623cb76022f8fcebe1ab768692a069bc1"
+    },
+    {
+      "path": "src/main/java/dev/maicra/pickclimber/climb/ClimbManager.java",
+      "size": 31013,
+      "sha256": "60f575fd65085596dc09772617c064cd201c231cdfdd798be55e92afa13e6642"
+    },
+    {
+      "path": "src/main/java/dev/maicra/pickclimber/climb/ModEnchantments.java",
+      "size": 1044,
+      "sha256": "628f7ee2c730b1c4a90b2e6d8a376688392153310957c6d6e73a6b2253541264"
+    },
+    {
+      "path": "src/main/java/dev/maicra/pickclimber/climb/ServerClimbState.java",
+      "size": 521,
+      "sha256": "6f7a3ff68fbd0b8af9dbae72e54c7da1ece2aa8790ee1d6b7860653a1e45ed24"
+    },
+    {
+      "path": "src/main/java/dev/maicra/pickclimber/climb/ToolIdentity.java",
+      "size": 3864,
+      "sha256": "c63cb5f6b88bc08e8f0f229672ef3a641c0131644385184a6bcd26de466add82"
+    },
+    {
+      "path": "src/main/java/dev/maicra/pickclimber/event/CommonEvents.java",
+      "size": 3836,
+      "sha256": "ce7cef62cca5617807c2eccdd4a54d7221f7c6774409b5144d7cd8da25024a1c"
+    },
+    {
+      "path": "src/main/java/dev/maicra/pickclimber/network/AnchorSyncPayload.java",
+      "size": 3659,
+      "sha256": "80521b228a958489eb79b68357425e4071ae6a99d481487167a305f17c1dd6f2"
+    },
+    {
+      "path": "src/main/java/dev/maicra/pickclimber/network/BoostSyncPayload.java",
+      "size": 1405,
+      "sha256": "dfdd492d770ef443d0ab781feebbcad213050f422cadb00ffdca3516eef9f8ab"
+    },
+    {
+      "path": "src/main/java/dev/maicra/pickclimber/network/DetachRequestPayload.java",
+      "size": 955,
+      "sha256": "4ee58376058bdb1cd521b4766de830d1b90a80bfc46705af043b420d05da83db"
+    },
+    {
+      "path": "src/main/java/dev/maicra/pickclimber/network/ModNetworking.java",
+      "size": 1812,
+      "sha256": "61b9a8b5d7a4cb10a4251272960ef904343c8307bca108bc094cb143efa73e17"
+    },
+    {
+      "path": "src/main/resources/assets/pickclimber/lang/en_us.json",
+      "size": 61,
+      "sha256": "c39d46ece0931d54f348aee0552ab3cd0195e2b9b52718c590662fdc5ba1831e"
+    },
+    {
+      "path": "src/main/resources/assets/pickclimber/lang/es_cl.json",
+      "size": 61,
+      "sha256": "c39d46ece0931d54f348aee0552ab3cd0195e2b9b52718c590662fdc5ba1831e"
+    },
+    {
+      "path": "src/main/resources/assets/pickclimber/lang/es_es.json",
+      "size": 61,
+      "sha256": "c39d46ece0931d54f348aee0552ab3cd0195e2b9b52718c590662fdc5ba1831e"
+    },
+    {
+      "path": "src/main/resources/data/minecraft/tags/enchantment/non_treasure.json",
+      "size": 73,
+      "sha256": "49507ff6502ec2bee4d92616c70289ee1db445468dfa224aac8de3c3d77be6ae"
+    },
+    {
+      "path": "src/main/resources/data/pickclimber/enchantment/pick_climber.json",
+      "size": 405,
+      "sha256": "cbf78dfc55492ebed0d4c6a56e10beb5450d0cffdd1fc9a7295c7f7ddfabbc53"
+    },
+    {
+      "path": "src/main/resources/pack.mcmeta",
+      "size": 87,
+      "sha256": "7a194266ee940547d19b165800b97309c9559b6c07109273ce97bc61bea95e92"
+    },
+    {
+      "path": "src/main/resources/pickclimber_logo.png",
+      "size": 92134,
+      "sha256": "28cb424fe0297a410d8d2474abd1112689ec46e5a05695a52a78e4321bc6633a"
+    },
+    {
+      "path": "src/main/templates/META-INF/neoforge.mods.toml",
+      "size": 602,
+      "sha256": "a33134ba54a843783b87b925bfce374a445438b0c305052b8c593e8f36b1c47d"
+    }
+  ]
+}

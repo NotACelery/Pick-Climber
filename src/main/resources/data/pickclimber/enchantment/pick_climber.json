@@ -1,0 +1,22 @@
+{
+  "description": {
+    "translate": "enchantment.pickclimber.pick_climber"
+  },
+  "supported_items": "#minecraft:pickaxes",
+  "primary_items": "#minecraft:pickaxes",
+  "weight": 4,
+  "max_level": 3,
+  "min_cost": {
+    "base": 10,
+    "per_level_above_first": 12
+  },
+  "max_cost": {
+    "base": 35,
+    "per_level_above_first": 12
+  },
+  "anvil_cost": 4,
+  "slots": [
+    "hand"
+  ],
+  "effects": {}
+}
