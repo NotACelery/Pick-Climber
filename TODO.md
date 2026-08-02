@@ -1,22 +1,21 @@
-# Pendientes posteriores a 0.1.9
+# Pendientes posteriores a 0.1.12
 
-- Congelar la pose del pico hacia adelante mientras está enganchado mediante render dedicado por mano.
-- Mantener la transformación separada para mano derecha e izquierda sin acumular animaciones vanilla.
-- Prioridad de mano secundaria y mano principal libre para minar/colocar.
-- Transferencia segura del pico activo mediante F.
-- Físicas futuras de frenado progresivo y superficies inestables.
+## Interacción y controles
 
-# Pendientes de Pick Climber
+- Validar en juego la prioridad de mano secundaria y la mano principal libre con mods que añadan interacciones propias.
+- Transferir el ancla al intercambiar manos con `F`, conservando UUID, cooldown, grietas y pose.
+- Dejar el salto como única liberación voluntaria y eliminar completamente el detach por clic izquierdo.
+- Cancelar sin impulso cuando el pico activo deja de estar equipado en ambas manos.
+- Definir un bypass explícito para bloques interactivos cuando la mano principal también contiene un pico disponible.
 
-## Interacción y visuales
+## Encantamiento Pick Climber
 
-- Priorizar la mano secundaria para enganchar.
-- Permitir minería y colocación con la principal mientras la secundaria sostiene.
-- Transferir el ancla al intercambiar manos con `F`.
-- Dejar el salto como única liberación voluntaria.
-- Cancelar sin impulso al cambiar el pico activo fuera de las manos.
-- Recuperar la pose del pico clavado mediante renderizado dedicado por mano.
-- Probar el nuevo `IItemDecorator` con escalas de GUI y mods de interfaz distintos.
+- Reducir `anvil_cost` de 4 a 1.
+- Aumentar `weight` de 4 a 6.
+- Ajustar costes de mesa a base 5 y aumento 8 por nivel.
+- Medir en juego la altura real del impulso base y de Pick Climber I–III.
+- Ajustar la ventana posterior al salto real —actualmente 8 ticks— sin volver a depender solo de la velocidad.
+- Evaluar si impulso y enganche deben tener costes de durabilidad diferentes.
 
 ## Física avanzada posterior
 
@@ -27,14 +26,6 @@
 - Arena, grava y bloques con gravedad —excepto yunques— deberán producir descenso controlado en vez de anclaje estático.
 - Anular el daño de caída al terminar un descenso todavía controlado por el pico.
 
-## Balance del impulso y encantamiento
-
-- Medir en juego la altura real del impulso base y de Pick Climber I–III.
-- Ajustar la ventana posterior al salto real —actualmente 8 ticks— sin volver a depender solo de la velocidad.
-- Mantener `0.08` únicamente como comprobación secundaria de ascenso.
-- Revisar peso, costes y disponibilidad del encantamiento en mesa, libros y aldeanos.
-- Evaluar si impulso y enganche deben tener costes de durabilidad diferentes.
-
 ## Compatibilidad
 
 - Twilight Forest.
@@ -44,5 +35,5 @@
 
 ## Ajustes visuales posteriores
 
-- Ajustar el valor exacto de la pose clavada después de pruebas in-game.
+- Probar `IItemDecorator` con escalas de GUI y mods de interfaz distintos.
 - Evaluar una pose equivalente en tercera persona.

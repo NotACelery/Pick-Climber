@@ -2,6 +2,7 @@ package dev.maicra.pickclimber.client;
 
 import dev.maicra.pickclimber.PickClimber;
 import dev.maicra.pickclimber.climb.ClimbManager;
+import dev.maicra.pickclimber.climb.ClimbingHandSelector;
 import dev.maicra.pickclimber.network.DetachRequestPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -38,6 +39,14 @@ public final class ClientEvents {
             return;
         }
 
+        if (ClimbManager.activeHand(player) != InteractionHand.MAIN_HAND) {
+            // El ancla de la secundaria no secuestra el clic izquierdo. La mano
+            // principal puede minar, atacar y reproducir su swing vanilla.
+            return;
+        }
+
+        // Compatibilidad temporal con la mecánica previa: únicamente un pico
+        // anclado en la principal sigue soltándose mediante clic izquierdo.
         event.setSwingHand(false);
         event.setCanceled(true);
         ClimbManager.detachClient(player, false);
@@ -123,10 +132,8 @@ public final class ClientEvents {
             return;
         }
 
-        boolean mainReady = ClimbManager.canAttemptAnchor(player, InteractionHand.MAIN_HAND, hit);
-        boolean offReady = ClimbManager.canAttemptAnchor(player, InteractionHand.OFF_HAND, hit);
-
-        if (!mainReady && !offReady) {
+        InteractionHand preferredHand = ClimbingHandSelector.preferred(player, hit);
+        if (preferredHand == null) {
             return;
         }
 

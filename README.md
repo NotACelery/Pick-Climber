@@ -1,10 +1,10 @@
-# Pick Climber — Beta experimental 0.1.11
+# Pick Climber — Beta experimental 0.1.12
 
 Mod para **Minecraft 1.21.1**, **NeoForge 21.1.235** y **Java 21**.
 
 Convierte cualquier herramienta incluida en `#minecraft:pickaxes` en una herramienta de escalada, impulso y rescate.
 
-## Base funcional heredada de 0.1.6
+## Base funcional estable
 
 - Quieto, cayendo o cerca del ápice: clic derecho intenta engancharse.
 - Tras un salto real y mientras todavía asciendes: clic derecho ejecuta el impulso.
@@ -14,7 +14,27 @@ Convierte cualquier herramienta incluida en `#minecraft:pickaxes` en una herrami
 - 15 puntos de durabilidad por enganche o impulso exitoso, respetando `Unbreaking`.
 - Pick Climber I–III mejora el impulso y el wall jump.
 
-## Estado visual, cooldown y pose en 0.1.11
+## Prioridad de manos en 0.1.12
+
+La mano secundaria tiene prioridad **entre picos disponibles**. Minecraft conserva el orden vanilla completo:
+
+1. Se prueba la interacción de la mano principal.
+2. Si colocar, usar, abrir o consumir un objeto tiene éxito, esa acción termina el clic.
+3. Si la principal devuelve `PASS`, se prueba la secundaria y Pick Climber puede enganchar con ella.
+
+Esto permite comenzar un enganche con el pico izquierdo cuando ambas manos tienen picos, sin impedir que un bloque, comida, cubo u otro objeto de la principal conserve su comportamiento normal.
+
+Mientras la mano secundaria sostiene al jugador:
+
+- La principal puede minar bloques.
+- La principal puede atacar entidades.
+- Un bloque en la principal puede colocarse sin soltar el ancla.
+- Objetos y bloques interactivos pueden usarse normalmente cuando la principal no está actuando como otro pico disponible.
+- Otro pico disponible en la principal puede crear el siguiente punto de apoyo y sustituir el ancla izquierda.
+
+La liberación por clic izquierdo se conserva temporalmente solo cuando el propio pico de la mano principal es el ancla. Su eliminación total permanece como tarea posterior.
+
+## Estado visual, cooldown y pose
 
 Cada pico mantiene un cooldown individual de 20 ticks identificado por el UUID persistente del `ItemStack`.
 
@@ -36,8 +56,10 @@ El encantamiento también mejora el wall jump en aproximadamente 0,5 bloques por
 ## Controles vigentes
 
 - Clic derecho sobre una cara vertical válida: impulso o enganche según el estado del salto.
-- Espacio tras soltarlo y volver a pulsarlo: wall jump.
-- Clic izquierdo todavía libera sin impulso durante esta fase.
+- Con dos picos disponibles, se prefiere la mano secundaria.
+- Espacio después de soltarlo y volver a pulsarlo: wall jump.
+- Clic izquierdo con ancla secundaria: minar o atacar normalmente.
+- Clic izquierdo con ancla principal: todavía libera sin impulso durante esta fase.
 
 ## Compilar en Windows
 
@@ -46,13 +68,13 @@ El encantamiento también mejora el wall jump en aproximadamente 0,5 bloques por
 3. El JAR aparecerá en:
 
 ```text
-build/libs/pickclimber-1.21.1-0.1.11-beta.jar
+build/libs/pickclimber-1.21.1-0.1.12-beta.jar
 ```
 
 Retira versiones anteriores antes de instalar esta beta.
 
 ## Identidad visual
 
-El nuevo icono oficial se encuentra en `src/main/resources/pickclimber_logo.png`.
+El icono oficial se encuentra en `src/main/resources/pickclimber_logo.png`.
 
 Autor: **NotACelery**.

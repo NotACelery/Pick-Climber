@@ -1,3 +1,14 @@
+## 0.1.12-beta
+
+- Añade un selector central de mano para todas las maniobras de Pick Climber.
+- Cuando ambos picos están disponibles, la mano secundaria tiene prioridad para enganchar o impulsar.
+- La interacción de la mano principal no se cancela al preferir la secundaria: colocar, usar, abrir o consumir objetos conserva el pipeline vanilla y solo un resultado `PASS` permite continuar con la izquierda.
+- Con un pico secundario sosteniendo el ancla, el clic izquierdo vuelve a minar y atacar normalmente con la mano principal.
+- Colocar bloques y usar objetos con la principal no desengancha el pico secundario.
+- Un segundo pico disponible en la principal puede reemplazar el anclaje secundario.
+- Se conserva temporalmente el detach por clic izquierdo únicamente cuando el ancla está en la propia mano principal.
+- No modifica la física de impulso, wall jump, cooldown, durabilidad ni la pose clavada de 0.1.11.
+
 ## 0.1.11-beta
 
 - Añade un render dedicado de primera persona para el pico que mantiene el anclaje.
