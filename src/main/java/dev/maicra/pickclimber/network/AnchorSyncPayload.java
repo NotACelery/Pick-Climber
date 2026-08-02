@@ -16,6 +16,10 @@ public record AnchorSyncPayload(
         double targetX,
         double targetY,
         double targetZ,
+        int anchorX,
+        int anchorY,
+        int anchorZ,
+        int crackId,
         int handOrdinal,
         UUID toolId,
         int flags
@@ -38,6 +42,10 @@ public record AnchorSyncPayload(
                 ByteBufCodecs.DOUBLE.encode(buffer, payload.targetX());
                 ByteBufCodecs.DOUBLE.encode(buffer, payload.targetY());
                 ByteBufCodecs.DOUBLE.encode(buffer, payload.targetZ());
+                ByteBufCodecs.VAR_INT.encode(buffer, payload.anchorX());
+                ByteBufCodecs.VAR_INT.encode(buffer, payload.anchorY());
+                ByteBufCodecs.VAR_INT.encode(buffer, payload.anchorZ());
+                ByteBufCodecs.VAR_INT.encode(buffer, payload.crackId());
                 ByteBufCodecs.VAR_INT.encode(buffer, payload.handOrdinal());
                 UUIDUtil.STREAM_CODEC.encode(buffer, payload.toolId());
                 ByteBufCodecs.VAR_INT.encode(buffer, payload.flags());
@@ -47,6 +55,10 @@ public record AnchorSyncPayload(
                     ByteBufCodecs.DOUBLE.decode(buffer),
                     ByteBufCodecs.DOUBLE.decode(buffer),
                     ByteBufCodecs.DOUBLE.decode(buffer),
+                    ByteBufCodecs.VAR_INT.decode(buffer),
+                    ByteBufCodecs.VAR_INT.decode(buffer),
+                    ByteBufCodecs.VAR_INT.decode(buffer),
+                    ByteBufCodecs.VAR_INT.decode(buffer),
                     ByteBufCodecs.VAR_INT.decode(buffer),
                     UUIDUtil.STREAM_CODEC.decode(buffer),
                     ByteBufCodecs.VAR_INT.decode(buffer)
@@ -63,6 +75,10 @@ public record AnchorSyncPayload(
                 state.targetPosition().x,
                 state.targetPosition().y,
                 state.targetPosition().z,
+                state.anchorBlock().getX(),
+                state.anchorBlock().getY(),
+                state.anchorBlock().getZ(),
+                state.crackId(),
                 state.activeHand().ordinal(),
                 state.toolId(),
                 flags
@@ -86,6 +102,10 @@ public record AnchorSyncPayload(
                 0.0D,
                 0.0D,
                 0.0D,
+                0,
+                0,
+                0,
+                0,
                 0,
                 toolId,
                 flags

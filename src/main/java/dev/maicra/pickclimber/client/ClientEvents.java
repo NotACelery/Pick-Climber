@@ -14,6 +14,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
@@ -28,6 +29,22 @@ public final class ClientEvents {
     private static boolean jumpReleaseArmed;
 
     private ClientEvents() {
+    }
+
+
+    @SubscribeEvent
+    public static void onClientLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
+        Player player = event.getPlayer();
+        if (player != null) {
+            // Se ejecuta mientras el ClientLevel todavía existe. El paquete de
+            // limpieza del servidor puede perderse durante el cierre de conexión,
+            // así que eliminamos también el overlay sintético localmente.
+            ClimbManager.clearAllClientStates(player);
+        } else {
+            ClimbManager.clearAllClientStates(null);
+        }
+        hadPlayerLastTick = false;
+        resetJumpLatch();
     }
 
     @SubscribeEvent

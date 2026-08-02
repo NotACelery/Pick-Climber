@@ -1,3 +1,18 @@
+## 0.1.13-beta
+
+- Completa la transferencia del anclaje al intercambiar manos con `F`.
+- Detecta el mismo pico por UUID en la mano contraria y actualiza únicamente la mano activa.
+- Transferir no consume durabilidad, no reinicia cooldown, no repite sonido, no recrea grietas y no mueve el ancla.
+- La pose clavada pasa a la nueva mano y la anterior vuelve al render vanilla.
+- Cambiar de slot o retirar el pico de ambas manos termina el anclaje de forma pasiva; ya no se repara el UUID sobre otra herramienta distinta.
+- El estado servidor guarda la dimensión exacta donde se creó el anclaje.
+- Cambiar de dimensión o desconectarse limpia la grieta en el nivel original.
+- El payload de anclaje sincroniza la posición del bloque y el `crackId` para permitir limpieza local.
+- `ClientPlayerNetworkEvent.LoggingOut` elimina el overlay antes de destruir el `ClientLevel`.
+- Los timeouts cliente y los cambios de punto también limpian overlays huérfanos.
+- Protocolo interno actualizado a versión 8.
+- Mantiene la prioridad secundaria y la mano principal libre de 0.1.12 sin alterar impulso, wall jump, cooldown, desgaste ni pose.
+
 ## 0.1.12-beta
 
 - Añade un selector central de mano para todas las maniobras de Pick Climber.

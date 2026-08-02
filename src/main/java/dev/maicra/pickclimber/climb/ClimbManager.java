@@ -5,6 +5,7 @@ import dev.maicra.pickclimber.network.AnchorSyncPayload;
 import dev.maicra.pickclimber.network.BoostSyncPayload;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
@@ -380,12 +381,13 @@ public final class ClimbManager {
                 : previous.crackId();
 
         if (previous != null) {
-            clearCracks(level, previous.crackId(), previous.anchorBlock());
+            clearAnchorVisuals(player, previous);
             // El pico anterior ya inició su cooldown al engancharse. Cambiar de
             // herramienta no reinicia ni prolonga ese temporizador.
         }
 
         ServerClimbState next = new ServerClimbState(
+                level.dimension(),
                 hit.getBlockPos().immutable(),
                 hit.getDirection(),
                 target,
@@ -450,6 +452,8 @@ public final class ClimbManager {
             return;
         }
 
+        state = reconcileActiveHand(player, state);
+
         if (!isServerStateValid(player, state)) {
             boolean failedImmediately = player.level().getGameTime() - state.attachedAtGameTime()
                     <= FAILED_ATTACH_GRACE_TICKS;
@@ -482,10 +486,51 @@ public final class ClimbManager {
 
         long elapsed = player.level().getGameTime() - state.lastSyncGameTime();
         if (elapsed > CLIENT_SYNC_TIMEOUT_TICKS) {
-            // El estado cliente es solamente visual. Nunca corrige posición,
-            // velocidad, gravedad ni vuelo; esas propiedades pertenecen al servidor.
+            // Si se perdió el paquete de desenganche, también se limpia localmente
+            // el overlay de grietas para que no quede huérfano varios segundos.
             CLIENT_STATES.remove(player.getUUID());
+            clearClientCracks(player, state);
         }
+    }
+
+    /**
+     * Reconcilia el intercambio vanilla de manos (`F`) por UUID del ItemStack.
+     * No intercepta la tecla ni vuelve a crear el anclaje: cuando el mismo pico
+     * aparece en la mano contraria, solo se traslada el estado activo y se
+     * sincroniza la pose. Durabilidad, cooldown, sonido y grietas no cambian.
+     */
+    private static ServerClimbState reconcileActiveHand(
+            ServerPlayer player,
+            ServerClimbState state
+    ) {
+        ItemStack current = player.getItemInHand(state.activeHand());
+        if (isPickaxe(current) && ToolIdentity.matches(current, state.toolId())) {
+            return state;
+        }
+
+        InteractionHand otherHand = state.activeHand() == InteractionHand.MAIN_HAND
+                ? InteractionHand.OFF_HAND
+                : InteractionHand.MAIN_HAND;
+        ItemStack other = player.getItemInHand(otherHand);
+
+        if (!isPickaxe(other) || !ToolIdentity.matches(other, state.toolId())) {
+            // No se repara un UUID ausente sobre otro pico: cambiar de slot debe
+            // desenganchar, no convertir accidentalmente una herramienta distinta
+            // en el ancla activa.
+            return state;
+        }
+
+        ServerClimbState transferred = state.withActiveHand(otherHand);
+        SERVER_STATES.put(player.getUUID(), transferred);
+        syncAttached(player, transferred, false);
+        LOGGER.info(
+                "[PickClimber] action=TRANSFER_HAND player={} from={} to={} target={}",
+                player.getScoreboardName(),
+                state.activeHand(),
+                otherHand,
+                state.anchorBlock()
+        );
+        return transferred;
     }
 
     private static boolean isServerStateValid(ServerPlayer player, ServerClimbState state) {
@@ -493,8 +538,12 @@ public final class ClimbManager {
             return false;
         }
 
+        if (!player.level().dimension().equals(state.anchorDimension())) {
+            return false;
+        }
+
         ItemStack held = player.getItemInHand(state.activeHand());
-        if (!isPickaxe(held) || !ToolIdentity.matchesOrRepair(held, state.toolId())) {
+        if (!isPickaxe(held) || !ToolIdentity.matches(held, state.toolId())) {
             return false;
         }
 
@@ -547,7 +596,7 @@ public final class ClimbManager {
                 state.anchorBlock()
         );
 
-        clearCracks(player.serverLevel(), state.crackId(), state.anchorBlock());
+        clearAnchorVisuals(player, state);
 
         ItemStack activeTool = findToolById(player, state.toolId());
         int remainingCooldownTicks = 0;
@@ -597,6 +646,8 @@ public final class ClimbManager {
             return;
         }
 
+        clearClientCracks(player, state);
+
         // Solo se predice localmente el salto solicitado por el usuario. La
         // gravedad, el vuelo y los desenganches pasivos los sincroniza el servidor.
         if (jump) {
@@ -613,15 +664,19 @@ public final class ClimbManager {
             return;
         }
 
-        clearCracks(player.serverLevel(), state.crackId(), state.anchorBlock());
+        clearAnchorVisuals(player, state);
         restoreAbilities(player, state.restoreNoGravity(), state.restoreFlying());
         player.setDeltaMovement(Vec3.ZERO);
     }
 
     public static void applyClientSync(Player player, AnchorSyncPayload payload) {
-        ClientClimbState previousState = CLIENT_STATES.remove(player.getUUID());
+        ClientClimbState previousState = CLIENT_STATES.get(player.getUUID());
 
         if (!payload.attached()) {
+            CLIENT_STATES.remove(player.getUUID());
+            if (previousState != null) {
+                clearClientCracks(player, previousState);
+            }
             ItemStack releasedTool = findToolById(player, payload.toolId());
             if (!releasedTool.isEmpty()) {
                 if (payload.refundCooldown()) {
@@ -650,20 +705,30 @@ public final class ClimbManager {
                 ? InteractionHand.OFF_HAND
                 : InteractionHand.MAIN_HAND;
         Vec3 target = new Vec3(payload.targetX(), payload.targetY(), payload.targetZ());
+        BlockPos anchorBlock = new BlockPos(
+                payload.anchorX(),
+                payload.anchorY(),
+                payload.anchorZ()
+        );
+
+        if (previousState != null
+                && (previousState.crackId() != payload.crackId()
+                || !previousState.anchorBlock().equals(anchorBlock))) {
+            clearClientCracks(player, previousState);
+        }
 
         ItemStack localTool = player.getItemInHand(hand);
-        if (isPickaxe(localTool)) {
-            // El paquete de anclaje es la fuente de verdad del UUID. Esto evita
-            // que una actualización tardía de inventario haga marcar otro pico.
+        if (isPickaxe(localTool) && payload.newAnchor()) {
+            // Solo un anclaje realmente nuevo puede asignar identidad. Durante
+            // una transferencia con F, el paquete vanilla de inventario puede
+            // llegar un instante después; asignar aquí marcaría el pico equivocado.
             if (!ToolIdentity.matches(localTool, payload.toolId())) {
                 ToolIdentity.assign(localTool, payload.toolId());
             }
-            if (payload.newAnchor()) {
-                ToolIdentity.startCooldown(
-                        localTool,
-                        player.level().getGameTime() + ANCHOR_COOLDOWN_TICKS
-                );
-            }
+            ToolIdentity.startCooldown(
+                    localTool,
+                    player.level().getGameTime() + ANCHOR_COOLDOWN_TICKS
+            );
         }
 
         long now = player.level().getGameTime();
@@ -675,6 +740,8 @@ public final class ClimbManager {
 
         ClientClimbState next = new ClientClimbState(
                 target,
+                anchorBlock,
+                payload.crackId(),
                 hand,
                 payload.toolId(),
                 payload.restoreNoGravity(),
@@ -715,9 +782,13 @@ public final class ClimbManager {
         player.setOnGround(false);
     }
 
+    /** Limpia el estado visual y el overlay sintético antes de abandonar el nivel. */
     public static void clearAllClientStates(Player localPlayer) {
         if (localPlayer != null) {
-            CLIENT_STATES.remove(localPlayer.getUUID());
+            ClientClimbState state = CLIENT_STATES.remove(localPlayer.getUUID());
+            if (state != null) {
+                clearClientCracks(localPlayer, state);
+            }
         } else {
             CLIENT_STATES.clear();
         }
@@ -858,6 +929,36 @@ public final class ClimbManager {
 
     private static void clearCracks(ServerLevel level, int crackId, BlockPos blockPos) {
         level.destroyBlockProgress(crackId, blockPos, -1);
+    }
+
+    /**
+     * Limpia siempre en la dimensión donde nació el anclaje. Esto importa al
+     * cambiar de dimensión: para cuando llega PlayerChangedDimensionEvent, el
+     * ServerPlayer ya pertenece al nivel nuevo.
+     */
+    private static void clearAnchorVisuals(ServerPlayer player, ServerClimbState state) {
+        MinecraftServer server = player.getServer();
+        if (server == null) {
+            return;
+        }
+
+        ServerLevel anchorLevel = server.getLevel(state.anchorDimension());
+        if (anchorLevel != null) {
+            clearCracks(anchorLevel, state.crackId(), state.anchorBlock());
+        }
+    }
+
+    /**
+     * El cliente conserva los overlays de destrucción en una tabla local. Al
+     * desconectarse, el paquete servidor puede llegar demasiado tarde; por eso
+     * se elimina también directamente antes de destruir el ClientLevel.
+     */
+    private static void clearClientCracks(Player player, ClientClimbState state) {
+        player.level().destroyBlockProgress(
+                state.crackId(),
+                state.anchorBlock(),
+                -1
+        );
     }
 
     private static void playAnchorSound(

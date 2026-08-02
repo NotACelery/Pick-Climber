@@ -1,5 +1,5 @@
 {
-  "version": "0.1.12-beta",
+  "version": "0.1.13-beta",
   "files": [
     {
       "path": ".gitignore",
@@ -8,28 +8,28 @@
     },
     {
       "path": "BETA-TEST-CHECKLIST.md",
-      "size": 2207,
-      "sha256": "738987440a20bb4a1bfba002fda76a386762524203f7469c72b20cb6057209a6"
+      "size": 2641,
+      "sha256": "164685adda72a6bc9d7c3ae315d5e10ca93ebd43b2419a0176765e4b6044035e"
     },
     {
       "path": "BUILD-STATUS.md",
-      "size": 1185,
-      "sha256": "c7aeae0b0081852b3db951cbd8079cab770bf0d5841b53ce09260aa3982ce008"
+      "size": 1509,
+      "sha256": "7cbe13a6bdb7a8a5527114ee59d283533dc231f2795a19135ed91e25f9c0915b"
     },
     {
       "path": "CHANGELOG.md",
-      "size": 7216,
-      "sha256": "72f2efda8864bb87c6fd4cc54883b3e94b0981f4dec2dce64081939dc9234ea8"
+      "size": 8352,
+      "sha256": "a3d838085f16b9da9a7fb475d8817ced580427d9583a4502ee2af9660092f081"
     },
     {
       "path": "README.md",
-      "size": 3761,
-      "sha256": "2c320bd0281b4d8c90fdfdd7c7eaa9635bb6bf08450501030a0874aeb5354b1b"
+      "size": 4174,
+      "sha256": "2f64329aa8b860955659d9100f1b161ca32c7aa4b3ef65f117786443f4f44775"
     },
     {
       "path": "TODO.md",
-      "size": 1883,
-      "sha256": "d13d176f43ca613bea7a342194b321a6439e755224e4653d112f97857feadc83"
+      "size": 4756,
+      "sha256": "74222ad529786a40fcda650c2a88c6293c9a6371b4740e4416c2980e2bfc88e4"
     },
     {
       "path": "build-beta.bat",
@@ -49,7 +49,7 @@
     {
       "path": "gradle.properties",
       "size": 448,
-      "sha256": "bfc48d2bfd64a218db02e18e66e08f37fdf74730e276c65dc74a833c724a6bfc"
+      "sha256": "25c637e49800c57d8a2b2a2f0c1da6508573f7acd97f04d641e6c05f98e304e6"
     },
     {
       "path": "settings.gradle",
@@ -63,8 +63,8 @@
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/client/ClientEvents.java",
-      "size": 5180,
-      "sha256": "024737192792230ad1b4f30a882db5f3024e9192858cde8f568e7bb69bd5d7a3"
+      "size": 5876,
+      "sha256": "560fdde7258472bde9474803ac50cd39539e2f66a9d017da82f760814eff9b14"
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/client/ClientModEvents.java",
@@ -83,13 +83,13 @@
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/climb/ClientClimbState.java",
-      "size": 399,
-      "sha256": "61ff306e096c147b1186ce51993a2c032520a122da14e0885aa1f86606936cad"
+      "size": 486,
+      "sha256": "e86809672db2ecda252152052fb1ad705b03c85d6b9ac7ef55073e7e8809b42b"
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/climb/ClimbManager.java",
-      "size": 35951,
-      "sha256": "57935db3dc0eb5467831396ae657abca24cd97269b440385329d230ee28d5df9"
+      "size": 39852,
+      "sha256": "e38502e706daf7e6300edea89e3400bfe4b6a84e3f57efdf7d19904bbb6a4149"
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/climb/ClimbingHandSelector.java",
@@ -103,8 +103,8 @@
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/climb/ServerClimbState.java",
-      "size": 521,
-      "sha256": "6f7a3ff68fbd0b8af9dbae72e54c7da1ece2aa8790ee1d6b7860653a1e45ed24"
+      "size": 1063,
+      "sha256": "17fd6982d6a5a16f72a5a9ec0b4eac71d5e5b1efd91a156361a7c79afb9d14f5"
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/climb/ToolIdentity.java",
@@ -118,8 +118,8 @@
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/network/AnchorSyncPayload.java",
-      "size": 4832,
-      "sha256": "b70539c4dfccf40da399de1f3520325916be446c36a52bc7e9f0bd57bd6603ad"
+      "size": 5681,
+      "sha256": "772bd7fcd1864626b94ac182ed0f4ea59728a7457ee920eb29d1051f23ab0f61"
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/network/BoostSyncPayload.java",
@@ -134,7 +134,7 @@
     {
       "path": "src/main/java/dev/maicra/pickclimber/network/ModNetworking.java",
       "size": 1812,
-      "sha256": "ab1f2403256f3d655a8340b3bc57bf019485106a4654d8728af4d9e3c995bc22"
+      "sha256": "8c7d8b4f44ed3d0b0c05716656c0ced9ec5870bb6e7f47f91e1fb2bd3ce3cb4a"
     },
     {
       "path": "src/main/resources/assets/pickclimber/lang/en_us.json",
