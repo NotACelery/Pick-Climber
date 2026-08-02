@@ -17,3 +17,7 @@ run-data/
 # OS
 .DS_Store
 Thumbs.db
+
+# Local Codex context (intentionally not versioned)
+/AGENTS.md
+/PROJECT-HANDOFF.md
