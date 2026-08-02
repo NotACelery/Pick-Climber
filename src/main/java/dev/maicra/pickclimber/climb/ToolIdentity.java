@@ -71,18 +71,30 @@ public final class ToolIdentity {
 
     public static long cooldownUntil(ItemStack stack) {
         CompoundTag root = root(stack);
-        return root.contains(COOLDOWN_UNTIL_KEY) ? root.getLong(COOLDOWN_UNTIL_KEY) : Long.MIN_VALUE;
+        // La ausencia de la clave significa que el pico nunca inició cooldown.
+        // No se usa Long.MIN_VALUE: restarle gameTime puede desbordar el long y
+        // producir un valor positivo enorme, que visualmente parece 100 % de CD.
+        return root.contains(COOLDOWN_UNTIL_KEY) ? root.getLong(COOLDOWN_UNTIL_KEY) : 0L;
     }
 
     public static boolean isCoolingDown(ItemStack stack, long gameTime) {
-        return gameTime < cooldownUntil(stack);
+        long until = cooldownUntil(stack);
+        return until > gameTime;
     }
 
     public static float cooldownFraction(ItemStack stack, long gameTime, int duration) {
-        long remaining = cooldownUntil(stack) - gameTime;
-        if (remaining <= 0L || duration <= 0) {
+        if (duration <= 0) {
             return 0.0F;
         }
+
+        long until = cooldownUntil(stack);
+        if (until <= gameTime) {
+            return 0.0F;
+        }
+
+        // La resta solo se ejecuta tras verificar until > gameTime, evitando
+        // underflow/overflow cuando el ItemStack no posee cooldown.
+        long remaining = until - gameTime;
         return Math.min(1.0F, remaining / (float) duration);
     }
 

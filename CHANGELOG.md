@@ -1,3 +1,41 @@
+## 0.1.10-beta
+
+- Corrige la interpretación visual del cooldown durante un enganche.
+- El cooldown comienza al confirmar el enganche y el overlay baja inmediatamente de 100 % a 0 %.
+- El overlay ya no queda congelado al 100 % mientras el pico sigue clavado.
+- Soltar el pico, saltar o cambiar al segundo pico no inicia ni reinicia el cooldown.
+- El estado de pico activo queda separado del temporizador; su indicador dedicado se implementará junto con la pose clavada.
+- No modifica la física, el impulso, la durabilidad ni la corrección crítica de salto de la 0.1.6.
+
+## 0.1.9-beta
+
+- El cooldown individual vuelve a comenzar inmediatamente al confirmar un enganche.
+- El pico activo sigue mostrando el overlay al 100 % mientras permanece clavado.
+- Al liberarse, el cooldown no se reinicia: solo continúa con los ticks que queden.
+- Si el jugador permanece enganchado durante 20 ticks o más, el pico queda disponible al soltarse.
+- Cambiar al segundo pico no reinicia ni prolonga el cooldown del primero.
+- Evita que un wall jump corto deje al pico sin una ventana de bloqueo y provoque un impulso accidental al intentar volver a engancharse arriba.
+- No modifica la física estable de impulso y enganche de la 0.1.6.
+
+## 0.1.8-beta
+
+- Corrige el overlay de cooldown completo en picos nuevos o sin cooldown.
+- Evita el desbordamiento de `long` causado por `Long.MIN_VALUE - gameTime`.
+- Un `ItemStack` sin `cooldown_until` ahora representa correctamente 0 ticks restantes.
+- El cálculo visual comprueba que el cooldown siga activo antes de restar tiempos.
+- No modifica la física, el enganche ni el impulso de la 0.1.7.
+
+## 0.1.7-beta
+
+- Reemplaza el overlay manual de hotbar por un `IItemDecorator` registrado en el render real del `ItemStack`.
+- El pico activo muestra el mismo blanco translúcido del cooldown vanilla, congelado al 100 %.
+- El cooldown de 20 ticks ya no comienza al engancharse: empieza únicamente al liberar el pico.
+- Al cambiar al segundo pico, el anterior comienza su cooldown y el nuevo queda marcado como activo.
+- Los estados visuales se vinculan al UUID propio de cada pico, incluso cuando ambos son del mismo material.
+- El indicador funciona en hotbar, mano secundaria e inventarios que rendericen las decoraciones del objeto.
+- Un pico activo queda ocupado y no puede reutilizarse para crear otro anclaje.
+- El payload de anclaje ahora sincroniza el UUID exacto y los ticks de cooldown al liberar.
+- Protocolo de red actualizado a versión 7.
 
 ## 0.1.6-beta
 

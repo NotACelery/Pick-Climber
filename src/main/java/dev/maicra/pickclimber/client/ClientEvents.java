@@ -2,12 +2,10 @@ package dev.maicra.pickclimber.client;
 
 import dev.maicra.pickclimber.PickClimber;
 import dev.maicra.pickclimber.climb.ClimbManager;
-import dev.maicra.pickclimber.climb.ToolIdentity;
 import dev.maicra.pickclimber.network.DetachRequestPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -118,7 +116,6 @@ public final class ClientEvents {
 
         GuiGraphics gui = event.getGuiGraphics();
         renderReachIndicator(minecraft, player, gui);
-        renderHeldToolIndicators(player, gui);
     }
 
     private static void renderReachIndicator(Minecraft minecraft, Player player, GuiGraphics gui) {
@@ -138,58 +135,4 @@ public final class ClientEvents {
         gui.renderItem(RANGE_ICON, x, y);
     }
 
-    private static void renderHeldToolIndicators(Player player, GuiGraphics gui) {
-        int centerX = gui.guiWidth() / 2;
-        int itemY = gui.guiHeight() - 19;
-        long gameTime = player.level().getGameTime();
-        InteractionHand active = ClimbManager.activeHand(player);
-
-        ItemStack main = player.getMainHandItem();
-        if (ClimbManager.isPickaxe(main)) {
-            int itemX = centerX - 90 + player.getInventory().selected * 20 + 2;
-            renderSlotOverlay(gui, itemX, itemY, main, gameTime, active == InteractionHand.MAIN_HAND);
-        }
-
-        ItemStack off = player.getOffhandItem();
-        if (ClimbManager.isPickaxe(off)) {
-            int itemX = player.getMainArm() == HumanoidArm.RIGHT
-                    ? centerX - 117
-                    : centerX + 101;
-            renderSlotOverlay(gui, itemX, itemY, off, gameTime, active == InteractionHand.OFF_HAND);
-        }
-    }
-
-    private static void renderSlotOverlay(
-            GuiGraphics gui,
-            int x,
-            int y,
-            ItemStack stack,
-            long gameTime,
-            boolean active
-    ) {
-        if (active) {
-            // El pico que sostiene al jugador se muestra como un cooldown lleno y
-            // congelado. Se usa la posición exacta del icono vanilla (16x16), no
-            // la esquina del fondo de la hotbar.
-            gui.fill(x, y, x + 16, y + 16, 0xB0000000);
-            gui.fill(x - 1, y - 1, x + 17, y, 0xFFFFFFFF);
-            gui.fill(x - 1, y + 16, x + 17, y + 17, 0xFFFFFFFF);
-            gui.fill(x - 1, y, x, y + 16, 0xFFFFFFFF);
-            gui.fill(x + 16, y, x + 17, y + 16, 0xFFFFFFFF);
-            return;
-        }
-
-        float cooldown = ToolIdentity.cooldownFraction(
-                stack,
-                gameTime,
-                ClimbManager.ANCHOR_COOLDOWN_TICKS
-        );
-
-        if (cooldown <= 0.0F) {
-            return;
-        }
-
-        int height = Math.max(1, (int) Math.ceil(16.0F * cooldown));
-        gui.fill(x, y + 16 - height, x + 16, y + 16, 0x99000000);
-    }
 }

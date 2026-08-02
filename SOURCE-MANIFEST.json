@@ -1,5 +1,5 @@
 {
-  "version": "0.1.6-beta",
+  "version": "0.1.10-beta",
   "files": [
     {
       "path": ".gitignore",
@@ -8,28 +8,28 @@
     },
     {
       "path": "BETA-TEST-CHECKLIST.md",
-      "size": 2607,
-      "sha256": "4225aaea8775fdaf7d8863c980cc3e101e0aac0cf17714c2f428cf5fbf6a444f"
+      "size": 1889,
+      "sha256": "ddd710cb177b0ebbb47ceed31fc7f8daea28eb3363c673b5b6149dc8d4645d86"
     },
     {
       "path": "BUILD-STATUS.md",
-      "size": 554,
-      "sha256": "d73f0d9be0c85d9f05b4291796ec7618bd1dc839acaa8d7e3bfab945c69f98dd"
+      "size": 719,
+      "sha256": "7b0af7d86583d06ea7a652a9bf8dd1f75db80cb1941b1e29cf216cf506ea0d46"
     },
     {
       "path": "CHANGELOG.md",
-      "size": 2982,
-      "sha256": "5151a8e56dbc6d6e6d952d8dd0ba0f3c75215a6d40f2e13c7967cee2301fcdb9"
+      "size": 5468,
+      "sha256": "90850888351c6f0d047adf9febece8f6506a8f8f0bf2ad465f9bc62204a70f39"
     },
     {
       "path": "README.md",
-      "size": 3874,
-      "sha256": "8292da84d0f4c72fa923e4a12153b84d1614884d6d662ae905b942483657db90"
+      "size": 2388,
+      "sha256": "07f83df18f07584ce509aa9debb5c3195feb1ea8814a510118e4760f415ba5b7"
     },
     {
       "path": "TODO.md",
-      "size": 1699,
-      "sha256": "0037f7f1fb271e67d576af1d81b709e83e640746b793622fa4e384525838d99d"
+      "size": 2136,
+      "sha256": "23a59bee705264d03e7852322f9bdaf6d3c4ef2588b5798172e0354f5e37a26d"
     },
     {
       "path": "build-beta.bat",
@@ -48,8 +48,8 @@
     },
     {
       "path": "gradle.properties",
-      "size": 447,
-      "sha256": "85ff7985100d10ef3e471d6c9bc244a8e04b6ba4460cb9853ccbbab8359e86b0"
+      "size": 448,
+      "sha256": "3dacff248d492946dfed7a95a2e001b99d13b7630a3edc33c1a5b25f984e8150"
     },
     {
       "path": "settings.gradle",
@@ -63,18 +63,28 @@
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/client/ClientEvents.java",
-      "size": 7021,
-      "sha256": "98c43b56a996b3b3c14c65470565be0e409b39d2ea191177de42548ed394fb27"
+      "size": 4814,
+      "sha256": "191c5adb5efa69d9905a777ac4bbeef1072173674e7e97ca58dd2a8c50d38cf5"
+    },
+    {
+      "path": "src/main/java/dev/maicra/pickclimber/client/ClientModEvents.java",
+      "size": 1137,
+      "sha256": "f611970a05648e086dfce87dc84446d8f62f44ae52a7bd23c8908a61c50d00a2"
+    },
+    {
+      "path": "src/main/java/dev/maicra/pickclimber/client/PickClimberItemDecorator.java",
+      "size": 1738,
+      "sha256": "b2e6abbfdb927acc2c7bd2a9cf1249d7f37cdd55637c774e89ec521ff3562122"
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/climb/ClientClimbState.java",
-      "size": 320,
-      "sha256": "5476af0de4baa201b5f0044e72fe4ba623cb76022f8fcebe1ab768692a069bc1"
+      "size": 365,
+      "sha256": "c954ae10c4a5e3011719905ece8721819cce3309bf98de02ab36916e12806f10"
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/climb/ClimbManager.java",
-      "size": 31013,
-      "sha256": "60f575fd65085596dc09772617c064cd201c231cdfdd798be55e92afa13e6642"
+      "size": 34330,
+      "sha256": "aa5f196a2aca21e3f416d3735a9b1e66840d8f299f6da21511df79cbcaadadce"
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/climb/ModEnchantments.java",
@@ -88,8 +98,8 @@
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/climb/ToolIdentity.java",
-      "size": 3864,
-      "sha256": "c63cb5f6b88bc08e8f0f229672ef3a641c0131644385184a6bcd26de466add82"
+      "size": 4350,
+      "sha256": "38aea483ab9f6cf860718e09515f10b5d085c4edef722d88cfbebd3120eb050a"
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/event/CommonEvents.java",
@@ -98,8 +108,8 @@
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/network/AnchorSyncPayload.java",
-      "size": 3659,
-      "sha256": "80521b228a958489eb79b68357425e4071ae6a99d481487167a305f17c1dd6f2"
+      "size": 4832,
+      "sha256": "b70539c4dfccf40da399de1f3520325916be446c36a52bc7e9f0bd57bd6603ad"
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/network/BoostSyncPayload.java",
@@ -114,7 +124,7 @@
     {
       "path": "src/main/java/dev/maicra/pickclimber/network/ModNetworking.java",
       "size": 1812,
-      "sha256": "61b9a8b5d7a4cb10a4251272960ef904343c8307bca108bc094cb143efa73e17"
+      "sha256": "ab1f2403256f3d655a8340b3bc57bf019485106a4654d8728af4d9e3c995bc22"
     },
     {
       "path": "src/main/resources/assets/pickclimber/lang/en_us.json",

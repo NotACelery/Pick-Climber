@@ -97,6 +97,39 @@ public final class ClimbManager {
         return state == null ? null : state.activeHand();
     }
 
+    /** Comprueba el UUID del pico, no solo el tipo de ítem o la mano. */
+    public static boolean isActiveTool(Player player, ItemStack stack) {
+        if (stack.isEmpty()) {
+            return false;
+        }
+
+        UUID activeId;
+        if (player.level().isClientSide()) {
+            ClientClimbState state = CLIENT_STATES.get(player.getUUID());
+            activeId = state == null ? null : state.toolId();
+        } else {
+            ServerClimbState state = SERVER_STATES.get(player.getUUID());
+            activeId = state == null ? null : state.toolId();
+        }
+
+        return activeId != null && ToolIdentity.matches(stack, activeId);
+    }
+
+    /**
+     * Fracción visual del cooldown individual persistido en el ItemStack.
+     *
+     * El temporizador comienza al confirmar el enganche y continúa bajando aunque
+     * el pico siga siendo el ancla activa. El estado "enganchado" no congela ni
+     * reemplaza el cooldown: su indicador dedicado se implementará por separado.
+     */
+    public static float visualCooldownFraction(Player player, ItemStack stack) {
+        return ToolIdentity.cooldownFraction(
+                stack,
+                player.level().getGameTime(),
+                ANCHOR_COOLDOWN_TICKS
+        );
+    }
+
     /**
      * Comprueba que el estado lógico del anclaje coincida con la posición física
      * del jugador. Se usa para recuperar estados transitorios donde el cliente
@@ -145,6 +178,12 @@ public final class ClimbManager {
 
         ItemStack stack = player.getItemInHand(hand);
         if (!isPickaxe(stack)) {
+            return false;
+        }
+
+        // Un pico enganchado está ocupado aunque su cooldown interno pueda
+        // haber terminado mientras permanecía clavado en la pared.
+        if (isActiveTool(player, stack)) {
             return false;
         }
 
@@ -315,6 +354,8 @@ public final class ClimbManager {
 
         if (previous != null) {
             clearCracks(level, previous.crackId(), previous.anchorBlock());
+            // El pico anterior ya inició su cooldown al engancharse. Cambiar de
+            // herramienta no reinicia ni prolonga ese temporizador.
         }
 
         ServerClimbState next = new ServerClimbState(
@@ -354,6 +395,10 @@ public final class ClimbManager {
 
         showCracks(level, next);
         playAnchorSound(level, player, anchorState, next.anchorBlock());
+
+        // El cooldown comienza inmediatamente al confirmar el enganche y su
+        // overlay baja en tiempo real aunque el pico continúe clavado. Soltarlo
+        // no inicia ni reinicia el temporizador.
         startCooldown(player, stack);
         syncAttached(player, next, true);
         return true;
@@ -477,15 +522,22 @@ public final class ClimbManager {
 
         clearCracks(player.serverLevel(), state.crackId(), state.anchorBlock());
 
+        ItemStack activeTool = findToolById(player, state.toolId());
+        int remainingCooldownTicks = 0;
         if (refundCooldown) {
-            ItemStack held = player.getItemInHand(state.activeHand());
-            if (isPickaxe(held) && ToolIdentity.matchesOrRepair(held, state.toolId())) {
-                ToolIdentity.clearCooldown(held);
+            if (!activeTool.isEmpty()) {
+                ToolIdentity.clearCooldown(activeTool);
                 player.getInventory().setChanged();
             }
+        } else if (!activeTool.isEmpty()) {
+            // El temporizador ya comenzó al crear el anclaje. Al soltar el pico
+            // no se reinicia: solo se sincroniza el tiempo que realmente queda.
+            remainingCooldownTicks = cooldownTicksRemaining(
+                    activeTool,
+                    player.level().getGameTime()
+            );
         }
 
-        ItemStack activeTool = player.getItemInHand(state.activeHand());
         Vec3 detachVelocity = jump
                 ? calculateJumpVelocity(player, activeTool)
                 : Vec3.ZERO;
@@ -501,7 +553,15 @@ public final class ClimbManager {
             CONSUMED_JUMP.remove(player.getUUID());
         }
 
-        syncDetached(player, state.restoreNoGravity(), state.restoreFlying(), jump, refundCooldown);
+        syncDetached(
+                player,
+                state.restoreNoGravity(),
+                state.restoreFlying(),
+                jump,
+                state.toolId(),
+                remainingCooldownTicks,
+                refundCooldown
+        );
     }
 
     public static void detachClient(Player player, boolean jump) {
@@ -532,22 +592,24 @@ public final class ClimbManager {
     }
 
     public static void applyClientSync(Player player, AnchorSyncPayload payload) {
-        ClientClimbState previous = CLIENT_STATES.remove(player.getUUID());
+        CLIENT_STATES.remove(player.getUUID());
 
         if (!payload.attached()) {
-            if (payload.refundCooldown() && previous != null) {
-                ItemStack localTool = player.getItemInHand(previous.activeHand());
-                if (isPickaxe(localTool)) {
-                    ToolIdentity.clearCooldown(localTool);
+            ItemStack releasedTool = findToolById(player, payload.toolId());
+            if (!releasedTool.isEmpty()) {
+                if (payload.refundCooldown()) {
+                    ToolIdentity.clearCooldown(releasedTool);
+                } else if (payload.cooldownTicks() > 0) {
+                    ToolIdentity.startCooldown(
+                            releasedTool,
+                            player.level().getGameTime() + payload.cooldownTicks()
+                    );
+                } else {
+                    // Si el cooldown terminó mientras el pico seguía enganchado,
+                    // se elimina cualquier desfase visual residual del cliente.
+                    ToolIdentity.clearCooldown(releasedTool);
                 }
             }
-
-            boolean restoreNoGravity = previous == null
-                    ? payload.restoreNoGravity()
-                    : previous.restoreNoGravity();
-            boolean restoreFlying = previous == null
-                    ? payload.restoreFlying()
-                    : previous.restoreFlying();
 
             // El payload propio solo sincroniza estado visual. La posición,
             // gravedad, vuelo y velocidad llegan por los paquetes vanilla del servidor.
@@ -562,26 +624,14 @@ public final class ClimbManager {
                 : InteractionHand.MAIN_HAND;
         Vec3 target = new Vec3(payload.targetX(), payload.targetY(), payload.targetZ());
 
-        boolean newAnchor = payload.newAnchor()
-                || previous == null
-                || previous.activeHand() != hand;
-
-        ClientClimbState next = new ClientClimbState(
-                target,
-                hand,
-                payload.restoreNoGravity(),
-                payload.restoreFlying(),
-                player.level().getGameTime()
-        );
-
-        CLIENT_STATES.put(player.getUUID(), next);
-
-        // El custom data del cooldown puede tardar un paquete de inventario en
-        // llegar. Se refleja inmediatamente en la copia cliente del pico para que
-        // la barra sea visible desde el primer frame del enganche.
-        if (newAnchor) {
-            ItemStack localTool = player.getItemInHand(hand);
-            if (isPickaxe(localTool)) {
+        ItemStack localTool = player.getItemInHand(hand);
+        if (isPickaxe(localTool)) {
+            // El paquete de anclaje es la fuente de verdad del UUID. Esto evita
+            // que una actualización tardía de inventario haga marcar otro pico.
+            if (!ToolIdentity.matches(localTool, payload.toolId())) {
+                ToolIdentity.assign(localTool, payload.toolId());
+            }
+            if (payload.newAnchor()) {
                 ToolIdentity.startCooldown(
                         localTool,
                         player.level().getGameTime() + ANCHOR_COOLDOWN_TICKS
@@ -589,6 +639,16 @@ public final class ClimbManager {
             }
         }
 
+        ClientClimbState next = new ClientClimbState(
+                target,
+                hand,
+                payload.toolId(),
+                payload.restoreNoGravity(),
+                payload.restoreFlying(),
+                player.level().getGameTime()
+        );
+
+        CLIENT_STATES.put(player.getUUID(), next);
         // No se toca la física local. connection.teleport y los datos de entidad
         // vanilla son la única fuente de verdad para el movimiento del jugador.
     }
@@ -721,6 +781,28 @@ public final class ClimbManager {
         return height;
     }
 
+    private static ItemStack findToolById(Player player, UUID toolId) {
+        for (ItemStack stack : player.getInventory().items) {
+            if (isPickaxe(stack) && ToolIdentity.matches(stack, toolId)) {
+                return stack;
+            }
+        }
+
+        ItemStack offhand = player.getOffhandItem();
+        if (isPickaxe(offhand) && ToolIdentity.matches(offhand, toolId)) {
+            return offhand;
+        }
+        return ItemStack.EMPTY;
+    }
+
+    private static int cooldownTicksRemaining(ItemStack stack, long gameTime) {
+        long until = ToolIdentity.cooldownUntil(stack);
+        if (until <= gameTime) {
+            return 0;
+        }
+        return (int) Math.min(ANCHOR_COOLDOWN_TICKS, until - gameTime);
+    }
+
     private static void startCooldown(ServerPlayer player, ItemStack stack) {
         ToolIdentity.startCooldown(
                 stack,
@@ -778,6 +860,8 @@ public final class ClimbManager {
             boolean restoreNoGravity,
             boolean restoreFlying,
             boolean jump,
+            UUID toolId,
+            int cooldownTicks,
             boolean refundCooldown
     ) {
         PacketDistributor.sendToPlayer(
@@ -786,6 +870,8 @@ public final class ClimbManager {
                         restoreNoGravity,
                         restoreFlying,
                         jump,
+                        toolId,
+                        cooldownTicks,
                         refundCooldown
                 )
         );

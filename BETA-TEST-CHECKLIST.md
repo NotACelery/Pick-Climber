@@ -1,58 +1,32 @@
-# Checklist 0.1.6-beta — corrección crítica
+# Checklist de pruebas — 0.1.10-beta
 
-## Prueba principal desde reposo
+## Cooldown en tiempo real
 
-- [ ] Permanecer completamente quieto frente a una pared.
-- [ ] Usar un pico 20 veces, esperando su cooldown entre intentos.
-- [ ] Cada intento debe terminar enganchado.
-- [ ] Ningún intento puede producir impulso vertical.
-- [ ] `latest.log` debe mostrar `action=ATTACH` en todos esos intentos.
+- [ ] Al engancharse, el overlay aparece lleno y comienza a bajar inmediatamente.
+- [ ] El overlay llega a cero después de 20 ticks aunque el pico siga clavado.
+- [ ] Soltarse antes de 20 ticks conserva solo la fracción restante, sin reiniciarla.
+- [ ] Soltarse después de 20 ticks no crea un cooldown nuevo.
+- [ ] Cambiar del pico A al B no reinicia el cooldown de A y B inicia el suyo al engancharse.
+- [ ] Alternar dos picos no permite spam de enganches: cada uso exitoso tiene sus propios 20 ticks.
 
-## Sincronización del anclaje
 
-- [ ] Engancharse apuntando arriba, abajo y a los lados.
-- [ ] El jugador llega al punto y permanece inmóvil.
-- [ ] No existe rubber-banding entre la posición anterior y el ancla.
-- [ ] Mantener teclas de movimiento no genera velocidad acumulada.
-- [ ] Al soltar una tecla, el jugador no sale disparado.
-- [ ] La grieta y el indicador del pico permanecen estables.
+## Cooldown al enganchar
 
-## Impulso autorizado
+- [ ] Sacar dos picos nuevos: ninguno presenta overlay.
+- [ ] Engancharse con el pico A: A queda visualmente cubierto al 100 %.
+- [ ] Soltarse antes de 20 ticks: A muestra solo la fracción restante y termina normalmente.
+- [ ] Permanecer enganchado más de 20 ticks: al soltarse, A queda disponible inmediatamente.
+- [ ] Cambiar de A a B antes de 20 ticks: B queda cubierto al 100 % y A continúa con el tiempo restante, sin reiniciarse.
+- [ ] Cambiar de A a B después de 20 ticks: A queda disponible al instante y B pasa a ser el activo.
+- [ ] Hacer un wall jump rápido y pulsar clic derecho durante el ascenso: el mismo pico sigue bloqueado durante el tiempo restante y no produce un impulso accidental.
+- [ ] Cuando termine el cooldown y el jugador esté cayendo o cerca del ápice, el pico puede volver a engancharse.
+- [ ] Dos picos del mismo material conservan UUID, overlays y cooldowns independientes.
 
-- [ ] Saltar normalmente y usar el pico durante el ascenso produce impulso.
-- [ ] El log muestra `action=BOOST`.
-- [ ] Usar el pico por segunda vez durante el mismo salto no vuelve a impulsar con ese ascenso ya consumido.
-- [ ] Al tocar el suelo, un nuevo salto vuelve a autorizar el impulso.
-- [ ] Wall jump y uso del segundo pico durante el ascenso permiten encadenar un impulso.
+## Regresión funcional
 
-## Salvamento durante caídas
-
-- [ ] Caer desde suficiente altura y engancharse detiene la caída.
-- [ ] El log muestra `action=ATTACH`, nunca `BOOST`.
-- [ ] El daño acumulado de caída queda en cero.
-- [ ] Tras un impulso, comenzar a caer y usar el otro pico permite engancharse.
-- [ ] Un intento fallido o un cooldown nunca deja al jugador bloqueado para futuros enganches.
-
-## Creativo
-
-- [ ] Quieto en creativo: engancha.
-- [ ] Cayendo en creativo: engancha.
-- [ ] Ascendiendo mediante vuelo creativo: engancha, no impulsa.
-- [ ] Activar y desactivar vuelo después de soltarse funciona normalmente.
-
-## Regresión
-
-- [ ] Movimiento horizontal y diagonal sigue funcionando.
-- [ ] Enganche e impulso consumen 15 de durabilidad.
-- [ ] Unbreaking funciona.
-- [ ] Los cooldowns siguen siendo individuales.
-- [ ] Pick Climber I–III modifica impulso y wall jump.
-- [ ] Romper el bloque ancla libera sin impulso residual.
-
-## Prueba crítica de salto fantasma
-
-- [ ] Saltar varias veces lejos de una pared, quedarse quieto y engancharse: no debe saltar solo.
-- [ ] Engancharse manteniendo Espacio: debe permanecer sujeto.
-- [ ] Soltar Espacio y volver a pulsarlo: debe ejecutar exactamente un wall jump.
-- [ ] Impulsarse con Espacio mantenido y luego engancharse con el otro pico: no debe desengancharse automáticamente.
-- [ ] Verificar en `latest.log` que solo aparezca `DETACH_JUMP` después de una pulsación nueva.
+- [ ] Desde reposo, clic derecho engancha y no impulsa.
+- [ ] Durante un salto real, clic derecho produce el impulso esperado.
+- [ ] Durante una caída, clic derecho sirve como rescate.
+- [ ] No reaparece el desenganche automático corregido en 0.1.6.
+- [ ] Grietas, sonido y desgaste de 15 funcionan.
+- [ ] Unbreaking sigue afectando el desgaste.
