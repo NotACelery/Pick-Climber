@@ -3,6 +3,7 @@ package dev.maicra.pickclimber.climb;
 import com.mojang.logging.LogUtils;
 import dev.maicra.pickclimber.network.AnchorSyncPayload;
 import dev.maicra.pickclimber.network.BoostSyncPayload;
+import dev.maicra.pickclimber.network.SlideInputPayload;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.MinecraftServer;
@@ -13,6 +14,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.SoundType;
@@ -31,6 +33,7 @@ public final class ClimbManager {
     public static final int DURABILITY_COST = 15;
     public static final int CRACK_STAGE = 5;
     public static final int ANCHOR_COOLDOWN_TICKS = 20;
+    public static final int UNSTABLE_ANCHOR_COOLDOWN_TICKS = 40;
 
     /** La velocidad sigue siendo una comprobación secundaria, nunca la autorización del impulso. */
     public static final double RISING_VELOCITY_THRESHOLD = 0.08D;
@@ -51,6 +54,15 @@ public final class ClimbManager {
     private static final int SERVER_SYNC_INTERVAL = 5;
     private static final int CLIENT_SYNC_TIMEOUT_TICKS = 40;
     private static final int FAILED_ATTACH_GRACE_TICKS = 5;
+    private static final double BRAKING_START_SPEED = -0.40D;
+    private static final float BRAKING_MIN_FALL_DISTANCE = 5.0F;
+    private static final double BRAKING_STOP_SPEED = -0.08D;
+    private static final double BRAKING_DRAG = 0.75D;
+    private static final double BRAKING_RECOVERY = 0.035D;
+    private static final double UNSTABLE_SLIDE_SPEED = -0.08D;
+    /** Evita atravesar o saltarse bloques al absorber una caída extrema. */
+    private static final double MAX_BRAKING_MOVE_PER_TICK = 0.60D;
+    private static final double CONTACT_BLOCK_EPSILON = 1.0E-3D;
 
     private static final Map<UUID, ServerClimbState> SERVER_STATES = new HashMap<>();
     private static final Map<UUID, ClientClimbState> CLIENT_STATES = new HashMap<>();
@@ -128,11 +140,7 @@ public final class ClimbManager {
      * reemplaza el cooldown: su indicador dedicado se implementará por separado.
      */
     public static float visualCooldownFraction(Player player, ItemStack stack) {
-        return ToolIdentity.cooldownFraction(
-                stack,
-                player.level().getGameTime(),
-                ANCHOR_COOLDOWN_TICKS
-        );
+        return ToolIdentity.cooldownFraction(stack, player.level().getGameTime());
     }
 
     /**
@@ -224,7 +232,7 @@ public final class ClimbManager {
         }
 
         BlockState state = player.level().getBlockState(hit.getBlockPos());
-        if (state.isAir() || !state.isFaceSturdy(player.level(), hit.getBlockPos(), face)) {
+        if (!hasValidAnchorFace(player, state, hit.getBlockPos(), face)) {
             return false;
         }
 
@@ -352,6 +360,8 @@ public final class ClimbManager {
         BlockState anchorState = level.getBlockState(hit.getBlockPos());
         ItemStack stack = player.getItemInHand(hand);
         UUID toolId = ToolIdentity.ensure(stack);
+        AnchorSurface surface = AnchorSurfaceClassifier.classify(anchorState);
+        AnchorMotion initialMotion = initialMotion(surface, player);
 
         EquipmentSlot slot = hand == InteractionHand.MAIN_HAND
                 ? EquipmentSlot.MAINHAND
@@ -396,7 +406,22 @@ public final class ClimbManager {
                 crackId,
                 restoreNoGravity,
                 restoreFlying,
-                player.level().getGameTime()
+                player.level().getGameTime(),
+                surface,
+                initialMotion,
+                initialSlideVelocity(surface, player),
+                cooldownTicksFor(surface),
+                0.0F,
+                0.0F,
+                // La cara golpeada vive justo en un borde entero. Se desplaza
+                // apenas hacia el interior del bloque para que BlockPos no
+                // resuelva el bloque de aire del lado del jugador.
+                hit.getLocation().subtract(target).subtract(
+                        hit.getDirection().getStepX() * CONTACT_BLOCK_EPSILON,
+                        hit.getDirection().getStepY() * CONTACT_BLOCK_EPSILON,
+                        hit.getDirection().getStepZ() * CONTACT_BLOCK_EPSILON
+                ),
+                Vec3.ZERO
         );
 
         SERVER_STATES.put(player.getUUID(), next);
@@ -428,7 +453,10 @@ public final class ClimbManager {
         // El cooldown comienza inmediatamente al confirmar el enganche y su
         // overlay baja en tiempo real aunque el pico continúe clavado. Soltarlo
         // no inicia ni reinicia el temporizador.
-        startCooldown(player, stack);
+        startCooldown(player, stack, next.cooldownTicks());
+        if (initialMotion == AnchorMotion.BRAKING) {
+            startEquippedEffortCooldown(player, hand);
+        }
         syncAttached(player, next, true);
         return true;
     }
@@ -468,10 +496,17 @@ public final class ClimbManager {
             player.onUpdateAbilities();
         }
 
+        state = advanceAnchorMotion(player, state);
+        if (state == null) {
+            detachServerInternal(player, false, false);
+            return;
+        }
+        SERVER_STATES.put(player.getUUID(), state);
+
         if (player.tickCount % CRACK_REFRESH_INTERVAL == 0) {
             showCracks(player.serverLevel(), state);
         }
-        if (player.tickCount % SERVER_SYNC_INTERVAL == 0) {
+        if (state.motion() != AnchorMotion.FIXED || player.tickCount % SERVER_SYNC_INTERVAL == 0) {
             syncAttached(player, state, false);
         }
 
@@ -552,8 +587,159 @@ public final class ClimbManager {
         }
 
         BlockState blockState = player.level().getBlockState(state.anchorBlock());
-        return !blockState.isAir()
-                && blockState.isFaceSturdy(player.level(), state.anchorBlock(), state.anchorFace());
+        return hasValidAnchorFace(player, blockState, state.anchorBlock(), state.anchorFace());
+    }
+
+    private static boolean hasValidAnchorFace(
+            Player player,
+            BlockState state,
+            BlockPos position,
+            Direction face
+    ) {
+        if (state.isAir() || AnchorSurfaceClassifier.classify(state) == AnchorSurface.UNCLIMBABLE) {
+            return false;
+        }
+
+        // Las superficies inestables incluyen nieve en capa y nieve en polvo,
+        // cuya geometría vanilla no siempre declara una cara lateral sturdy.
+        return state.isFaceSturdy(player.level(), position, face)
+                || AnchorSurfaceClassifier.classify(state) == AnchorSurface.UNSTABLE;
+    }
+
+    private static AnchorMotion initialMotion(AnchorSurface surface, ServerPlayer player) {
+        if (player.getDeltaMovement().y < BRAKING_START_SPEED
+                && player.fallDistance > BRAKING_MIN_FALL_DISTANCE) {
+            return AnchorMotion.BRAKING;
+        }
+        return surface == AnchorSurface.UNSTABLE
+                ? AnchorMotion.UNSTABLE_SLIDING
+                : AnchorMotion.FIXED;
+    }
+
+    private static double initialSlideVelocity(AnchorSurface surface, ServerPlayer player) {
+        return initialMotion(surface, player) == AnchorMotion.BRAKING
+                ? player.getDeltaMovement().y
+                : surface == AnchorSurface.UNSTABLE ? UNSTABLE_SLIDE_SPEED : 0.0D;
+    }
+
+    private static int cooldownTicksFor(AnchorSurface surface) {
+        return surface == AnchorSurface.UNSTABLE
+                ? UNSTABLE_ANCHOR_COOLDOWN_TICKS
+                : ANCHOR_COOLDOWN_TICKS;
+    }
+
+    /** Actualiza exclusivamente en el servidor el frenado o descenso del ancla. */
+    private static ServerClimbState advanceAnchorMotion(ServerPlayer player, ServerClimbState state) {
+        if (state.motion() == AnchorMotion.FIXED) {
+            return state;
+        }
+        if (player.level().getGameTime() <= state.attachedAtGameTime()) {
+            return state;
+        }
+
+        AnchorMotion nextMotion = state.motion();
+        double nextVelocity = state.slideVelocity();
+        if (state.motion() == AnchorMotion.BRAKING) {
+            nextVelocity = Math.min(0.0D, nextVelocity * BRAKING_DRAG + BRAKING_RECOVERY);
+            if (nextVelocity > BRAKING_STOP_SPEED) {
+                if (state.surface() == AnchorSurface.UNSTABLE) {
+                    nextMotion = AnchorMotion.UNSTABLE_SLIDING;
+                    nextVelocity = UNSTABLE_SLIDE_SPEED;
+                } else {
+                    return state.withMotion(state.targetPosition(), AnchorMotion.FIXED, 0.0D);
+                }
+            }
+        } else {
+            nextVelocity = UNSTABLE_SLIDE_SPEED;
+        }
+
+        // La velocidad interna puede ser muy alta tras una caída larga, pero el
+        // recorrido físico se limita para inspeccionar cada bloque de la pared.
+        double movementVelocity = Math.max(nextVelocity, -MAX_BRAKING_MOVE_PER_TICK);
+        double lateralSpeed = Math.abs(movementVelocity) * 0.5D;
+        if (state.motion() == AnchorMotion.BRAKING
+                && state.committedBrakeDirection().lengthSqr() < 1.0E-5D) {
+            Vec3 requestedDirection = lateralSlideDirection(player, state);
+            if (requestedDirection.lengthSqr() >= 1.0E-5D) {
+                state = state.withCommittedBrakeDirection(requestedDirection.normalize());
+            }
+        }
+        Vec3 lateralMovement = state.committedBrakeDirection().lengthSqr() >= 1.0E-5D
+                ? state.committedBrakeDirection().scale(lateralSpeed)
+                : lateralSlideMovement(player, state, lateralSpeed);
+        Vec3 nextTarget = state.targetPosition().add(lateralMovement).add(0.0D, movementVelocity, 0.0D);
+        Vec3 displacement = nextTarget.subtract(player.position());
+        if (!player.level().noCollision(player, player.getBoundingBox().move(displacement))) {
+            if (!player.level().noCollision(
+                    player,
+                    player.getBoundingBox().move(0.0D, movementVelocity, 0.0D)
+            )) {
+                return null;
+            }
+            // Una colisión durante el deslizamiento nunca atraviesa bloques ni
+            // fuerza una caída artificial. Se estabiliza en la última posición segura.
+            return state.withMotion(state.targetPosition(), AnchorMotion.FIXED, 0.0D);
+        }
+
+        BlockPos nextAnchorBlock = anchorBlockAt(player, state, nextTarget);
+        BlockState nextBlockState = player.level().getBlockState(nextAnchorBlock);
+        if (!hasValidAnchorFace(player, nextBlockState, nextAnchorBlock, state.anchorFace())) {
+            // Al acabar la pared inestable no queda un soporte válido: el
+            // servidor termina el anclaje en vez de seguir usando el bloque inicial.
+            return null;
+        }
+
+        AnchorSurface nextSurface = AnchorSurfaceClassifier.classify(nextBlockState);
+        // Una pared firme no cancela su propio frenado. Solo una transición
+        // desde material inestable a uno firme debe terminar el descenso.
+        if (state.surface() == AnchorSurface.UNSTABLE
+                && nextSurface != AnchorSurface.UNSTABLE) {
+            nextMotion = AnchorMotion.FIXED;
+            nextVelocity = 0.0D;
+        }
+
+        ServerClimbState next = state.withSlide(
+                nextAnchorBlock,
+                nextSurface,
+                nextTarget,
+                nextMotion,
+                nextVelocity
+        );
+        if (!state.anchorBlock().equals(nextAnchorBlock)) {
+            clearAnchorVisuals(player, state);
+            showCracks(player.serverLevel(), next);
+        }
+        return next;
+    }
+
+    private static Vec3 lateralSlideMovement(ServerPlayer player, ServerClimbState state, double speed) {
+        return lateralSlideDirection(player, state).scale(speed);
+    }
+
+    private static Vec3 lateralSlideDirection(ServerPlayer player, ServerClimbState state) {
+        Vec3 look = player.getLookAngle();
+        Vec3 forward = new Vec3(look.x, 0.0D, look.z);
+        if (forward.lengthSqr() < 1.0E-5D) {
+            return Vec3.ZERO;
+        }
+        forward = forward.normalize();
+        Vec3 right = new Vec3(-forward.z, 0.0D, forward.x);
+        Vec3 input = forward.scale(state.lateralForward()).add(right.scale(-state.lateralStrafe()));
+        if (input.lengthSqr() > 1.0D) {
+            input = input.normalize();
+        }
+
+        // La componente normal a la pared queda anulada: se puede mirar y
+        // girar libremente, pero el ancla no se separa ni atraviesa la pared.
+        return switch (state.anchorFace().getAxis()) {
+            case X -> new Vec3(0.0D, 0.0D, input.z);
+            case Z -> new Vec3(input.x, 0.0D, 0.0D);
+            case Y -> Vec3.ZERO;
+        };
+    }
+
+    private static BlockPos anchorBlockAt(Player player, ServerClimbState state, Vec3 target) {
+        return BlockPos.containing(target.add(state.contactOffset()));
     }
 
     private static void holdPlayer(ServerPlayer player, Vec3 target) {
@@ -570,7 +756,8 @@ public final class ClimbManager {
                     target.y,
                     target.z,
                     player.getYRot(),
-                    player.getXRot()
+                    player.getXRot(),
+                    RelativeMovement.ROTATION
             );
             player.setDeltaMovement(Vec3.ZERO);
         }
@@ -578,6 +765,24 @@ public final class ClimbManager {
 
     public static void detachServer(ServerPlayer player, boolean jump) {
         detachServerInternal(player, jump, false);
+    }
+
+    /** Recibe intención cliente; el servidor decide velocidad, plano y colisiones. */
+    public static void updateSlideInput(ServerPlayer player, SlideInputPayload payload) {
+        ServerClimbState state = SERVER_STATES.get(player.getUUID());
+        if (state == null
+                || !Float.isFinite(payload.forward())
+                || !Float.isFinite(payload.strafe())
+                || !Float.isFinite(payload.yaw())
+                || !Float.isFinite(payload.pitch())) {
+            return;
+        }
+
+        float forward = Mth.clamp(payload.forward(), -1.0F, 1.0F);
+        float strafe = Mth.clamp(payload.strafe(), -1.0F, 1.0F);
+        player.setYRot(Mth.wrapDegrees(payload.yaw()));
+        player.setXRot(Mth.clamp(payload.pitch(), -90.0F, 90.0F));
+        SERVER_STATES.put(player.getUUID(), state.withSlideInput(forward, strafe));
     }
 
     private static void detachServerInternal(ServerPlayer player, boolean jump, boolean refundCooldown) {
@@ -727,7 +932,8 @@ public final class ClimbManager {
             }
             ToolIdentity.startCooldown(
                     localTool,
-                    player.level().getGameTime() + ANCHOR_COOLDOWN_TICKS
+                    player.level().getGameTime() + payload.cooldownTicks(),
+                    payload.cooldownTicks()
             );
         }
 
@@ -769,7 +975,8 @@ public final class ClimbManager {
         if (isPickaxe(localTool) && payload.cooldownTicks() > 0) {
             ToolIdentity.startCooldown(
                     localTool,
-                    player.level().getGameTime() + payload.cooldownTicks()
+                    player.level().getGameTime() + payload.cooldownTicks(),
+                    payload.cooldownTicks()
             );
         }
 
@@ -910,10 +1117,30 @@ public final class ClimbManager {
     }
 
     private static void startCooldown(ServerPlayer player, ItemStack stack) {
+        startCooldown(player, stack, ANCHOR_COOLDOWN_TICKS);
+    }
+
+    private static void startCooldown(ServerPlayer player, ItemStack stack, int cooldownTicks) {
         ToolIdentity.startCooldown(
                 stack,
-                player.level().getGameTime() + ANCHOR_COOLDOWN_TICKS
+                player.level().getGameTime() + cooldownTicks,
+                cooldownTicks
         );
+        player.getInventory().setChanged();
+    }
+
+    /** Una caída fuerte compromete ambas manos equipadas y evita encadenar otro pico. */
+    private static void startEquippedEffortCooldown(ServerPlayer player, InteractionHand activeHand) {
+        long until = player.level().getGameTime() + ANCHOR_COOLDOWN_TICKS;
+        for (InteractionHand hand : InteractionHand.values()) {
+            if (hand == activeHand) {
+                continue;
+            }
+            ItemStack equipped = player.getItemInHand(hand);
+            if (isPickaxe(equipped)) {
+                ToolIdentity.startCooldown(equipped, until, ANCHOR_COOLDOWN_TICKS);
+            }
+        }
         player.getInventory().setChanged();
     }
 

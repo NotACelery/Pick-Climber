@@ -1,4 +1,4 @@
-# Pick Climber — Beta experimental 0.1.14
+# Pick Climber — Beta experimental 0.1.17
 
 Mod para **Minecraft 1.21.1**, **NeoForge 21.1.235** y **Java 21**.
 
@@ -87,6 +87,22 @@ Mientras un pico mantiene el anclaje, su modelo de primera persona entra suaveme
 
 Las grietas sintéticas se limpian al cambiar de punto, soltarse, cambiar de dimensión, perder el pico, romper el bloque o desconectarse.
 
+## Superficies y frenado de caída
+
+La clasificación de superficies es data-driven y puede ampliarse desde datapacks o modpacks:
+
+- `pickclimber:unclimbable_blocks`: rechaza el anclaje.
+- `pickclimber:unstable_anchor_blocks`: permite engancharse, pero continúa con un descenso controlado.
+- `pickclimber:stable_anchor_blocks`: declara superficies firmes; los bloques no clasificados conservan el comportamiento firme anterior.
+
+Las exclusiones tienen prioridad sobre cualquier otro tag. Hielo, hielo compacto, hielo azul, hielo escarchado y yunques son firmes. Arena, grava, concreto en polvo y toda la nieve —incluidas capas y nieve en polvo— son inestables.
+
+El frenado solo se activa si el jugador ya descendió más de 5 bloques (`fallDistance`) y su velocidad vertical es menor que `-0.40` bloques/tick. Los saltos y caídas cortas se enganchan directamente. Durante el frenado el servidor absorbe la velocidad gradualmente y desplaza el ancla hacia abajo sin atravesar colisiones. En una superficie firme termina inmóvil; en una inestable continúa a velocidad descendente controlada.
+
+Durante el frenado o descenso, `W/A/S/D` permite desplazarse por el plano de la pared a la mitad de la velocidad vertical actual. En `BRAKING`, la primera dirección lateral queda fijada como trayectoria diagonal. La intención de cámara y movimiento llega al servidor cada tick, mientras las correcciones de posición conservan la rotación local. El punto de anclaje y sus grietas siguen el contacto exacto del clic; al llegar a una superficie firme o al suelo, el descenso termina. Un enganche iniciado en una superficie inestable usa 40 ticks de cooldown. Una caída que activa `BRAKING` también aplica 20 ticks de esfuerzo al otro pico equipado para evitar anular el frenado alternando manos.
+
+Todavía no existe desgaste proporcional ni `Sturdy Latch`.
+
 ## Controles vigentes
 
 - **Clic derecho** sobre una cara vertical válida: impulso o enganche.
@@ -104,7 +120,7 @@ Las grietas sintéticas se limpian al cambiar de punto, soltarse, cambiar de dim
 3. El JAR aparecerá en:
 
 ```text
-build/libs/pickclimber-1.21.1-0.1.14-beta.jar
+build/libs/pickclimber-1.21.1-0.1.17-beta.jar
 ```
 
 Retira versiones anteriores antes de instalar esta beta.

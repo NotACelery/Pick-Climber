@@ -19,7 +19,15 @@ public record ServerClimbState(
         int crackId,
         boolean restoreNoGravity,
         boolean restoreFlying,
-        long attachedAtGameTime
+        long attachedAtGameTime,
+        AnchorSurface surface,
+        AnchorMotion motion,
+        double slideVelocity,
+        int cooldownTicks,
+        float lateralForward,
+        float lateralStrafe,
+        Vec3 contactOffset,
+        Vec3 committedBrakeDirection
 ) {
     public ServerClimbState withActiveHand(InteractionHand hand) {
         return new ServerClimbState(
@@ -32,7 +40,80 @@ public record ServerClimbState(
                 crackId,
                 restoreNoGravity,
                 restoreFlying,
-                attachedAtGameTime
+                attachedAtGameTime,
+                surface,
+                motion,
+                slideVelocity,
+                cooldownTicks,
+                lateralForward,
+                lateralStrafe,
+                contactOffset,
+                committedBrakeDirection
+        );
+    }
+
+    public ServerClimbState withMotion(Vec3 target, AnchorMotion nextMotion, double nextSlideVelocity) {
+        return withSlide(anchorBlock, surface, target, nextMotion, nextSlideVelocity);
+    }
+
+    public ServerClimbState withSlide(
+            BlockPos nextAnchorBlock,
+            AnchorSurface nextSurface,
+            Vec3 target,
+            AnchorMotion nextMotion,
+            double nextSlideVelocity
+    ) {
+        return new ServerClimbState(
+                anchorDimension,
+                nextAnchorBlock,
+                anchorFace,
+                target,
+                activeHand,
+                toolId,
+                crackId,
+                restoreNoGravity,
+                restoreFlying,
+                attachedAtGameTime,
+                nextSurface,
+                nextMotion,
+                nextSlideVelocity,
+                cooldownTicks,
+                lateralForward,
+                lateralStrafe,
+                contactOffset,
+                committedBrakeDirection
+        );
+    }
+
+    public ServerClimbState withSlideInput(float nextForward, float nextStrafe) {
+        return new ServerClimbState(
+                anchorDimension,
+                anchorBlock,
+                anchorFace,
+                targetPosition,
+                activeHand,
+                toolId,
+                crackId,
+                restoreNoGravity,
+                restoreFlying,
+                attachedAtGameTime,
+                surface,
+                motion,
+                slideVelocity,
+                cooldownTicks,
+                nextForward,
+                nextStrafe,
+                contactOffset,
+                committedBrakeDirection
+        );
+    }
+
+    public ServerClimbState withCommittedBrakeDirection(Vec3 direction) {
+        return new ServerClimbState(
+                anchorDimension, anchorBlock, anchorFace, targetPosition, activeHand,
+                toolId, crackId, restoreNoGravity, restoreFlying, attachedAtGameTime,
+                surface, motion, slideVelocity, cooldownTicks, lateralForward, lateralStrafe,
+                contactOffset, direction
         );
     }
 }

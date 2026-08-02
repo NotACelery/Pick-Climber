@@ -4,6 +4,7 @@ import dev.maicra.pickclimber.PickClimber;
 import dev.maicra.pickclimber.climb.ClimbManager;
 import dev.maicra.pickclimber.climb.ClimbingHandSelector;
 import dev.maicra.pickclimber.network.DetachRequestPayload;
+import dev.maicra.pickclimber.network.SlideInputPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.InteractionHand;
@@ -27,6 +28,9 @@ public final class ClientEvents {
     private static boolean wasAttachedLastTick;
     private static boolean jumpWasDown;
     private static boolean jumpReleaseArmed;
+    private static boolean shiftWasDown;
+    private static long lastShiftPressGameTime = Long.MIN_VALUE;
+    private static final int DOUBLE_SHIFT_WINDOW_TICKS = 7;
 
     private ClientEvents() {
     }
@@ -87,6 +91,7 @@ public final class ClientEvents {
         hadPlayerLastTick = true;
         boolean attached = ClimbManager.isAttached(player);
         boolean jumpDown = minecraft.options.keyJump.isDown();
+        boolean shiftDown = minecraft.options.keyShift.isDown();
 
         if (!attached) {
             // Fuera del anclaje solo seguimos el estado físico actual de la tecla.
@@ -96,8 +101,17 @@ public final class ClientEvents {
             wasAttachedLastTick = false;
             jumpWasDown = jumpDown;
             jumpReleaseArmed = false;
+            shiftWasDown = shiftDown;
+            lastShiftPressGameTime = Long.MIN_VALUE;
             return;
         }
+
+        PacketDistributor.sendToServer(new SlideInputPayload(
+                minecraft.player.input.forwardImpulse,
+                minecraft.player.input.leftImpulse,
+                player.getYRot(),
+                player.getXRot()
+        ));
 
         if (!wasAttachedLastTick) {
             // Al recibir un anclaje nuevo se exige una liberación completa de la
@@ -106,7 +120,23 @@ public final class ClientEvents {
             wasAttachedLastTick = true;
             jumpWasDown = jumpDown;
             jumpReleaseArmed = !jumpDown;
+            shiftWasDown = shiftDown;
+            lastShiftPressGameTime = Long.MIN_VALUE;
             return;
+        }
+
+        boolean freshShiftPress = shiftDown && !shiftWasDown;
+        shiftWasDown = shiftDown;
+        if (freshShiftPress) {
+            long now = player.level().getGameTime();
+            if (lastShiftPressGameTime != Long.MIN_VALUE
+                    && now - lastShiftPressGameTime <= DOUBLE_SHIFT_WINDOW_TICKS) {
+                lastShiftPressGameTime = Long.MIN_VALUE;
+                ClimbManager.detachClient(player, false);
+                PacketDistributor.sendToServer(new DetachRequestPayload(false));
+                return;
+            }
+            lastShiftPressGameTime = now;
         }
 
         if (!jumpDown) {
@@ -130,6 +160,8 @@ public final class ClientEvents {
         wasAttachedLastTick = false;
         jumpWasDown = false;
         jumpReleaseArmed = false;
+        shiftWasDown = false;
+        lastShiftPressGameTime = Long.MIN_VALUE;
     }
 
     @SubscribeEvent

@@ -96,6 +96,42 @@
 
 # Changelog
 
+## 0.1.17-beta
+
+- Corrige la cámara bloqueada durante frenado o descenso: las correcciones de posición conservan la rotación local.
+- Añade payload servidor-autoritativo de intención de cámara y `W/A/S/D` para que el movimiento lateral funcione tanto durante `BRAKING` como `UNSTABLE_SLIDING`.
+- Sincroniza el estado móvil en cada tick, eliminando el retraso de actualización de ancla y grietas durante el deslizamiento.
+- Corrige la orientación de A/D durante el deslizamiento.
+- Llegar al suelo durante un descenso termina el anclaje pasivamente en lugar de congelarlo.
+- Doble pulsación de Shift dentro de 7 ticks suelta el anclaje sin impulso.
+- El ancla conserva el punto exacto del clic para resolver correctamente el bloque y la grieta durante el deslizamiento.
+- En frenado por caída libre, la primera dirección lateral queda fijada como trayectoria diagonal hasta que el anclaje termine o se estabilice.
+- El umbral de frenado pasa de `-0.25` a `-0.40` bloques/tick para que caídas leves se enganchen directamente.
+- El frenado absorbe la caída aproximadamente durante el doble de tiempo; valores de balance actuales fijados en arrastre `0.75` y recuperación `0.035`.
+- `BRAKING` ahora exige más de 5 bloques de caída acumulada además de velocidad suficiente, evitando activarlo tras saltos o caídas cortas.
+- Protocolo interno actualizado a versión 10.
+
+## 0.1.16-beta
+
+- Permite desplazamiento lateral con `W/A/S/D` durante frenado y descenso a la mitad de la velocidad vertical actual, limitado al plano de la pared.
+- La cámara conserva orientación libre durante el movimiento; el servidor mantiene autoridad sobre la posición final y las colisiones.
+- El ancla y las grietas avanzan al bloque que sostiene actualmente el pico al deslizarse entre bloques.
+- Encontrar una pared firme durante un descenso inestable lo convierte en un anclaje fijo; acabar la superficie termina el anclaje de forma segura.
+- Los anclajes iniciados en superficies inestables aplican 40 ticks de cooldown individual en vez de 20.
+- El cooldown persistente conserva su duración para que el indicador cliente represente correctamente ambos tiempos.
+- Protocolo interno actualizado a versión 9 para sincronizar el cooldown inicial variable de un anclaje.
+
+## 0.1.15-beta
+
+- Añade clasificación de superficies mediante los tags data-driven `stable_anchor_blocks`, `unstable_anchor_blocks` y `unclimbable_blocks`.
+- La prioridad es no escalable, inestable, estable y fallback compatible vigente.
+- Hielo, hielo compacto, hielo azul, hielo escarchado y yunques se declaran firmes.
+- Arena, grava, concreto en polvo, nieve, capas de nieve y nieve en polvo se declaran inestables.
+- Los bloques administrativos/protegidos incluidos en `unclimbable_blocks` rechazan el anclaje.
+- Una caída rápida se frena progresivamente desde el servidor; no usa velocidad cliente ni corrección hacia el ancla.
+- En superficies firmes el frenado termina fijo; en inestables continúa con descenso controlado y comprobación de colisiones por tick.
+- No añade desgaste proporcional, Sturdy Latch, Strong Grip ni techos.
+
 ## 0.1.5-beta
 
 - Reescribe la sincronización física del anclaje desde la raíz.

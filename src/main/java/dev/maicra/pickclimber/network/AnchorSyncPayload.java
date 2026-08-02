@@ -66,7 +66,12 @@ public record AnchorSyncPayload(
     );
 
     public static AnchorSyncPayload attached(ServerClimbState state, boolean newAnchor) {
-        int flags = makeFlags(state.restoreNoGravity(), state.restoreFlying(), false, 0);
+        int flags = makeFlags(
+                state.restoreNoGravity(),
+                state.restoreFlying(),
+                false,
+                newAnchor ? state.cooldownTicks() : 0
+        );
         if (newAnchor) {
             flags |= FLAG_NEW_ANCHOR;
         }

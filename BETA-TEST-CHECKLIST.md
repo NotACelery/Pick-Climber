@@ -1,6 +1,41 @@
-# Checklist 0.1.14-beta — bloques interactivos y balance del encantamiento
+# Checklist 0.1.17-beta — superficies, deslizamiento y regresiones
 
-## Bloques con menú vanilla
+## Tags de superficies
+
+- [ ] Hielo, hielo compacto, hielo azul e hielo escarchado permiten anclaje firme.
+- [ ] Yunques permiten anclaje firme pese a verse afectados por gravedad.
+- [ ] Arena, arena roja, grava y concreto en polvo permiten engancharse pero descienden controladamente.
+- [ ] Bloque de nieve, capa de nieve y nieve en polvo permiten engancharse y se clasifican como inestables.
+- [ ] Bedrock, barrera, bloques de comando, structure block y jigsaw rechazan sin coste, cooldown, sonido ni grietas.
+- [ ] Un datapack puede añadir un bloque a cada tag y la prioridad `unclimbable > unstable > stable > fallback` se respeta.
+
+## Frenado y descenso
+
+- [ ] Enganche desde reposo o caída lenta en piedra: queda fijo inmediatamente.
+- [ ] Enganche tras caída alta en piedra: desliza visiblemente y termina fijo sin atravesar bloques.
+- [ ] Enganche tras caída alta en arena o nieve: frena primero y luego continúa descendiendo a velocidad controlada.
+- [ ] Una pared con obstáculo durante el deslizamiento no permite atravesarlo ni teletransporta al jugador dentro de bloques.
+- [ ] Al aterrizar aún sujeto durante el descenso controlado no se cobra daño de la caída ya absorbida.
+- [ ] Soltarse tras frenar inicia una caída nueva; el daño posterior no incluye la caída previamente absorbida.
+- [ ] Durante frenado rápido, W/A/S/D desplaza lateralmente a la mitad de la velocidad de caída sin permitir separarse ni atravesar la pared.
+- [ ] Durante descenso en grava/nieve, mirar y girar 90° o más no bloquea la cámara ni cambia la autoridad del servidor.
+- [ ] La grieta abandona el bloque anterior y aparece en cada bloque actual de la ruta de deslizamiento.
+- [ ] Al llegar desde grava a una pared de piedra/cobblestone, el descenso se detiene en esa superficie firme.
+- [ ] Al terminar la pared inestable sin soporte, el anclaje termina de forma segura.
+- [ ] Un anclaje iniciado en arena, grava, concreto en polvo o nieve aplica exactamente 40 ticks de cooldown; piedra e hielo siguen usando 20.
+- [ ] La cámara no vuelve sola a una orientación previa durante frenado o deslizamiento; verificar giro a izquierda, derecha, arriba y abajo.
+- [ ] W/A/S/D funciona durante `BRAKING` por caída rápida y durante `UNSTABLE_SLIDING` desde reposo.
+- [ ] El bloque ancla, la grieta y la pose sincronizada cambian sin esperar el intervalo anterior de cinco ticks.
+- [ ] A y D desplazan al lado visualmente correspondiente en cada orientación de pared.
+- [ ] Llegar al suelo durante descenso suelta el anclaje sin impulso ni estado congelado.
+- [ ] Doble Shift dentro de 7 ticks libera pasivamente; Shift mantenido no lo hace.
+- [ ] Clic en la parte alta, central y baja de un bloque: la grieta empieza y sigue el bloque de contacto correcto.
+- [ ] Durante una caída libre, la primera dirección lateral queda fija y no puede reorientarse hasta terminar el frenado.
+- [ ] Saltar desde el suelo y engancharse tras una caída corta no activa `BRAKING`.
+- [ ] Más de 5 bloques de descenso y velocidad menor que `-0.40` activa `BRAKING`; medir la distancia con una caída de 30 bloques.
+- [ ] Con dos picos equipados, una caída que frena aplica 20 ticks de cooldown al pico no activo y no permite anular el desliz con un segundo clic.
+
+## Regresión 0.1.14 — bloques con menú vanilla
 
 - [ ] Clic derecho normal con una picota sobre una mesa de crafteo abre su interfaz y no engancha.
 - [ ] Clic derecho normal sobre horno, ahumador y alto horno abre su interfaz y no engancha.

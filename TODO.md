@@ -54,6 +54,29 @@
 
 ## Superficies de anclaje
 
+### Completado en 0.1.15
+
+- Tags data-driven `stable_anchor_blocks`, `unstable_anchor_blocks` y `unclimbable_blocks`.
+- Prioridad de clasificación: no escalable, inestable, estable y fallback firme vigente.
+- Hielo y yunques clasificados como firmes; arena, grava, concreto en polvo y toda la nieve como inestables.
+- Bloques inestables permiten anclaje incluso cuando la geometría de capas de nieve no declara una cara lateral sturdy.
+- Frenado servidor-autoritativo para caídas rápidas y descenso controlado en superficies inestables.
+- Cada desplazamiento del ancla durante el frenado o descenso comprueba colisiones antes de confirmar la nueva posición.
+
+### Completado en 0.1.16
+
+- El jugador puede desplazarse lateralmente en el plano de la pared a la mitad de su velocidad de descenso durante frenado o deslizamiento.
+- El ancla, superficie activa y grietas avanzan de bloque al deslizarse; una superficie firme encontrada detiene el descenso.
+- Los anclajes iniciados en superficies inestables usan un cooldown individual de 40 ticks.
+
+### Completado en 0.1.17
+
+- Input de cámara y movimiento de deslizamiento enviado cada tick al servidor, que sigue validando plano, velocidad y colisión.
+- Las correcciones de posición usan rotación relativa y no restauran una orientación vieja de la cámara.
+- El estado en movimiento se sincroniza cada tick para que el bloque ancla y la grieta cambien sin el retraso del intervalo fijo.
+- A/D sigue la dirección esperada durante el deslizamiento; llegar al suelo termina el anclaje pasivamente.
+- Doble Shift dentro de 7 ticks libera el anclaje sin impulso.
+
 Crear tags data-driven:
 
 ```text
@@ -74,14 +97,19 @@ Reglas previstas:
 
 ## Frenado progresivo durante caídas
 
-- Guardar la velocidad inicial al comenzar el enganche.
-- Una caída lenta debe detenerse casi de inmediato.
-- Una caída rápida debe producir un deslizamiento visible antes de detenerse.
-- La distancia y el tiempo de frenado deben depender de la velocidad absorbida.
-- En bloques sólidos, el frenado termina en reposo completo.
-- En bloques inestables, el frenado termina en una velocidad de descenso constante y controlada.
-- Si el pico se rompe durante el frenado, el jugador continúa con la velocidad restante.
-- El servidor debe conservar autoridad total sobre posición, velocidad y daño de caída.
+- Completado base en 0.1.15–0.1.16: se conserva la velocidad vertical inicial y una caída rápida se frena de forma visible y servidor-autoritativa.
+- Completado base en 0.1.16: el ancla sigue las superficies durante el descenso y se detiene al encontrar una superficie firme o una colisión segura.
+- Pendiente: calibrar valores en juego y conservar la velocidad restante si el pico se rompe durante el frenado proporcional futuro.
+- El servidor conserva autoridad total sobre posición, velocidad y daño de caída.
+- Balance cerrado actual: frenado solo tras más de 5 bloques de caída descendida y velocidad menor que `-0.40`; arrastre `0.75`, recuperación `0.035` y recorrido físico máximo `0.60` bloques/tick.
+
+### Diseño futuro — frenado con dos picotas
+
+- Si ambas manos sostienen picotas válidas al engancharse durante una caída que activa `BRAKING`, el diseño futuro podrá crear un agarre dual temporal.
+- El agarre dual debe reducir aproximadamente a la mitad la distancia de deslizamiento necesaria para absorber la misma caída; representa el doble de puntos de apoyo, no vuelo ni inmunidad.
+- El cooldown de esfuerzo se comparte entre las dos picotas equipadas para impedir alternar clics y anular el frenado.
+- Al terminar el frenado, la picota secundaria conserva el anclaje y la principal se libera para construir o crear el siguiente punto. Con una sola picota, esa misma herramienta permanece anclada.
+- Esta fase necesita estado dual servidor-autoritativo, costes y transición visual propios; no está implementada todavía.
 
 ## Durabilidad proporcional al rescate
 
