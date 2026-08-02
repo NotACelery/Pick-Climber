@@ -97,9 +97,9 @@ La clasificación de superficies es data-driven y puede ampliarse desde datapack
 
 Las exclusiones tienen prioridad sobre cualquier otro tag. Hielo, hielo compacto, hielo azul, hielo escarchado y yunques son firmes. Arena, grava, concreto en polvo y toda la nieve —incluidas capas y nieve en polvo— son inestables.
 
-Al engancharse durante una caída rápida, el servidor absorbe la velocidad gradualmente y desplaza el ancla hacia abajo sin atravesar colisiones. En una superficie firme termina inmóvil; en una inestable continúa a velocidad descendente controlada.
+El frenado solo se activa si el jugador ya descendió más de 5 bloques (`fallDistance`) y su velocidad vertical es menor que `-0.40` bloques/tick. Los saltos y caídas cortas se enganchan directamente. Durante el frenado el servidor absorbe la velocidad gradualmente y desplaza el ancla hacia abajo sin atravesar colisiones. En una superficie firme termina inmóvil; en una inestable continúa a velocidad descendente controlada.
 
-Durante el frenado o descenso, `W/A/S/D` permite desplazarse por el plano de la pared a la mitad de la velocidad vertical actual. La intención de cámara y movimiento llega al servidor cada tick, mientras las correcciones de posición conservan la rotación local, por lo que la cámara no queda forzada hacia una orientación anterior. El punto de anclaje y sus grietas avanzan al bloque que realmente sostiene el pico; al llegar a una superficie firme o al suelo, el descenso se detiene. Un enganche iniciado en una superficie inestable usa 40 ticks de cooldown para impedir contrarrestar el descenso con clics repetidos.
+Durante el frenado o descenso, `W/A/S/D` permite desplazarse por el plano de la pared a la mitad de la velocidad vertical actual. En `BRAKING`, la primera dirección lateral queda fijada como trayectoria diagonal. La intención de cámara y movimiento llega al servidor cada tick, mientras las correcciones de posición conservan la rotación local. El punto de anclaje y sus grietas siguen el contacto exacto del clic; al llegar a una superficie firme o al suelo, el descenso termina. Un enganche iniciado en una superficie inestable usa 40 ticks de cooldown. Una caída que activa `BRAKING` también aplica 20 ticks de esfuerzo al otro pico equipado para evitar anular el frenado alternando manos.
 
 Todavía no existe desgaste proporcional ni `Sturdy Latch`.
 

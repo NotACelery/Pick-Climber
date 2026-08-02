@@ -25,7 +25,9 @@ public record ServerClimbState(
         double slideVelocity,
         int cooldownTicks,
         float lateralForward,
-        float lateralStrafe
+        float lateralStrafe,
+        Vec3 contactOffset,
+        Vec3 committedBrakeDirection
 ) {
     public ServerClimbState withActiveHand(InteractionHand hand) {
         return new ServerClimbState(
@@ -44,7 +46,9 @@ public record ServerClimbState(
                 slideVelocity,
                 cooldownTicks,
                 lateralForward,
-                lateralStrafe
+                lateralStrafe,
+                contactOffset,
+                committedBrakeDirection
         );
     }
 
@@ -75,7 +79,9 @@ public record ServerClimbState(
                 nextSlideVelocity,
                 cooldownTicks,
                 lateralForward,
-                lateralStrafe
+                lateralStrafe,
+                contactOffset,
+                committedBrakeDirection
         );
     }
 
@@ -96,7 +102,18 @@ public record ServerClimbState(
                 slideVelocity,
                 cooldownTicks,
                 nextForward,
-                nextStrafe
+                nextStrafe,
+                contactOffset,
+                committedBrakeDirection
+        );
+    }
+
+    public ServerClimbState withCommittedBrakeDirection(Vec3 direction) {
+        return new ServerClimbState(
+                anchorDimension, anchorBlock, anchorFace, targetPosition, activeHand,
+                toolId, crackId, restoreNoGravity, restoreFlying, attachedAtGameTime,
+                surface, motion, slideVelocity, cooldownTicks, lateralForward, lateralStrafe,
+                contactOffset, direction
         );
     }
 }

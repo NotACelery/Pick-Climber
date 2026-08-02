@@ -101,6 +101,15 @@ Reglas previstas:
 - Completado base en 0.1.16: el ancla sigue las superficies durante el descenso y se detiene al encontrar una superficie firme o una colisión segura.
 - Pendiente: calibrar valores en juego y conservar la velocidad restante si el pico se rompe durante el frenado proporcional futuro.
 - El servidor conserva autoridad total sobre posición, velocidad y daño de caída.
+- Balance cerrado actual: frenado solo tras más de 5 bloques de caída descendida y velocidad menor que `-0.40`; arrastre `0.75`, recuperación `0.035` y recorrido físico máximo `0.60` bloques/tick.
+
+### Diseño futuro — frenado con dos picotas
+
+- Si ambas manos sostienen picotas válidas al engancharse durante una caída que activa `BRAKING`, el diseño futuro podrá crear un agarre dual temporal.
+- El agarre dual debe reducir aproximadamente a la mitad la distancia de deslizamiento necesaria para absorber la misma caída; representa el doble de puntos de apoyo, no vuelo ni inmunidad.
+- El cooldown de esfuerzo se comparte entre las dos picotas equipadas para impedir alternar clics y anular el frenado.
+- Al terminar el frenado, la picota secundaria conserva el anclaje y la principal se libera para construir o crear el siguiente punto. Con una sola picota, esa misma herramienta permanece anclada.
+- Esta fase necesita estado dual servidor-autoritativo, costes y transición visual propios; no está implementada todavía.
 
 ## Durabilidad proporcional al rescate
 

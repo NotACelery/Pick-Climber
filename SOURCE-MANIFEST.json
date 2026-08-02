@@ -8,8 +8,8 @@
                   },
                   {
                       "path":  "BETA-TEST-CHECKLIST.md",
-                      "size":  5303,
-                      "sha256":  "be9d450c6ea06e19a563b8e4c6af40a239d601a94744e1209cb02d3049a95d1d"
+                      "size":  5910,
+                      "sha256":  "a81afdbc03c76dafacdd1f27d80e71cfc2be53d2003d27fea824d48bb06a9052"
                   },
                   {
                       "path":  "build.gradle",
@@ -28,13 +28,13 @@
                   },
                   {
                       "path":  "BUILD-STATUS.md",
-                      "size":  1081,
-                      "sha256":  "50dae6df380ed6b52a2bd750d2b10e7d33e34ab50fcf73bf7ef38c98538a56ee"
+                      "size":  1337,
+                      "sha256":  "2e442cf94d5cd6c8441748cd9747a0262c5ac8baa2c04e7d77b04adef0af4d00"
                   },
                   {
                       "path":  "CHANGELOG.md",
-                      "size":  11782,
-                      "sha256":  "b0c62f050daae50351a93304d00ba1602da11da46ba475c4aabb48972172ccf6"
+                      "size":  12460,
+                      "sha256":  "ae2e57e5db2c887a1e29f2ffb96d761009b121a2c0e0b63ec0dd01a79e96e1cb"
                   },
                   {
                       "path":  "docs/README-STRONG-GRIP.md",
@@ -48,8 +48,8 @@
                   },
                   {
                       "path":  "README.md",
-                      "size":  6714,
-                      "sha256":  "ac47e2631259fb9ce7aeaf5e01836360ccbd145693b4081b05de599fb3619220"
+                      "size":  6968,
+                      "sha256":  "915d365342fcc9eb84e103bb3a28e8648676f23b3b3c4b4899d3d91540ab928b"
                   },
                   {
                       "path":  "settings.gradle",
@@ -103,8 +103,8 @@
                   },
                   {
                       "path":  "src/main/java/dev/maicra/pickclimber/climb/ClimbManager.java",
-                      "size":  47828,
-                      "sha256":  "655feb83152c2d4508ff47f11c4332d08c527f113f9677a5baeaa5c828b60960"
+                      "size":  50541,
+                      "sha256":  "f7aea755e692d161c0c322b678f3661cce3490fe218f6f73d6cb0dc2df9d11db"
                   },
                   {
                       "path":  "src/main/java/dev/maicra/pickclimber/climb/ModEnchantments.java",
@@ -113,8 +113,8 @@
                   },
                   {
                       "path":  "src/main/java/dev/maicra/pickclimber/climb/ServerClimbState.java",
-                      "size":  2975,
-                      "sha256":  "81d01ad210b48d21a7063b9b626e925dacf714edbc5a150e91a20e117ca4f62f"
+                      "size":  3693,
+                      "sha256":  "7a36f2d73a81739a5caf21f2f10a3d1de8b61f49fe2e37d2797853e3ec3e88fa"
                   },
                   {
                       "path":  "src/main/java/dev/maicra/pickclimber/climb/ToolIdentity.java",
@@ -213,8 +213,8 @@
                   },
                   {
                       "path":  "TODO.md",
-                      "size":  10897,
-                      "sha256":  "da44e618a33d5cc4f90c3819991528e1818b9c900be41417bc6c35c7a992f33d"
+                      "size":  11936,
+                      "sha256":  "69f49872075b6adfec492956fa14098eedc69d62f0a8f9a86dceb305daaae33e"
                   }
               ]
 }

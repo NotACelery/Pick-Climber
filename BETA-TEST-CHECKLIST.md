@@ -29,6 +29,11 @@
 - [ ] A y D desplazan al lado visualmente correspondiente en cada orientación de pared.
 - [ ] Llegar al suelo durante descenso suelta el anclaje sin impulso ni estado congelado.
 - [ ] Doble Shift dentro de 7 ticks libera pasivamente; Shift mantenido no lo hace.
+- [ ] Clic en la parte alta, central y baja de un bloque: la grieta empieza y sigue el bloque de contacto correcto.
+- [ ] Durante una caída libre, la primera dirección lateral queda fija y no puede reorientarse hasta terminar el frenado.
+- [ ] Saltar desde el suelo y engancharse tras una caída corta no activa `BRAKING`.
+- [ ] Más de 5 bloques de descenso y velocidad menor que `-0.40` activa `BRAKING`; medir la distancia con una caída de 30 bloques.
+- [ ] Con dos picos equipados, una caída que frena aplica 20 ticks de cooldown al pico no activo y no permite anular el desliz con un segundo clic.
 
 ## Regresión 0.1.14 — bloques con menú vanilla
 

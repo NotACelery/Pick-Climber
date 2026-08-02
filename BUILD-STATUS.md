@@ -10,6 +10,8 @@ Cambios funcionales:
 - Frenado progresivo servidor-autoritativo para caídas rápidas.
 - Descenso controlado en superficies inestables y comprobación de colisión antes de cada desplazamiento.
 - Desplazamiento lateral a media velocidad de descenso con input cliente validado por servidor y transición inmediata de grietas/superficie.
+- Frenado definitivo: `fallDistance > 5`, velocidad `< -0.40`, arrastre `0.75`, recuperación `0.035` y movimiento máximo `0.60` bloques/tick.
+- La caída de frenado fija la primera dirección diagonal y aplica 20 ticks de esfuerzo al otro pico equipado.
 - Protocolo 10: sincroniza el cooldown inicial variable y la intención de movimiento/cámara sin delegar física al cliente.
 
 Validación realizada en este entorno:

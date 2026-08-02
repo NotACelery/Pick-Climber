@@ -104,6 +104,11 @@
 - Corrige la orientación de A/D durante el deslizamiento.
 - Llegar al suelo durante un descenso termina el anclaje pasivamente en lugar de congelarlo.
 - Doble pulsación de Shift dentro de 7 ticks suelta el anclaje sin impulso.
+- El ancla conserva el punto exacto del clic para resolver correctamente el bloque y la grieta durante el deslizamiento.
+- En frenado por caída libre, la primera dirección lateral queda fijada como trayectoria diagonal hasta que el anclaje termine o se estabilice.
+- El umbral de frenado pasa de `-0.25` a `-0.40` bloques/tick para que caídas leves se enganchen directamente.
+- El frenado absorbe la caída aproximadamente durante el doble de tiempo; valores de balance actuales fijados en arrastre `0.75` y recuperación `0.035`.
+- `BRAKING` ahora exige más de 5 bloques de caída acumulada además de velocidad suficiente, evitando activarlo tras saltos o caídas cortas.
 - Protocolo interno actualizado a versión 10.
 
 ## 0.1.16-beta
