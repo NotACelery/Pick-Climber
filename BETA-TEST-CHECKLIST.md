@@ -1,4 +1,4 @@
-# Checklist 0.1.22-beta — Strong Grip, techo y regresiones
+# Checklist 0.1.24-beta — fluidez y alcance de Strong Grip
 
 ## Tags de superficies
 
@@ -63,6 +63,17 @@
 - [ ] Tras 20 ticks completos suspendido cobra 1 adicional; `F` conserva el contador y no cobra de nuevo.
 - [ ] Un techo inestable requiere Strong Grip + Sturdy Latch; sin Sturdy Latch se rechaza sin coste.
 - [ ] Romper el pico activo o el bloque del techo limpia grietas, restaura gravedad y suelta sin impulso artificial.
+
+## Balanceo y liberación de techo
+
+- [ ] W/A/S/D acelera según cámara sin superar 0.665 bloques respecto del centro ni atravesar bloques.
+- [ ] Al soltar W/A/S/D cerca de la amplitud máxima, el retorno avanza suavemente cada tick sin pausas ni saltos visibles de 0.05 bloques.
+- [ ] Soltar movimiento amortigua el balanceo y el retorno al centro no genera aceleración infinita.
+- [ ] Espacio libera hacia la dirección horizontal de cámara y conserva la velocidad del balanceo.
+- [ ] Liberar cerca de la amplitud máxima cubre más distancia que liberar desde reposo, sin superar el límite de velocidad.
+- [ ] Doble Shift libera con velocidad horizontal exactamente cero.
+- [ ] Clic izquierdo con el pico activo en la principal libera con velocidad horizontal cero; la mano principal libre no rompe un ancla secundaria.
+- [ ] F conserva ancla, velocidad, contador de desgaste y mano correcta durante el balanceo.
 
 ## Regresión 0.1.14 — bloques con menú vanilla
 

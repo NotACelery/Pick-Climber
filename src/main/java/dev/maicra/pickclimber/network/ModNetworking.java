@@ -12,7 +12,7 @@ public final class ModNetworking {
     }
 
     public static void registerPayloads(RegisterPayloadHandlersEvent event) {
-        PayloadRegistrar registrar = event.registrar("10");
+        PayloadRegistrar registrar = event.registrar("11");
 
         registrar.playToClient(
                 AnchorSyncPayload.TYPE,

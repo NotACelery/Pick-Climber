@@ -141,14 +141,19 @@ Pendiente validar junto con Strong Grip el presupuesto final de yunque y la excl
 - Enganche estático en cara inferior de techos firmes; los techos inestables exigen también `Sturdy Latch I`.
 - Coste de 20 por anclaje de techo y 1 de durabilidad por cada 20 ticks completos, respetando Unbreaking y `F`.
 
+### Completado en 0.1.23
+
+- Balanceo restringido de techo con radio inicial de `0.95`, reducido 30 % a `0.665` en 0.1.24; aceleración, amortiguación y velocidad máxima autoritativas del servidor.
+- El retorno lento confirma desplazamientos pequeños cada tick y evita acumularlos en saltos de `0.05` bloques.
+- Colisiones comprobadas antes de confirmar cada posición del arco pendular.
+- Espacio conserva la inercia, suma impulso según cámara y convierte amplitud acumulada en alcance adicional limitado.
+- Doble Shift y clic izquierdo con el pico activo liberan verticalmente con velocidad horizontal cero.
+
 Pendiente en fases posteriores:
 
 - Pose elevada del brazo y pico en primera y tercera persona.
-- Balanceo restringido mediante movimiento, con autoridad del servidor.
 - Maniobras avanzadas con dos picotas `Strong Grip`.
 - Posibilidad de rodear bordes y alcanzar techos separados por aproximadamente dos bloques de vacío desde una posición balanceada válida.
-- Espacio para liberación activa con impulso.
-- Doble pulsación de Shift para liberación vertical pasiva, sin salto ni impulso horizontal inicial.
 - Shift mantenido conserva agachado e interacciones vanilla.
 
 Este bloque es **mandatorio**, pero no tiene prioridad inmediata sobre la estabilización y las físicas base.

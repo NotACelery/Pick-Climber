@@ -33,6 +33,14 @@ public final class ClimbManager {
     public static final int DURABILITY_COST = 15;
     private static final int CEILING_DURABILITY_COST = 20;
     private static final int CEILING_DURABILITY_INTERVAL_TICKS = 20;
+    private static final double CEILING_SWING_RADIUS = 0.665D;
+    private static final double CEILING_SWING_ACCELERATION = 0.025D;
+    private static final double CEILING_SWING_RETURN = 0.012D;
+    private static final double CEILING_SWING_DAMPING = 0.96D;
+    private static final double CEILING_SWING_MAX_SPEED = 0.18D;
+    private static final double CEILING_RELEASE_IMPULSE = 0.45D;
+    private static final double CEILING_RELEASE_AMPLITUDE_BONUS = 0.20D;
+    private static final double CEILING_RELEASE_MAX_SPEED = 0.78D;
     private static final int BRAKING_DURABILITY_PER_BLOCK = 10;
     public static final int CRACK_STAGE = 5;
     public static final int ANCHOR_COOLDOWN_TICKS = 20;
@@ -490,7 +498,9 @@ public final class ClimbManager {
                 reinforcedLatch,
                 brakingSupportToolId,
                 0.0D,
-                0
+                0,
+                target,
+                Vec3.ZERO
         );
 
         SERVER_STATES.put(player.getUUID(), next);
@@ -583,11 +593,13 @@ public final class ClimbManager {
         if (player.tickCount % CRACK_REFRESH_INTERVAL == 0) {
             showCracks(player.serverLevel(), state);
         }
-        if (state.motion() != AnchorMotion.FIXED || player.tickCount % SERVER_SYNC_INTERVAL == 0) {
+        if (state.anchorFace() == Direction.DOWN
+                || state.motion() != AnchorMotion.FIXED
+                || player.tickCount % SERVER_SYNC_INTERVAL == 0) {
             syncAttached(player, state, false);
         }
 
-        holdPlayer(player, state.targetPosition());
+        holdPlayer(player, state);
     }
 
     private static void tickClient(Player player) {
@@ -740,10 +752,13 @@ public final class ClimbManager {
 
     /** Actualiza exclusivamente en el servidor el frenado o descenso del ancla. */
     private static ServerClimbState advanceAnchorMotion(ServerPlayer player, ServerClimbState state) {
-        if (state.motion() == AnchorMotion.FIXED) {
+        if (player.level().getGameTime() <= state.attachedAtGameTime()) {
             return state;
         }
-        if (player.level().getGameTime() <= state.attachedAtGameTime()) {
+        if (state.anchorFace() == Direction.DOWN) {
+            return advanceCeilingSwing(player, state);
+        }
+        if (state.motion() == AnchorMotion.FIXED) {
             return state;
         }
         if (state.motion() == AnchorMotion.BRAKING
@@ -843,6 +858,64 @@ public final class ClimbManager {
             showCracks(player.serverLevel(), next);
         }
         return next;
+    }
+
+    /**
+     * Balanceo horizontal restringido alrededor del punto central del techo.
+     * El servidor integra input, retorno, amortiguación, radio y colisiones.
+     */
+    private static ServerClimbState advanceCeilingSwing(ServerPlayer player, ServerClimbState state) {
+        Vec3 center = state.ceilingCenter();
+        Vec3 horizontalOffset = new Vec3(
+                state.targetPosition().x - center.x,
+                0.0D,
+                state.targetPosition().z - center.z
+        );
+        Vec3 input = ceilingInputDirection(player, state);
+        Vec3 velocity = new Vec3(state.swingVelocity().x, 0.0D, state.swingVelocity().z)
+                .add(input.scale(CEILING_SWING_ACCELERATION))
+                .add(horizontalOffset.scale(-CEILING_SWING_RETURN))
+                .scale(CEILING_SWING_DAMPING);
+
+        if (velocity.length() > CEILING_SWING_MAX_SPEED) {
+            velocity = velocity.normalize().scale(CEILING_SWING_MAX_SPEED);
+        }
+
+        Vec3 nextOffset = horizontalOffset.add(velocity);
+        if (nextOffset.length() > CEILING_SWING_RADIUS) {
+            nextOffset = nextOffset.normalize().scale(CEILING_SWING_RADIUS);
+            double outwardSpeed = velocity.dot(nextOffset.normalize());
+            if (outwardSpeed > 0.0D) {
+                velocity = velocity.subtract(nextOffset.normalize().scale(outwardSpeed));
+            }
+        }
+
+        // La hitbox vanilla permanece vertical y no puede inclinarse como un
+        // cuerpo pendular. Elevarla en los extremos la introduciría en el techo,
+        // así que el pivote se simula en un plano horizontal a altura segura.
+        Vec3 nextTarget = new Vec3(
+                center.x + nextOffset.x,
+                center.y,
+                center.z + nextOffset.z
+        );
+        Vec3 displacement = nextTarget.subtract(player.position());
+        if (!player.level().noCollision(player, player.getBoundingBox().move(displacement))) {
+            return state.withCeilingSwing(state.targetPosition(), Vec3.ZERO);
+        }
+        return state.withCeilingSwing(nextTarget, velocity);
+    }
+
+    private static Vec3 ceilingInputDirection(ServerPlayer player, ServerClimbState state) {
+        Vec3 look = player.getLookAngle();
+        Vec3 forward = new Vec3(look.x, 0.0D, look.z);
+        if (forward.lengthSqr() < 1.0E-5D) {
+            return Vec3.ZERO;
+        }
+        forward = forward.normalize();
+        Vec3 right = new Vec3(-forward.z, 0.0D, forward.x);
+        Vec3 input = forward.scale(state.lateralForward())
+                .add(right.scale(-state.lateralStrafe()));
+        return input.lengthSqr() > 1.0D ? input.normalize() : input;
     }
 
     /** Dos picos reducen a la mitad aproximada el tiempo y recorrido de frenado. */
@@ -954,15 +1027,20 @@ public final class ClimbManager {
         return BlockPos.containing(target.add(state.contactOffset()));
     }
 
-    private static void holdPlayer(ServerPlayer player, Vec3 target) {
+    private static void holdPlayer(ServerPlayer player, ServerClimbState state) {
+        Vec3 target = state.targetPosition();
         player.setNoGravity(true);
         player.fallDistance = 0.0F;
         player.setOnGround(false);
         player.setDeltaMovement(Vec3.ZERO);
 
-        // Solo se corrige si realmente hubo deriva. La corrección usa el canal de
-        // teletransporte del jugador, no setPos ni una velocidad hacia el ancla.
-        if (player.position().distanceToSqr(target) > 2.5E-3D) {
+        // Las paredes toleran una deriva mínima. El balanceo necesita confirmar
+        // incluso desplazamientos pequeños: acumular 0.05 bloques hacía que el
+        // retorno lento se enviara en saltos visibles de varios ticks.
+        double correctionThresholdSqr = state.anchorFace() == Direction.DOWN
+                ? 1.0E-8D
+                : 2.5E-3D;
+        if (player.position().distanceToSqr(target) > correctionThresholdSqr) {
             player.connection.teleport(
                     target.x,
                     target.y,
@@ -1032,14 +1110,16 @@ public final class ClimbManager {
         }
 
         Vec3 detachVelocity = jump
-                ? calculateJumpVelocity(player, activeTool)
+                ? state.anchorFace() == Direction.DOWN
+                ? calculateCeilingReleaseVelocity(player, state)
+                : calculateJumpVelocity(player, activeTool)
                 : Vec3.ZERO;
 
         restoreAbilities(player, state.restoreNoGravity(), state.restoreFlying());
         player.fallDistance = 0.0F;
         player.setDeltaMovement(detachVelocity);
 
-        if (jump) {
+        if (jump && state.anchorFace() != Direction.DOWN) {
             // El wall jump es también un ascenso explícitamente solicitado por el
             // jugador y puede encadenar un impulso con el otro pico.
             LAST_REAL_JUMP.put(player.getUUID(), player.level().getGameTime());
@@ -1067,7 +1147,7 @@ public final class ClimbManager {
 
         // Solo se predice localmente el salto solicitado por el usuario. La
         // gravedad, el vuelo y los desenganches pasivos los sincroniza el servidor.
-        if (jump) {
+        if (jump && !state.ceilingAnchor()) {
             ItemStack activeTool = player.getItemInHand(state.activeHand());
             player.setDeltaMovement(calculateJumpVelocity(player, activeTool));
         }
@@ -1165,7 +1245,8 @@ public final class ClimbManager {
                 payload.restoreNoGravity(),
                 payload.restoreFlying(),
                 now,
-                poseStartedGameTime
+                poseStartedGameTime,
+                payload.ceilingAnchor()
         );
 
         CLIENT_STATES.put(player.getUUID(), next);
@@ -1276,6 +1357,38 @@ public final class ClimbManager {
                 ? baseVertical
                 : velocityForAdditionalRise(baseVertical, extraHeight);
         return new Vec3(horizontal.x, vertical, horizontal.z);
+    }
+
+    private static Vec3 calculateCeilingReleaseVelocity(
+            Player player,
+            ServerClimbState state
+    ) {
+        Vec3 look = player.getLookAngle();
+        Vec3 horizontalLook = new Vec3(look.x, 0.0D, look.z);
+        if (horizontalLook.lengthSqr() < 1.0E-5D) {
+            horizontalLook = Vec3.directionFromRotation(0.0F, player.getYRot());
+            horizontalLook = new Vec3(horizontalLook.x, 0.0D, horizontalLook.z);
+        }
+
+        Vec3 inherited = new Vec3(state.swingVelocity().x, 0.0D, state.swingVelocity().z);
+        Vec3 amplitude = new Vec3(
+                state.targetPosition().x - state.ceilingCenter().x,
+                0.0D,
+                state.targetPosition().z - state.ceilingCenter().z
+        );
+        Vec3 amplitudeBonus = amplitude.lengthSqr() < 1.0E-5D
+                ? Vec3.ZERO
+                : amplitude.normalize().scale(
+                CEILING_RELEASE_AMPLITUDE_BONUS
+                        * Math.min(1.0D, amplitude.length() / CEILING_SWING_RADIUS)
+        );
+        Vec3 release = inherited
+                .add(amplitudeBonus)
+                .add(horizontalLook.normalize().scale(CEILING_RELEASE_IMPULSE));
+        if (release.length() > CEILING_RELEASE_MAX_SPEED) {
+            release = release.normalize().scale(CEILING_RELEASE_MAX_SPEED);
+        }
+        return release;
     }
 
     /**
