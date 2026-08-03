@@ -1,8 +1,8 @@
 # Strong Grip, Sturdy Latch y movimiento de techo
 
-> **Estado:** diseño obligatorio para una fase futura de Pick Climber.
+> **Estado:** anclaje estático y balanceo base implementados; poses y maniobras avanzadas siguen pendientes.
 >
-> **No implementado todavía.** Este documento fija el comportamiento esperado para evitar que la idea se pierda o cambie accidentalmente durante otros parches.
+> Este documento conserva el comportamiento obligatorio y distingue lo implementado de las fases pendientes.
 >
 > **Dependencias:** controles base estabilizados, clasificación de superficies, frenado progresivo, desgaste proporcional y `Sturdy Latch`.
 
@@ -255,6 +255,8 @@ Estado central bajo el punto de anclaje:
 
 Movimiento pendular restringido alrededor del ancla. No será vuelo libre ni una cuerda completamente simulada.
 
+Implementado como base en `0.1.23-beta`: el servidor integra el movimiento en un plano horizontal seguro para la hitbox vertical de Minecraft. En `0.1.24` el radio se redujo 30 % a `0.665`; la aceleración es `0.025`, la amortiguación `0.96` y la velocidad máxima `0.18` bloques/tick. Los movimientos pequeños de techo se confirman cada tick para evitar tirones durante el retorno.
+
 Principios:
 
 - el ancla actúa como pivote;
@@ -347,6 +349,8 @@ Desde el techo:
 - `Pick Climber` no participa porque es incompatible con `Strong Grip`.
 
 Los valores exactos se ajustarán en pruebas.
+
+Implementado en `0.1.23-beta`: el impulso horizontal base es `0.45`; se suma la velocidad pendular y hasta `0.20` por amplitud, con límite total `0.78` bloques/tick.
 
 ### 7.3 Shift mantenido
 

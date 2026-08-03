@@ -15,6 +15,7 @@ public record ClientClimbState(
         boolean restoreNoGravity,
         boolean restoreFlying,
         long lastSyncGameTime,
-        long poseStartedGameTime
+        long poseStartedGameTime,
+        boolean ceilingAnchor
 ) {
 }

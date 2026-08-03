@@ -1,18 +1,18 @@
 {
   "description": {
-    "translate": "enchantment.pickclimber.pick_climber"
+    "translate": "enchantment.pickclimber.strong_grip"
   },
   "supported_items": "#minecraft:pickaxes",
   "primary_items": "#minecraft:pickaxes",
-  "weight": 6,
-  "max_level": 3,
+  "weight": 3,
+  "max_level": 1,
   "min_cost": {
-    "base": 5,
-    "per_level_above_first": 8
+    "base": 12,
+    "per_level_above_first": 10
   },
   "max_cost": {
-    "base": 25,
-    "per_level_above_first": 8
+    "base": 42,
+    "per_level_above_first": 10
   },
   "anvil_cost": 1,
   "exclusive_set": "#pickclimber:climb_specializations",

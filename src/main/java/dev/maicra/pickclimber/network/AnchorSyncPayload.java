@@ -29,6 +29,7 @@ public record AnchorSyncPayload(
     private static final int FLAG_JUMP_DETACH = 1 << 2;
     private static final int FLAG_NEW_ANCHOR = 1 << 3;
     private static final int FLAG_REFUND_COOLDOWN = 1 << 4;
+    private static final int FLAG_CEILING_ANCHOR = 1 << 5;
     private static final int COOLDOWN_SHIFT = 8;
     private static final int COOLDOWN_MASK = 0xFFFF;
 
@@ -74,6 +75,9 @@ public record AnchorSyncPayload(
         );
         if (newAnchor) {
             flags |= FLAG_NEW_ANCHOR;
+        }
+        if (state.anchorFace() == net.minecraft.core.Direction.DOWN) {
+            flags |= FLAG_CEILING_ANCHOR;
         }
         return new AnchorSyncPayload(
                 true,
@@ -135,6 +139,10 @@ public record AnchorSyncPayload(
 
     public boolean refundCooldown() {
         return (flags & FLAG_REFUND_COOLDOWN) != 0;
+    }
+
+    public boolean ceilingAnchor() {
+        return (flags & FLAG_CEILING_ANCHOR) != 0;
     }
 
     public int cooldownTicks() {

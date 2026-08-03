@@ -1,4 +1,4 @@
-# Pick Climber — Beta experimental 0.1.21
+# Pick Climber — Beta experimental 0.1.24
 
 Mod para **Minecraft 1.21.1**, **NeoForge 21.1.235** y **Java 21**.
 
@@ -107,6 +107,10 @@ El frenado cobra 15 de durabilidad inicial. Si hay dos picotas equipadas, ambas 
 
 Mientras una picota sostiene el ancla, la otra puede crear un nuevo punto dentro de 1.5 bloques del punto actual. Las dos herramientas mantienen UUID y cooldown propios; si dos copias llegan con el mismo UUID, el servidor separa la identidad de la segunda antes de cobrar o anclar.
 
+`Strong Grip I` habilita anclajes en la cara inferior de techos firmes. Cada anclaje nuevo cuesta 20 de durabilidad y permanecer suspendido cobra 1 cada 20 ticks; ambos costes respetan Unbreaking. Los techos inestables exigen además `Sturdy Latch I`. Strong Grip y Pick Climber son especializaciones excluyentes.
+
+Mientras cuelga, `W/A/S/D` impulsa un balanceo servidor-autoritativo de hasta 0.665 bloques, con aceleración, amortiguación, velocidad máxima y colisiones limitadas. Los desplazamientos pequeños se confirman cada tick para mantener fluido el retorno. Espacio libera horizontalmente hacia la cámara, conserva la velocidad tangencial y convierte parte de la amplitud acumulada en alcance. Doble Shift o clic izquierdo con el pico activo producen una liberación pasiva con velocidad horizontal cero.
+
 ## Controles vigentes
 
 - **Clic derecho** sobre una cara vertical válida: impulso o enganche.
@@ -124,7 +128,7 @@ Mientras una picota sostiene el ancla, la otra puede crear un nuevo punto dentro
 3. El JAR aparecerá en:
 
 ```text
-build/libs/pickclimber-1.21.1-0.1.21-beta.jar
+build/libs/pickclimber-1.21.1-0.1.24-beta.jar
 ```
 
 Retira versiones anteriores antes de instalar esta beta.

@@ -96,6 +96,24 @@
 
 # Changelog
 
+## 0.1.24-beta
+
+- Reduce 30 % el radio del balanceo Strong Grip, de `0.95` a `0.665` bloques.
+- El balanceo de techo confirma movimientos pequeños cada tick para eliminar tirones durante la desaceleración y el retorno.
+
+## 0.1.23-beta
+
+- Añade balanceo restringido bajo techos Strong Grip, integrado y validado por el servidor.
+- Espacio libera hacia la cámara conservando inercia y aprovechando la amplitud acumulada.
+- Doble Shift y clic izquierdo con el pico activo liberan sin velocidad horizontal.
+- Protocolo interno actualizado a versión 11 para identificar visualmente anclajes de techo.
+
+## 0.1.22-beta
+
+- Añade Strong Grip I, exclusivo con Pick Climber y compatible con Sturdy Latch.
+- Permite anclaje estático en techos firmes; un techo inestable exige Strong Grip + Sturdy Latch.
+- Cada anclaje de techo cuesta 20 de durabilidad y permanecer suspendido cobra 1 cada 20 ticks.
+
 ## 0.1.21-beta
 
 - Corrige el desgaste adicional con dos picotas al separar UUIDs duplicados antes del frenado dual.

@@ -1,5 +1,5 @@
 ﻿{
-    "version":  "0.1.21-beta",
+    "version":  "0.1.24-beta",
     "files":  [
                   {
                       "path":  ".gitignore",
@@ -8,8 +8,8 @@
                   },
                   {
                       "path":  "BETA-TEST-CHECKLIST.md",
-                      "size":  7642,
-                      "sha256":  "25116174e2725fd3467a29a10c22b08a0fe26ae68f5a8eb1c397b1283db6db4d"
+                      "size":  9259,
+                      "sha256":  "d4620d948566645f6bba46e53a109c09fc0c4e86847d1177e96d13cfb3f66d2c"
                   },
                   {
                       "path":  "build.gradle",
@@ -19,37 +19,37 @@
                   {
                       "path":  "build-beta.bat",
                       "size":  6091,
-                      "sha256":  "b06a3dea38d69d895be2be9011cdd8550a92a57e95964dd835d67f0920def49d"
+                      "sha256":  "09b41b031c483d0f1da5ccd0cf18ba1386d274495bc30c8d65e2e6764d68dd49"
                   },
                   {
                       "path":  "build-beta.sh",
                       "size":  760,
-                      "sha256":  "b069bc6db9926e03b52e1b1a83533606cd74aed1de83cc23173b881b90c7b205"
+                      "sha256":  "ac4fb855d6ce7eb1d4256c030f37b01d76d521b077cfa32771234a9a6e2ab8cf"
                   },
                   {
                       "path":  "BUILD-STATUS.md",
-                      "size":  1857,
-                      "sha256":  "9c704fbfb429d30310a240ae578e6f0d75e7132dc4e399dd485119649c0c96fa"
+                      "size":  2264,
+                      "sha256":  "fefb69bb1649b6523cb039f5a12f216752d2a23cdcaaac5c01875faf27595a04"
                   },
                   {
                       "path":  "CHANGELOG.md",
-                      "size":  13783,
-                      "sha256":  "0106544b9ba016347036aa406b2d5cf611f3ad631f82ec5b2b476e67fa5183f9"
+                      "size":  14701,
+                      "sha256":  "cbacf5283e7ef4900e6fc9530b1c843bc2361bcb8dd912b97047bc472ce06492"
                   },
                   {
                       "path":  "docs/README-STRONG-GRIP.md",
-                      "size":  26483,
-                      "sha256":  "70f410267cddd9b431e62a5c13e6436ffe09d024f55fac244e05e2e38223f887"
+                      "size":  27023,
+                      "sha256":  "4f5ab6cc15992b03aa2b69d587afab2f80f43b569f095ab567dd574328f1afba"
                   },
                   {
                       "path":  "gradle.properties",
                       "size":  466,
-                      "sha256":  "3ba6fa3e0620cf1ae3c0ac407855585ef3effc35139045c35723f7f3e02e43ee"
+                      "sha256":  "4bcf1a38e43e8540ce8a247b044553499b7ab7af5f2fbd96531fde7d4f175cac"
                   },
                   {
                       "path":  "README.md",
-                      "size":  8095,
-                      "sha256":  "0d231fddb5cfdbdb2724d9ea8c06aec37cf63e1a8ca036e60ab3f8ec24f7978e"
+                      "size":  8918,
+                      "sha256":  "0191e348384b66af00e12f724ed38692827e690768bacc9f7a4ed45e99d29a1e"
                   },
                   {
                       "path":  "settings.gradle",
@@ -93,8 +93,8 @@
                   },
                   {
                       "path":  "src/main/java/dev/maicra/pickclimber/climb/ClientClimbState.java",
-                      "size":  486,
-                      "sha256":  "e86809672db2ecda252152052fb1ad705b03c85d6b9ac7ef55073e7e8809b42b"
+                      "size":  517,
+                      "sha256":  "5c04f9f6a02aec4b8b521b2683746c613ea8a9c30fcbbf4b8138c3a9801bf0b8"
                   },
                   {
                       "path":  "src/main/java/dev/maicra/pickclimber/climb/ClimbingHandSelector.java",
@@ -103,18 +103,18 @@
                   },
                   {
                       "path":  "src/main/java/dev/maicra/pickclimber/climb/ClimbManager.java",
-                      "size":  59331,
-                      "sha256":  "72bf1b49d6c8c1b13e5d4e4a91d3bbd65f89f2aa287aca6c96aefb75fb3a84cd"
+                      "size":  67282,
+                      "sha256":  "e827068b4a0ac3ae8463e7ae71222835bc0128929bc6750b4626504a259bbede"
                   },
                   {
                       "path":  "src/main/java/dev/maicra/pickclimber/climb/ModEnchantments.java",
-                      "size":  1555,
-                      "sha256":  "963e206a22c4a235b28a6985c96744b47ec55ded9daff9af979998d18d6039f9"
+                      "size":  1935,
+                      "sha256":  "2d2a6e9af85dbab279b78e6c462898053f4f3bed98ead3ccc3636966e78da55a"
                   },
                   {
                       "path":  "src/main/java/dev/maicra/pickclimber/climb/ServerClimbState.java",
-                      "size":  5503,
-                      "sha256":  "88dde98ed72571427e48b6ac9ab0f63c354625da2017c82d31446272eec39723"
+                      "size":  6426,
+                      "sha256":  "fb3e1ccf25909a4110fd8e98b0da4380aaec90b41bbbb082c4d05002caeb112e"
                   },
                   {
                       "path":  "src/main/java/dev/maicra/pickclimber/climb/ToolIdentity.java",
@@ -128,8 +128,8 @@
                   },
                   {
                       "path":  "src/main/java/dev/maicra/pickclimber/network/AnchorSyncPayload.java",
-                      "size":  5959,
-                      "sha256":  "61c52886a5ff8c708b2b83b21afb8eb2dec1764d1e6912c998b813b70e36561f"
+                      "size":  6229,
+                      "sha256":  "0fe7c9065de0584c8fe18ba688812c252b52ef27f67d24cd629d26a9c56efc06"
                   },
                   {
                       "path":  "src/main/java/dev/maicra/pickclimber/network/BoostSyncPayload.java",
@@ -143,8 +143,8 @@
                   },
                   {
                       "path":  "src/main/java/dev/maicra/pickclimber/network/ModNetworking.java",
-                      "size":  2303,
-                      "sha256":  "11871d9b2783fca609a2eb7fa493219847722f70ebe7a3464d24149c4f44e14b"
+                      "size":  2302,
+                      "sha256":  "d32dc6b5513cd5160fbe6042909895e75003d52c73abe10f98e197be0dee3fdc"
                   },
                   {
                       "path":  "src/main/java/dev/maicra/pickclimber/network/SlideInputPayload.java",
@@ -158,33 +158,38 @@
                   },
                   {
                       "path":  "src/main/resources/assets/pickclimber/lang/en_us.json",
-                      "size":  119,
-                      "sha256":  "81886f11d48cc3fad0b334157bcf1bedd757407ec2f128bef5afa237aec3a975"
+                      "size":  178,
+                      "sha256":  "764ef641187e590a2c52507fcf17a07c26aed0cf1c94ea3d01aae3abe835187d"
                   },
                   {
                       "path":  "src/main/resources/assets/pickclimber/lang/es_cl.json",
-                      "size":  122,
-                      "sha256":  "e325fe1bb825a3ff80c8ceca1f2911a0b260db49eb03852f4f700ae76967721b"
+                      "size":  183,
+                      "sha256":  "14347aeca62cc113d4acb4a6a80cb6ac39c7608e268c71eaf8dc35fe9531b5fb"
                   },
                   {
                       "path":  "src/main/resources/assets/pickclimber/lang/es_es.json",
-                      "size":  122,
-                      "sha256":  "e325fe1bb825a3ff80c8ceca1f2911a0b260db49eb03852f4f700ae76967721b"
+                      "size":  183,
+                      "sha256":  "14347aeca62cc113d4acb4a6a80cb6ac39c7608e268c71eaf8dc35fe9531b5fb"
                   },
                   {
                       "path":  "src/main/resources/data/minecraft/tags/enchantment/non_treasure.json",
-                      "size":  105,
-                      "sha256":  "e80fc26404af43f62991dd2a47356df349a541fcea82c6f4cb74211b8eccd621"
+                      "size":  142,
+                      "sha256":  "4a17f97ee49dcd0239c74e5fe8156b0c26a53a66ca2b6a9413b90f2fd2fa7af7"
                   },
                   {
                       "path":  "src/main/resources/data/pickclimber/enchantment/pick_climber.json",
-                      "size":  402,
-                      "sha256":  "d67e16432a6b5f9f4bac2e3f1522e54456cb9e589753352b2de88e603ab7a66d"
+                      "size":  459,
+                      "sha256":  "637080b73ab21657976c9823472710e2721f498965b7106fa2831bdc4904a78a"
+                  },
+                  {
+                      "path":  "src/main/resources/data/pickclimber/enchantment/strong_grip.json",
+                      "size":  461,
+                      "sha256":  "6da4f8957764e37bd4c029aae61fbe0202f709a6cbf58730ce818011bb412553"
                   },
                   {
                       "path":  "src/main/resources/data/pickclimber/enchantment/sturdy_latch.json",
-                      "size":  405,
-                      "sha256":  "3329babd090d27d5a0dd176ec73d50cb2845379e31360731e2e2cb534d674a67"
+                      "size":  426,
+                      "sha256":  "1d7d4366620402144116645b66046017145fb85c7b7a6688a4b3063fbc01a699"
                   },
                   {
                       "path":  "src/main/resources/data/pickclimber/tags/block/stable_anchor_blocks.json",
@@ -200,6 +205,11 @@
                       "path":  "src/main/resources/data/pickclimber/tags/block/unstable_anchor_blocks.json",
                       "size":  921,
                       "sha256":  "06f4f59dd113f542250e031ad1ea3f05e64f614644782afb0c0a5c2c2421e35f"
+                  },
+                  {
+                      "path":  "src/main/resources/data/pickclimber/tags/enchantment/climb_specializations.json",
+                      "size":  104,
+                      "sha256":  "e62f12fccbc7c016273543812ee0b503c47390d83b9dea0470cc4b0c4b3a290c"
                   },
                   {
                       "path":  "src/main/resources/pack.mcmeta",
@@ -218,8 +228,8 @@
                   },
                   {
                       "path":  "TODO.md",
-                      "size":  12355,
-                      "sha256":  "faa40507eaf49312020f52b2e50e5064e71a910a3f06aac841adf97043eda1ae"
+                      "size":  12625,
+                      "sha256":  "504396bb39767fe02596bf382dcb6431a5ada8b16f56cbf77d0d9191f84fdb2e"
                   }
               ]
 }
