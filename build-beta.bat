@@ -11,7 +11,7 @@ set "JAVA_EXE="
 set "BUILD_FAILED=0"
 
  echo ============================================================
- echo        PICK CLIMBER - BETA BUILD 0.1.25
+ echo        PICK CLIMBER - BETA BUILD 0.1.26
  echo ============================================================
  echo Directory: %CD%
  echo.

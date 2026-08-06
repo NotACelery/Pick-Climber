@@ -19,6 +19,6 @@ if [ ! -x "$DIST_DIR/bin/gradle" ]; then
     unzip -q -o "$DIST_ZIP" -d "$DIST_ROOT"
 fi
 
-echo "Building Pick Climber beta 0.1.25..."
+echo "Building Pick Climber beta 0.1.26..."
 "$DIST_DIR/bin/gradle" clean build
 echo "DONE: check build/libs/"

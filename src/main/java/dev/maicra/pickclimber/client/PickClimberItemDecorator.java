@@ -26,7 +26,7 @@ public final class PickClimberItemDecorator implements IItemDecorator {
             int yOffset
     ) {
         LocalPlayer player = Minecraft.getInstance().player;
-        if (player == null || !ClimbManager.isPickaxe(stack)) {
+        if (player == null || !ClimbManager.isClimbingTool(stack)) {
             return false;
         }
 

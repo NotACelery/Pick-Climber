@@ -161,10 +161,20 @@ Pendiente validar junto con Strong Grip el presupuesto final de yunque y la excl
 
 Pendiente en fases posteriores:
 
-- Sincronizar la pose elevada de tercera persona para que también sea visible en otros clientes multijugador.
-- Maniobras avanzadas con dos picotas `Strong Grip`.
-- Posibilidad de rodear bordes y alcanzar techos separados por aproximadamente dos bloques de vacío desde una posición balanceada válida.
-- Shift mantenido conserva agachado e interacciones vanilla.
+- Validar que Shift mantenido conserve agachado e interacciones vanilla también sobre máquinas modded.
+
+Validado manualmente en 0.1.25:
+
+- Cambio con `F`, transferencia visual del brazo y nuevo enganche con una segunda picota durante el balanceo.
+- Liberación pasiva y salto con momento pendular acumulado.
+- Extensión efectiva del alcance desde una posición balanceada válida, cruce de huecos y transición alrededor de bordes hacia una pared superior.
+- Un nuevo enganche termina intencionalmente el momento previo porque confirma una nueva posición autoritativa.
+
+Implementado en 0.1.26, pendiente de validación con dos clientes:
+
+- La pose elevada de techo se sincroniza con observadores mediante un payload visual separado de la física.
+- El cambio con `F`, el cambio techo/pared y el desenganche actualizan o limpian la mano elevada remota.
+- Una renovación periódica permite que un cliente que empieza a observar tarde reciba la pose; un timeout evita estados visuales huérfanos.
 
 Este bloque es **mandatorio**, pero no tiene prioridad inmediata sobre la estabilización y las físicas base.
 
@@ -181,28 +191,36 @@ Este bloque es **mandatorio**, pero no tiene prioridad inmediata sobre la estabi
 
 ## Compatibilidad de herramientas
 
-Crear:
+### Completado en 0.1.26
 
 ```text
 pickclimber:climbing_tools
 pickclimber:excluded_climbing_tools
 ```
 
+- La elegibilidad se resuelve en un clasificador central compartido por lógica, render y cooldown.
+- `climbing_tools` incluye `#minecraft:pickaxes` y una entrada opcional explícita para `eternal_starlight:thermal_springstone_hammer`.
+- `excluded_climbing_tools` excluye la picota de madera y siempre tiene prioridad sobre inclusión.
+- Ambos tags admiten ampliación desde datapacks y modpacks.
+
+Validado manualmente:
+
+- Picotas de Eternal Starlight y Twilight Forest.
+- Exclusión funcional de la picota de madera.
+- Cambio de mano y encantamientos con herramientas compatibles.
+
 Objetivos:
 
-- Twilight Forest.
-- Eternal Starlight.
-- Picos de otros mods.
-- Herramientas híbridas.
-- Mazas o herramientas que funcionen como pico sin pertenecer a `#minecraft:pickaxes`.
-- Lista configurable para modpacks.
+- Probar herramientas híbridas añadidas únicamente por `pickclimber:climbing_tools`, sin pertenecer a `#minecraft:pickaxes`.
+- Probar extensión y exclusión simultáneas mediante datapack.
+- Validar bloques con menú y máquinas de mods sin listas hardcodeadas.
 
 Las pruebas de interacción específica con bloques y máquinas modded se realizarán después de cerrar el comportamiento vanilla.
 
 ## Visuales posteriores
 
 - Evaluar una pose equivalente en tercera persona para paredes.
-- Sincronizar la pose elevada de Strong Grip para otros jugadores en multijugador.
+- Validar la pose elevada de Strong Grip con dos clientes en multijugador, incluyendo `F`, detach, dimensión y desconexión.
 - Probar `IItemDecorator` con otras escalas de GUI y mods de interfaz.
 - Evaluar indicadores distintos para superficies firmes, inestables y no escalables.
 - Considerar variantes del icono de alcance según el tipo de superficie.
@@ -219,4 +237,5 @@ Las pruebas de interacción específica con bloques y máquinas modded se realiz
 7. Implementar `Strong Grip`, exclusividad y anclajes básicos de techo.
 8. Implementar pose elevada y doble pulsación de Shift.
 9. Implementar balanceo y maniobras con dos picotas.
-10. Compatibilidad general de herramientas, pruebas modded y pulido visual.
+10. **Compatibilidad base completada en 0.1.26:** tags de herramientas y pruebas con Eternal Starlight/Twilight Forest.
+11. **Siguiente:** validar pose remota y pulir indicadores de superficie, requisitos de techo, sonidos y partículas.

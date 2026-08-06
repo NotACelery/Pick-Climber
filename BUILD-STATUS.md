@@ -1,6 +1,6 @@
 # Estado de compilación
 
-Versión preparada: `0.1.25-beta`
+Versión preparada: `0.1.26-beta`
 
 Objetivo: Minecraft 1.21.1, NeoForge 21.1.235 y Java 21.
 
@@ -26,12 +26,16 @@ Cambios funcionales:
 - El impulso voluntario de techo comparte ahora la magnitud horizontal `0.65` del wall jump; el límite combinado `1.03` solo protege contra estados fuera del presupuesto físico máximo.
 - La velocidad final de liberación del techo se sincroniza explícitamente después del detach, pues no puede predecirse desde el estado cliente sin delegar la inercia autoritativa del balanceo.
 - Los destinos de techo validados se aplican suavemente en cliente cada tick; el servidor usa `setPos` para pasos intermedios y conserva `teleport` cada cinco ticks como confirmación dura.
-- Protocolo 12: identifica anclajes de techo y sincroniza input/cámara; la liberación transporta además la intención exacta del instante de Espacio sin delegar física al cliente.
+- Protocolo 13: conserva input/cámara y liberación autoritativa, y añade un payload mínimo para la pose elevada de observadores multijugador.
+- Clasificador central de herramientas basado en `pickclimber:climbing_tools` con exclusión prioritaria mediante `pickclimber:excluded_climbing_tools`.
+- Compatibilidad opcional explícita con `eternal_starlight:thermal_springstone_hammer`; la picota de madera queda excluida.
+- Compatibilidad manual confirmada con Eternal Starlight y Twilight Forest, incluida transferencia de mano y encantamientos.
+- La pose remota se refresca cada 20 ticks, se limpia explícitamente al terminar y expira en cliente tras 40 ticks sin sincronización.
 
 Validación realizada en este entorno:
 
 - `cmd /c build-beta.bat` terminó con `BUILD SUCCESSFUL` usando Java 21.
-- El JAR generado corresponde a la versión 0.1.25-beta.
+- El JAR generado corresponde a la versión 0.1.26-beta.
 - La lógica de tags, frenado, descenso y render elevado compila contra NeoForge 21.1.235.
 - Las pruebas físicas dentro de Minecraft siguen pendientes.
 
@@ -42,5 +46,5 @@ build-beta.bat
 Resultado esperado:
 
 ```text
-build/libs/pickclimber-1.21.1-0.1.25-beta.jar
+build/libs/pickclimber-1.21.1-0.1.26-beta.jar
 ```

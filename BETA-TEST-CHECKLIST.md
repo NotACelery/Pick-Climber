@@ -1,4 +1,24 @@
-# Checklist 0.1.25-beta — pose elevada de Strong Grip
+# Checklist 0.1.26-beta — compatibilidad de herramientas
+
+## Tags de herramientas
+
+- [x] La picota de madera no muestra indicador ni permite engancharse.
+- [ ] Picotas vanilla de piedra, hierro, oro, diamante y netherita conservan todas las maniobras existentes.
+- [x] Las picotas de Eternal Starlight y Twilight Forest permiten escalar normalmente.
+- [x] Cambio de mano y encantamientos funcionan con las herramientas modded validadas.
+- [ ] Una herramienta añadida por datapack a `pickclimber:climbing_tools` recibe UUID, cooldown, desgaste y render de Pick Climber.
+- [ ] Una herramienta presente simultáneamente en ambos tags queda excluida.
+- [ ] Retirar Eternal Starlight no provoca errores de carga del tag opcional.
+
+## Pose elevada remota en multijugador
+
+- [ ] Con dos clientes, el observador ve elevado el brazo que sostiene el anclaje de techo.
+- [ ] `F` cambia inmediatamente el brazo elevado también para el observador.
+- [ ] Cambiar de techo a pared restaura la pose remota sin esperar el timeout.
+- [ ] Espacio, doble Shift, clic izquierdo, rotura del pico y pérdida del bloque limpian la pose remota.
+- [ ] Cambio de dimensión y desconexión no dejan el brazo elevado en el cliente observador.
+- [ ] Entrar en distancia de seguimiento mientras el otro jugador ya cuelga recibe la pose en un máximo de 20 ticks.
+- [ ] Un paquete de pose atrasado no altera posición, velocidad, cooldown, durabilidad ni grietas.
 
 ## Tags de superficies
 
@@ -100,14 +120,14 @@
 - [ ] Soltarse con Espacio, doble Shift o clic izquierdo restaura inmediatamente el render normal.
 - [ ] La pose clavada de pared permanece visualmente idéntica a 0.1.24.
 
-## Pose elevada local en tercera persona
+## Pose elevada en tercera persona
 
 - [ ] En `F5`, solamente el brazo que sostiene el anclaje de techo apunta hacia arriba y la picota acompaña su rotación.
 - [ ] Con dos picotas, la herramienta libre permanece en su pose normal.
 - [ ] Mano principal, secundaria, `F` y jugador zurdo elevan el brazo correcto.
 - [ ] Soltarse por cualquiera de las rutas restaura ambos brazos sin conservar la pose de techo.
 - [ ] Un anclaje de pared no activa la pose elevada de tercera persona.
-- [ ] Pendiente futuro: confirmar la pose desde un segundo cliente multijugador cuando se sincronice el estado remoto.
+- [ ] Confirmar la pose desde un segundo cliente multijugador mediante el estado remoto de protocolo 13.
 
 ## Regresión 0.1.14 — bloques con menú vanilla
 

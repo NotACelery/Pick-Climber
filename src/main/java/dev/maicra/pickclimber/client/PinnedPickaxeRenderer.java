@@ -37,7 +37,7 @@ public final class PinnedPickaxeRenderer {
 
         if (player == null
                 || stack.isEmpty()
-                || !ClimbManager.isPickaxe(stack)
+                || !ClimbManager.isClimbingTool(stack)
                 || ClimbManager.activeHand(player) != event.getHand()) {
             return;
         }

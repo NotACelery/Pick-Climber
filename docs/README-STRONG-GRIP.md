@@ -455,7 +455,9 @@ El modelo del jugador debe mostrar:
 
 La implementación debe usar un estado sincronizado de pose, no deducirla solamente del item en la mano.
 
-Implementado localmente en `0.1.25-beta`: la vista en tercera persona consulta el tipo de anclaje y la mano activa sincronizados, aplica una pose elevada al brazo correcto y deja que la capa vanilla del objeto alinee la picota con la mano. La pose anterior del modelo se restaura al terminar cada render para no afectar al brazo libre ni a jugadores sin anclaje. Aún queda pendiente propagar este estado a clientes que observan a otro jugador en multijugador.
+Implementado localmente en `0.1.25-beta`: la vista en tercera persona consulta el tipo de anclaje y la mano activa sincronizados, aplica una pose elevada al brazo correcto y deja que la capa vanilla del objeto alinee la picota con la mano. La pose anterior del modelo se restaura al terminar cada render para no afectar al brazo libre ni a jugadores sin anclaje.
+
+Implementado para observadores en `0.1.26-beta`: un payload visual independiente transporta únicamente UUID del jugador, presencia del anclaje de techo y mano activa. Se actualiza al enganchar, transferir con `F`, cambiar entre techo y pared o soltar; además se renueva cada 20 ticks para observadores tardíos y expira tras 40 ticks sin sincronización. El payload no contiene ni modifica posición, velocidad, durabilidad, cooldown o física. La validación visual definitiva queda pendiente de una sesión con dos clientes.
 
 ### 9.3 Balanceo visual
 
@@ -616,20 +618,20 @@ Este sistema no debe comenzar antes de completar sus dependencias.
 
 1. **Completado en 0.1.14:** conservar el detach intencional y cerrar `Shift + clic derecho` sobre bloques interactivos vanilla.
 2. **Balance base completado en 0.1.14:** costes actuales de `Pick Climber`; la obtención final seguirá afinándose mediante pruebas.
-3. Implementar tags de superficies.
-4. Implementar frenado progresivo.
-5. Implementar desgaste proporcional a la caída.
-6. Implementar comportamiento inestable de arena, grava, concreto en polvo y nieve.
-7. Implementar `Sturdy Latch`.
-8. Implementar exclusividad `Pick Climber` / `Strong Grip`.
-9. Implementar enganche estático básico de techo.
-10. Implementar coste inicial y coste sostenido.
-11. Implementar pose elevada de primera persona.
-12. Implementar pose elevada de tercera persona.
-13. Implementar doble pulsación de Shift para caída vertical y conservar Shift mantenido como sneak vanilla.
-14. Implementar balanceo restringido.
-15. Implementar transferencias de techo y cruce de huecos.
-16. Pulir indicadores, sonidos, partículas y compatibilidad modded.
+3. **Completado:** tags de superficies.
+4. **Completado:** frenado progresivo.
+5. **Completado:** desgaste proporcional a la caída.
+6. **Completado:** comportamiento inestable de arena, grava, concreto en polvo y nieve.
+7. **Completado:** `Sturdy Latch`.
+8. **Completado:** exclusividad `Pick Climber` / `Strong Grip`.
+9. **Completado:** enganche estático básico de techo.
+10. **Completado:** coste inicial y coste sostenido.
+11. **Completado:** pose elevada de primera persona.
+12. **Implementado, pendiente de prueba multijugador:** pose elevada de tercera persona local y remota.
+13. **Completado:** doble pulsación de Shift para caída vertical; queda validación modded de Shift mantenido.
+14. **Completado:** balanceo restringido.
+15. **Completado y validado:** transferencias de techo, rodeo de bordes y cruce de huecos.
+16. **Siguiente fase:** pulir indicadores, sonidos y partículas; completar pruebas modded y multijugador.
 
 ## 17. Criterios de aceptación
 

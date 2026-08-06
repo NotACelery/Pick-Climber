@@ -96,6 +96,20 @@
 
 # Changelog
 
+## 0.1.26-beta
+
+- Añade los tags de objeto `pickclimber:climbing_tools` y `pickclimber:excluded_climbing_tools` para compatibilidad configurable con herramientas de otros mods.
+- Toda la elegibilidad durante escalada, cooldown y render pasa por un clasificador central; una exclusión siempre prevalece sobre una inclusión.
+- `climbing_tools` hereda `#minecraft:pickaxes` para conservar compatibilidad general e incluye de forma opcional la maza-picota `eternal_starlight:thermal_springstone_hammer`.
+- La picota de madera se incluye en `excluded_climbing_tools` y deja de poder iniciar o mantener anclajes.
+- La integración con Eternal Starlight es opcional mediante tag y no añade dependencias de carga.
+- Valida manualmente las picotas de Eternal Starlight y Twilight Forest, la exclusión de madera, el cambio de mano y los encantamientos.
+- Sincroniza la pose elevada de Strong Grip con los clientes que observan al jugador mediante un payload visual mínimo e independiente de la física.
+- La pose remota se actualiza al enganchar, cambiar con `F`, pasar entre techo y pared o soltarse; una renovación periódica cubre observadores tardíos y un timeout evita estados huérfanos.
+- Protocolo interno actualizado a versión 13.
+- Documenta como validadas las maniobras Strong Grip con dos picotas, cambio con `F`, salto con momento, cruce de huecos y transición alrededor de bordes.
+- No modifica física, distancias, durabilidad, cooldown ni balance de encantamientos.
+
 ## 0.1.25-beta
 
 - Añade una pose elevada propia para el brazo y la picota activos al usar Strong Grip en primera persona.

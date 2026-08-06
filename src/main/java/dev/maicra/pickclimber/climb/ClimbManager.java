@@ -3,6 +3,7 @@ package dev.maicra.pickclimber.climb;
 import com.mojang.logging.LogUtils;
 import dev.maicra.pickclimber.network.AnchorSyncPayload;
 import dev.maicra.pickclimber.network.BoostSyncPayload;
+import dev.maicra.pickclimber.network.RemoteAnchorPosePayload;
 import dev.maicra.pickclimber.network.SlideInputPayload;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -10,7 +11,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -66,6 +66,7 @@ public final class ClimbManager {
     private static final int CRACK_REFRESH_INTERVAL = 10;
     private static final int SERVER_SYNC_INTERVAL = 5;
     private static final int CLIENT_SYNC_TIMEOUT_TICKS = 40;
+    private static final int REMOTE_POSE_REFRESH_INTERVAL_TICKS = 20;
     private static final int FAILED_ATTACH_GRACE_TICKS = 5;
     private static final double BRAKING_START_SPEED = -0.40D;
     private static final float BRAKING_MIN_FALL_DISTANCE = 5.0F;
@@ -79,6 +80,7 @@ public final class ClimbManager {
 
     private static final Map<UUID, ServerClimbState> SERVER_STATES = new HashMap<>();
     private static final Map<UUID, ClientClimbState> CLIENT_STATES = new HashMap<>();
+    private static final Map<UUID, RemoteAnchorPoseState> REMOTE_ANCHOR_POSES = new HashMap<>();
     private static final Map<UUID, Long> LAST_REAL_JUMP = new HashMap<>();
     private static final Map<UUID, Long> CONSUMED_JUMP = new HashMap<>();
 
@@ -107,8 +109,8 @@ public final class ClimbManager {
         }
     }
 
-    public static boolean isPickaxe(ItemStack stack) {
-        return !stack.isEmpty() && stack.is(ItemTags.PICKAXES);
+    public static boolean isClimbingTool(ItemStack stack) {
+        return ClimbingToolClassifier.isClimbingTool(stack);
     }
 
     public static boolean isAttached(Player player) {
@@ -120,7 +122,11 @@ public final class ClimbManager {
     public static InteractionHand activeHand(Player player) {
         if (player.level().isClientSide()) {
             ClientClimbState state = CLIENT_STATES.get(player.getUUID());
-            return state == null ? null : state.activeHand();
+            if (state != null) {
+                return state.activeHand();
+            }
+            RemoteAnchorPoseState remotePose = remoteAnchorPose(player);
+            return remotePose == null ? null : remotePose.activeHand();
         }
 
         ServerClimbState state = SERVER_STATES.get(player.getUUID());
@@ -131,7 +137,7 @@ public final class ClimbManager {
     public static boolean isCeilingAnchor(Player player) {
         if (player.level().isClientSide()) {
             ClientClimbState state = CLIENT_STATES.get(player.getUUID());
-            return state != null && state.ceilingAnchor();
+            return state != null && state.ceilingAnchor() || remoteAnchorPose(player) != null;
         }
 
         ServerClimbState state = SERVER_STATES.get(player.getUUID());
@@ -262,7 +268,7 @@ public final class ClimbManager {
         }
 
         ItemStack stack = player.getItemInHand(hand);
-        if (!isPickaxe(stack)) {
+        if (!isClimbingTool(stack)) {
             return false;
         }
 
@@ -473,7 +479,7 @@ public final class ClimbManager {
                     ? InteractionHand.OFF_HAND
                     : InteractionHand.MAIN_HAND;
             ItemStack supportStack = player.getItemInHand(supportHand);
-            if (isPickaxe(supportStack)) {
+            if (isClimbingTool(supportStack)) {
                 brakingSupportToolId = ToolIdentity.ensure(supportStack);
                 if (brakingSupportToolId.equals(toolId)) {
                     brakingSupportToolId = UUID.randomUUID();
@@ -579,6 +585,7 @@ public final class ClimbManager {
             startEquippedEffortCooldown(player, hand);
         }
         syncAttached(player, next, true);
+        syncRemoteAnchorPose(player, next);
         return true;
     }
 
@@ -640,6 +647,10 @@ public final class ClimbManager {
                 || player.tickCount % SERVER_SYNC_INTERVAL == 0) {
             syncAttached(player, state, false);
         }
+        if (state.anchorFace() == Direction.DOWN
+                && player.tickCount % REMOTE_POSE_REFRESH_INTERVAL_TICKS == 0) {
+            syncRemoteAnchorPose(player, state);
+        }
 
         holdPlayer(player, state);
     }
@@ -670,7 +681,7 @@ public final class ClimbManager {
             ServerClimbState state
     ) {
         ItemStack current = player.getItemInHand(state.activeHand());
-        if (isPickaxe(current) && ToolIdentity.matches(current, state.toolId())) {
+        if (isClimbingTool(current) && ToolIdentity.matches(current, state.toolId())) {
             return state;
         }
 
@@ -679,7 +690,7 @@ public final class ClimbManager {
                 : InteractionHand.MAIN_HAND;
         ItemStack other = player.getItemInHand(otherHand);
 
-        if (!isPickaxe(other) || !ToolIdentity.matches(other, state.toolId())) {
+        if (!isClimbingTool(other) || !ToolIdentity.matches(other, state.toolId())) {
             // Do not repair a missing UUID onto another pickaxe: changing slots
             // must detach, not accidentally turn a different tool into the active
             // anchor.
@@ -689,6 +700,7 @@ public final class ClimbManager {
         ServerClimbState transferred = state.withActiveHand(otherHand);
         SERVER_STATES.put(player.getUUID(), transferred);
         syncAttached(player, transferred, false);
+        syncRemoteAnchorPose(player, transferred);
         LOGGER.info(
                 "[PickClimber] action=TRANSFER_HAND player={} from={} to={} target={}",
                 player.getScoreboardName(),
@@ -709,7 +721,7 @@ public final class ClimbManager {
         }
 
         ItemStack held = player.getItemInHand(state.activeHand());
-        if (!isPickaxe(held) || !ToolIdentity.matches(held, state.toolId())) {
+        if (!isClimbingTool(held) || !ToolIdentity.matches(held, state.toolId())) {
             return false;
         }
 
@@ -1195,6 +1207,7 @@ public final class ClimbManager {
                 remainingCooldownTicks,
                 refundCooldown
         );
+        syncRemoteAnchorPoseDetached(player);
         if (jump && state.anchorFace() == Direction.DOWN) {
             // Unlike wall jumps, ceiling releases cannot be predicted from client
             // anchor state because swing velocity is server-authoritative. Send
@@ -1236,6 +1249,7 @@ public final class ClimbManager {
         clearAnchorVisuals(player, state);
         restoreAbilities(player, state.restoreNoGravity(), state.restoreFlying());
         player.setDeltaMovement(Vec3.ZERO);
+        syncRemoteAnchorPoseDetached(player);
     }
 
     public static void applyClientSync(Player player, AnchorSyncPayload payload) {
@@ -1288,7 +1302,7 @@ public final class ClimbManager {
         }
 
         ItemStack localTool = player.getItemInHand(hand);
-        if (isPickaxe(localTool) && payload.newAnchor()) {
+        if (isClimbingTool(localTool) && payload.newAnchor()) {
             // Only a genuinely new anchor may assign identity. During an F transfer,
             // the vanilla inventory packet may arrive an instant later; assigning
             // here would mark the wrong pickaxe.
@@ -1343,7 +1357,7 @@ public final class ClimbManager {
                 ? InteractionHand.OFF_HAND
                 : InteractionHand.MAIN_HAND;
         ItemStack localTool = player.getItemInHand(hand);
-        if (isPickaxe(localTool) && payload.cooldownTicks() > 0) {
+        if (isClimbingTool(localTool) && payload.cooldownTicks() > 0) {
             ToolIdentity.startCooldown(
                     localTool,
                     player.level().getGameTime() + payload.cooldownTicks(),
@@ -1360,6 +1374,22 @@ public final class ClimbManager {
         player.setOnGround(false);
     }
 
+    /** Applies observer-only pose state without touching local anchor physics. */
+    public static void applyRemoteAnchorPose(Player receivingPlayer, RemoteAnchorPosePayload payload) {
+        if (!payload.ceilingAnchor()) {
+            REMOTE_ANCHOR_POSES.remove(payload.playerId());
+            return;
+        }
+
+        InteractionHand hand = payload.handOrdinal() == InteractionHand.OFF_HAND.ordinal()
+                ? InteractionHand.OFF_HAND
+                : InteractionHand.MAIN_HAND;
+        REMOTE_ANCHOR_POSES.put(
+                payload.playerId(),
+                new RemoteAnchorPoseState(hand, receivingPlayer.level().getGameTime())
+        );
+    }
+
     /** Clears visual state and the synthetic overlay before leaving the level. */
     public static void clearAllClientStates(Player localPlayer) {
         if (localPlayer != null) {
@@ -1370,6 +1400,7 @@ public final class ClimbManager {
         } else {
             CLIENT_STATES.clear();
         }
+        REMOTE_ANCHOR_POSES.clear();
     }
 
     private static Vec3 calculateTargetPosition(Player player, BlockHitResult hit) {
@@ -1543,13 +1574,13 @@ public final class ClimbManager {
 
     private static ItemStack findToolById(Player player, UUID toolId) {
         for (ItemStack stack : player.getInventory().items) {
-            if (isPickaxe(stack) && ToolIdentity.matches(stack, toolId)) {
+            if (isClimbingTool(stack) && ToolIdentity.matches(stack, toolId)) {
                 return stack;
             }
         }
 
         ItemStack offhand = player.getOffhandItem();
-        if (isPickaxe(offhand) && ToolIdentity.matches(offhand, toolId)) {
+        if (isClimbingTool(offhand) && ToolIdentity.matches(offhand, toolId)) {
             return offhand;
         }
         return ItemStack.EMPTY;
@@ -1584,7 +1615,7 @@ public final class ClimbManager {
                 continue;
             }
             ItemStack equipped = player.getItemInHand(hand);
-            if (isPickaxe(equipped)) {
+            if (isClimbingTool(equipped)) {
                 ToolIdentity.startCooldown(equipped, until, ANCHOR_COOLDOWN_TICKS);
             }
         }
@@ -1665,6 +1696,20 @@ public final class ClimbManager {
         PacketDistributor.sendToPlayer(player, AnchorSyncPayload.attached(state, newAnchor));
     }
 
+    private static void syncRemoteAnchorPose(ServerPlayer player, ServerClimbState state) {
+        RemoteAnchorPosePayload payload = state.anchorFace() == Direction.DOWN
+                ? RemoteAnchorPosePayload.attached(player.getUUID(), state.activeHand())
+                : RemoteAnchorPosePayload.detached(player.getUUID());
+        PacketDistributor.sendToPlayersTrackingEntity(player, payload);
+    }
+
+    private static void syncRemoteAnchorPoseDetached(ServerPlayer player) {
+        // A dimension change can move the entity between tracking sets before
+        // cleanup runs. Broadcasting this tiny removal packet prevents a stale
+        // raised arm in clients that tracked the previous dimension.
+        PacketDistributor.sendToAllPlayers(RemoteAnchorPosePayload.detached(player.getUUID()));
+    }
+
     private static void syncDetached(
             ServerPlayer player,
             boolean restoreNoGravity,
@@ -1685,5 +1730,23 @@ public final class ClimbManager {
                         refundCooldown
                 )
         );
+    }
+
+    private static RemoteAnchorPoseState remoteAnchorPose(Player player) {
+        RemoteAnchorPoseState state = REMOTE_ANCHOR_POSES.get(player.getUUID());
+        if (state == null) {
+            return null;
+        }
+        if (player.level().getGameTime() - state.lastSyncGameTime() > CLIENT_SYNC_TIMEOUT_TICKS) {
+            REMOTE_ANCHOR_POSES.remove(player.getUUID());
+            return null;
+        }
+        return state;
+    }
+
+    private record RemoteAnchorPoseState(
+            InteractionHand activeHand,
+            long lastSyncGameTime
+    ) {
     }
 }

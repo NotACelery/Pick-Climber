@@ -1,8 +1,8 @@
-# Pick Climber — Beta experimental 0.1.25
+# Pick Climber — Beta experimental 0.1.26
 
 Mod para **Minecraft 1.21.1**, **NeoForge 21.1.235** y **Java 21**.
 
-Convierte cualquier herramienta incluida en `#minecraft:pickaxes` en una herramienta de escalada, impulso y rescate.
+Convierte las herramientas incluidas en `#pickclimber:climbing_tools` en herramientas de escalada, impulso y rescate. `#pickclimber:excluded_climbing_tools` tiene prioridad y permite vetar herramientas concretas.
 
 ## Mecánica principal
 
@@ -113,7 +113,7 @@ Al cambiar entre techo y pared, el destino mantiene el punto ideal siempre que l
 
 Mientras cuelga, `W/A/S/D` impulsa un balanceo servidor-autoritativo de hasta 0.665 bloques, con aceleración, amortiguación, velocidad máxima y colisiones limitadas. El cliente recibe cada tick el destino ya validado y el servidor conserva confirmaciones absolutas periódicas, reduciendo tirones sin delegar la física. Espacio suma hasta `0.38` bloques/tick de momento pendular acumulado al impulso de salto de `0.65` en la dirección de `W/A/S/D`: ambos vectores pueden reforzarse o contrarrestarse hasta el límite combinado de `1.03`. Sin direccional ni balanceo acumulado, la liberación no recibe velocidad horizontal. Doble Shift o clic izquierdo con el pico activo producen siempre una liberación pasiva con velocidad horizontal cero.
 
-En primera persona, el brazo y la picota activos adoptan una pose elevada propia de los anclajes de techo. La entrada dura 4 ticks, no acumula el swing vanilla y se refleja al brazo correcto; transferir el mismo pico con `F` mueve la pose sin reiniciarla. La vista local en tercera persona eleva ese mismo brazo y alinea con él la picota sostenida. La otra mano conserva su render normal.
+En primera persona, el brazo y la picota activos adoptan una pose elevada propia de los anclajes de techo. La entrada dura 4 ticks, no acumula el swing vanilla y se refleja al brazo correcto; transferir el mismo pico con `F` mueve la pose sin reiniciarla. En tercera persona, el servidor sincroniza un estado visual mínimo con los clientes que observan al jugador para elevar el brazo activo y alinear la picota también en multijugador. La otra mano conserva su render normal.
 
 ## Controles vigentes
 
@@ -125,6 +125,19 @@ En primera persona, el brazo y la picota activos adoptan una pose elevada propia
 - **Clic izquierdo con ancla secundaria**: minería o ataque vanilla con la principal.
 - **Clic izquierdo con el mismo pico activo**: desenganche pasivo sin impulso.
 
+## Compatibilidad de herramientas
+
+La selección de herramientas es data-driven:
+
+- `pickclimber:climbing_tools` incluye por defecto `#minecraft:pickaxes` y puede ampliarse desde datapacks o mods.
+- `pickclimber:excluded_climbing_tools` siempre gana si un objeto aparece en ambos tags.
+- La picota de madera está excluida por defecto.
+- `eternal_starlight:thermal_springstone_hammer` se declara como integración opcional y no obliga a instalar Eternal Starlight.
+
+Todos los controles, cooldowns, UUID, desgaste y render consultan el mismo clasificador central durante la escalada.
+
+Compatibilidad validada manualmente con las picotas de Eternal Starlight y Twilight Forest. La picota de madera queda excluida de la escalada, mientras cambio de mano y encantamientos continúan funcionando con herramientas compatibles.
+
 ## Compilar en Windows
 
 1. Instala Java 21.
@@ -132,7 +145,7 @@ En primera persona, el brazo y la picota activos adoptan una pose elevada propia
 3. El JAR aparecerá en:
 
 ```text
-build/libs/pickclimber-1.21.1-0.1.25-beta.jar
+build/libs/pickclimber-1.21.1-0.1.26-beta.jar
 ```
 
 Retira versiones anteriores antes de instalar esta beta.
@@ -145,7 +158,7 @@ La especificación de `Strong Grip`, `Sturdy Latch`, nieve, hielo, anclajes de t
 docs/README-STRONG-GRIP.md
 ```
 
-No está implementada todavía.
+El documento se conserva como especificación y registro de las fases implementadas.
 
 ## Identidad visual
 

@@ -17,9 +17,9 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 
 /**
- * Applies the raised pose to the local third-person model while Strong Grip
- * maintains a ceiling anchor. A vanilla ArmPose is used because ItemInHandLayer
- * inherits the same transformation for the pickaxe.
+ * Applies the raised pose to local and remotely synchronized player models while
+ * Strong Grip maintains a ceiling anchor. A vanilla ArmPose is used because
+ * ItemInHandLayer inherits the same transformation for the pickaxe.
  */
 @EventBusSubscriber(modid = PickClimber.MOD_ID, value = Dist.CLIENT)
 public final class CeilingPlayerPoseRenderer {

@@ -12,7 +12,7 @@ public final class ModNetworking {
     }
 
     public static void registerPayloads(RegisterPayloadHandlersEvent event) {
-        PayloadRegistrar registrar = event.registrar("12");
+        PayloadRegistrar registrar = event.registrar("13");
 
         registrar.playToClient(
                 AnchorSyncPayload.TYPE,
@@ -24,6 +24,12 @@ public final class ModNetworking {
                 BoostSyncPayload.TYPE,
                 BoostSyncPayload.STREAM_CODEC,
                 ModNetworking::handleBoostSync
+        );
+
+        registrar.playToClient(
+                RemoteAnchorPosePayload.TYPE,
+                RemoteAnchorPosePayload.STREAM_CODEC,
+                ModNetworking::handleRemoteAnchorPose
         );
 
         registrar.playToServer(
@@ -47,6 +53,10 @@ public final class ModNetworking {
     private static void handleBoostSync(BoostSyncPayload payload, IPayloadContext context) {
         Player player = context.player();
         ClimbManager.applyClientBoost(player, payload);
+    }
+
+    private static void handleRemoteAnchorPose(RemoteAnchorPosePayload payload, IPayloadContext context) {
+        ClimbManager.applyRemoteAnchorPose(context.player(), payload);
     }
 
     private static void handleDetachRequest(DetachRequestPayload payload, IPayloadContext context) {
