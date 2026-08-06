@@ -40,9 +40,9 @@ public final class ClientEvents {
     public static void onClientLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
         Player player = event.getPlayer();
         if (player != null) {
-            // Se ejecuta mientras el ClientLevel todavía existe. El paquete de
-            // limpieza del servidor puede perderse durante el cierre de conexión,
-            // así que eliminamos también el overlay sintético localmente.
+            // This runs while ClientLevel still exists. The server cleanup packet
+            // may be lost while the connection closes, so also remove the
+            // synthetic overlay locally.
             ClimbManager.clearAllClientStates(player);
         } else {
             ClimbManager.clearAllClientStates(null);
@@ -61,17 +61,17 @@ public final class ClientEvents {
         }
 
         if (ClimbManager.activeHand(player) != InteractionHand.MAIN_HAND) {
-            // El ancla de la secundaria no secuestra el clic izquierdo. La mano
-            // principal puede minar, atacar y reproducir su swing vanilla.
+            // An off-hand anchor does not capture left click. The main hand may
+            // mine, attack, and play its vanilla swing.
             return;
         }
 
-        // Regla intencional: usar para minar/atacar el mismo pico clavado en la
-        // principal lo retira del ancla. La mano libre no es interceptada.
+        // Intentional rule: mining or attacking with the same pinned main-hand
+        // pickaxe removes it from the anchor. The free hand is not intercepted.
         event.setSwingHand(false);
         event.setCanceled(true);
         ClimbManager.detachClient(player, false);
-        PacketDistributor.sendToServer(new DetachRequestPayload(false));
+        PacketDistributor.sendToServer(detachRequest(minecraft, false));
     }
 
     @SubscribeEvent
@@ -94,10 +94,10 @@ public final class ClientEvents {
         boolean shiftDown = minecraft.options.keyShift.isDown();
 
         if (!attached) {
-            // Fuera del anclaje solo seguimos el estado físico actual de la tecla.
-            // No consumimos la cola interna de KeyMapping, porque puede contener
-            // clicks antiguos de saltos vanilla y producir un wall jump fantasma
-            // al engancharse varios ticks después.
+            // Outside an anchor, only track the key's current physical state.
+            // Do not consume KeyMapping's internal queue: it may contain stale
+            // vanilla jump clicks and cause a phantom wall jump when attaching
+            // several ticks later.
             wasAttachedLastTick = false;
             jumpWasDown = jumpDown;
             jumpReleaseArmed = false;
@@ -114,9 +114,9 @@ public final class ClientEvents {
         ));
 
         if (!wasAttachedLastTick) {
-            // Al recibir un anclaje nuevo se exige una liberación completa de la
-            // tecla. Esto impide que el mismo Espacio usado para saltar/impulsarse
-            // o un click almacenado desenganche inmediatamente al jugador.
+            // A newly received anchor requires a full key release. This prevents
+            // the same Space press used to jump or boost, or a queued click, from
+            // immediately detaching the player.
             wasAttachedLastTick = true;
             jumpWasDown = jumpDown;
             jumpReleaseArmed = !jumpDown;
@@ -133,7 +133,7 @@ public final class ClientEvents {
                     && now - lastShiftPressGameTime <= DOUBLE_SHIFT_WINDOW_TICKS) {
                 lastShiftPressGameTime = Long.MIN_VALUE;
                 ClimbManager.detachClient(player, false);
-                PacketDistributor.sendToServer(new DetachRequestPayload(false));
+                PacketDistributor.sendToServer(detachRequest(minecraft, false));
                 return;
             }
             lastShiftPressGameTime = now;
@@ -152,7 +152,21 @@ public final class ClientEvents {
 
         jumpReleaseArmed = false;
         ClimbManager.detachClient(player, true);
-        PacketDistributor.sendToServer(new DetachRequestPayload(true));
+        PacketDistributor.sendToServer(detachRequest(minecraft, true));
+    }
+
+    private static DetachRequestPayload detachRequest(Minecraft minecraft, boolean jump) {
+        Player player = minecraft.player;
+        if (player == null) {
+            return new DetachRequestPayload(jump, 0.0F, 0.0F, 0.0F, 0.0F);
+        }
+        return new DetachRequestPayload(
+                jump,
+                minecraft.player.input.forwardImpulse,
+                minecraft.player.input.leftImpulse,
+                player.getYRot(),
+                player.getXRot()
+        );
     }
 
 

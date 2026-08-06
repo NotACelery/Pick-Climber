@@ -8,8 +8,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * Punto único de clasificación de superficies. Los tags pueden ampliarse desde
- * datapacks o modpacks sin modificar la lógica de movimiento.
+ * Single surface-classification entry point. Tags can be extended by datapacks
+ * or modpacks without changing movement logic.
  */
 public final class AnchorSurfaceClassifier {
     public static final TagKey<Block> STABLE_ANCHOR_BLOCKS = tag("stable_anchor_blocks");
@@ -20,8 +20,8 @@ public final class AnchorSurfaceClassifier {
     }
 
     public static AnchorSurface classify(BlockState state) {
-        // El orden es parte del contrato: una exclusión siempre gana sobre un
-        // tag más amplio que accidentalmente también contenga el mismo bloque.
+        // Ordering is part of the contract: an exclusion always wins over a
+        // broader tag that accidentally contains the same block.
         if (state.is(UNCLIMBABLE_BLOCKS)) {
             return AnchorSurface.UNCLIMBABLE;
         }

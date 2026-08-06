@@ -146,12 +146,22 @@ Pendiente validar junto con Strong Grip el presupuesto final de yunque y la excl
 - Balanceo restringido de techo con radio inicial de `0.95`, reducido 30 % a `0.665` en 0.1.24; aceleración, amortiguación y velocidad máxima autoritativas del servidor.
 - El retorno lento confirma desplazamientos pequeños cada tick y evita acumularlos en saltos de `0.05` bloques.
 - Colisiones comprobadas antes de confirmar cada posición del arco pendular.
-- Espacio conserva la inercia, suma impulso según cámara y convierte amplitud acumulada en alcance adicional limitado.
+- Espacio conserva hasta `0.38` de momento pendular acumulado y suma `0.65` solo en la dirección de `W/A/S/D` orientada por cámara.
 - Doble Shift y clic izquierdo con el pico activo liberan verticalmente con velocidad horizontal cero.
+
+### Completado en 0.1.25
+
+- Pose elevada de primera persona para el brazo y la picota activos en anclajes de techo.
+- Entrada suave de 4 ticks, orientación reflejada por brazo y supresión del swing vanilla superpuesto.
+- La transferencia con `F` mueve la pose sin reiniciar la transición del mismo pico.
+- La vista local en tercera persona eleva el brazo activo y alinea la picota sostenida mediante la pose del modelo.
+- Los cambios de techo a pared resuelven una altura libre cercana cuando el destino ideal solaparía la hitbox con el techo, manteniendo paridad entre indicador y servidor.
+- Espacio usa la direccional pulsada para el impulso de techo y la combina vectorialmente con el momento pendular acumulado; el límite del radio no elimina esa energía de liberación.
+- El destino de balanceo validado se aplica suavemente mediante el sync de techo, con teletransporte absoluto periódico como confirmación autoritativa.
 
 Pendiente en fases posteriores:
 
-- Pose elevada del brazo y pico en primera y tercera persona.
+- Sincronizar la pose elevada de tercera persona para que también sea visible en otros clientes multijugador.
 - Maniobras avanzadas con dos picotas `Strong Grip`.
 - Posibilidad de rodear bordes y alcanzar techos separados por aproximadamente dos bloques de vacío desde una posición balanceada válida.
 - Shift mantenido conserva agachado e interacciones vanilla.
@@ -192,7 +202,7 @@ Las pruebas de interacción específica con bloques y máquinas modded se realiz
 ## Visuales posteriores
 
 - Evaluar una pose equivalente en tercera persona para paredes.
-- Implementar la pose elevada de Strong Grip en primera y tercera persona.
+- Sincronizar la pose elevada de Strong Grip para otros jugadores en multijugador.
 - Probar `IItemDecorator` con otras escalas de GUI y mods de interfaz.
 - Evaluar indicadores distintos para superficies firmes, inestables y no escalables.
 - Considerar variantes del icono de alcance según el tipo de superficie.

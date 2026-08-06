@@ -1,4 +1,4 @@
-# Pick Climber — Beta experimental 0.1.24
+# Pick Climber — Beta experimental 0.1.25
 
 Mod para **Minecraft 1.21.1**, **NeoForge 21.1.235** y **Java 21**.
 
@@ -107,9 +107,13 @@ El frenado cobra 15 de durabilidad inicial. Si hay dos picotas equipadas, ambas 
 
 Mientras una picota sostiene el ancla, la otra puede crear un nuevo punto dentro de 1.5 bloques del punto actual. Las dos herramientas mantienen UUID y cooldown propios; si dos copias llegan con el mismo UUID, el servidor separa la identidad de la segunda antes de cobrar o anclar.
 
+Al cambiar entre techo y pared, el destino mantiene el punto ideal siempre que la hitbox sea libre. Si ese cálculo introduciría parcialmente al jugador en un suelo o techo cercano, cliente y servidor buscan la altura libre más próxima sin superar el alcance de 1.5 bloques; un destino que siga colisionando continúa rechazándose sin coste.
+
 `Strong Grip I` habilita anclajes en la cara inferior de techos firmes. Cada anclaje nuevo cuesta 20 de durabilidad y permanecer suspendido cobra 1 cada 20 ticks; ambos costes respetan Unbreaking. Los techos inestables exigen además `Sturdy Latch I`. Strong Grip y Pick Climber son especializaciones excluyentes.
 
-Mientras cuelga, `W/A/S/D` impulsa un balanceo servidor-autoritativo de hasta 0.665 bloques, con aceleración, amortiguación, velocidad máxima y colisiones limitadas. Los desplazamientos pequeños se confirman cada tick para mantener fluido el retorno. Espacio libera horizontalmente hacia la cámara, conserva la velocidad tangencial y convierte parte de la amplitud acumulada en alcance. Doble Shift o clic izquierdo con el pico activo producen una liberación pasiva con velocidad horizontal cero.
+Mientras cuelga, `W/A/S/D` impulsa un balanceo servidor-autoritativo de hasta 0.665 bloques, con aceleración, amortiguación, velocidad máxima y colisiones limitadas. El cliente recibe cada tick el destino ya validado y el servidor conserva confirmaciones absolutas periódicas, reduciendo tirones sin delegar la física. Espacio suma hasta `0.38` bloques/tick de momento pendular acumulado al impulso de salto de `0.65` en la dirección de `W/A/S/D`: ambos vectores pueden reforzarse o contrarrestarse hasta el límite combinado de `1.03`. Sin direccional ni balanceo acumulado, la liberación no recibe velocidad horizontal. Doble Shift o clic izquierdo con el pico activo producen siempre una liberación pasiva con velocidad horizontal cero.
+
+En primera persona, el brazo y la picota activos adoptan una pose elevada propia de los anclajes de techo. La entrada dura 4 ticks, no acumula el swing vanilla y se refleja al brazo correcto; transferir el mismo pico con `F` mueve la pose sin reiniciarla. La vista local en tercera persona eleva ese mismo brazo y alinea con él la picota sostenida. La otra mano conserva su render normal.
 
 ## Controles vigentes
 
@@ -128,7 +132,7 @@ Mientras cuelga, `W/A/S/D` impulsa un balanceo servidor-autoritativo de hasta 0.
 3. El JAR aparecerá en:
 
 ```text
-build/libs/pickclimber-1.21.1-0.1.24-beta.jar
+build/libs/pickclimber-1.21.1-0.1.25-beta.jar
 ```
 
 Retira versiones anteriores antes de instalar esta beta.

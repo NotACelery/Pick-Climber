@@ -1,10 +1,10 @@
 package dev.maicra.pickclimber.climb;
 
-/** Clasificación data-driven de la superficie que recibe un anclaje. */
+/** Data-driven classification of the surface receiving an anchor. */
 public enum AnchorSurface {
     UNCLIMBABLE,
     UNSTABLE,
     STABLE,
-    /** Conserva la compatibilidad actual para los bloques que ningún tag clasifica. */
+    /** Preserves current compatibility for blocks not classified by any tag. */
     FALLBACK
 }

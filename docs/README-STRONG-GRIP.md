@@ -1,6 +1,6 @@
 # Strong Grip, Sturdy Latch y movimiento de techo
 
-> **Estado:** anclaje estático y balanceo base implementados; poses y maniobras avanzadas siguen pendientes.
+> **Estado:** anclaje estático, balanceo base y poses elevadas locales implementados; la sincronización visual multijugador y maniobras avanzadas siguen pendientes.
 >
 > Este documento conserva el comportamiento obligatorio y distingue lo implementado de las fases pendientes.
 >
@@ -300,6 +300,8 @@ El nuevo punto:
 - transfiere la pose elevada al nuevo brazo;
 - conserva una transición física controlada.
 
+Implementado en `0.1.25-beta`: al pasar de techo a una cara lateral, el destino conserva primero la altura derivada del punto exacto de impacto. Si esa posición introduce la hitbox en el techo o suelo adyacente, se busca por pasos la altura libre más cercana hacia la posición actual. La corrección máxima es media altura del jugador, el resultado sigue sujeto al radio real de 1.5 bloques y cliente/servidor ejecutan la misma comprobación.
+
 ### 6.2 Cruce de huecos
 
 El balanceo debe permitir intentar alcanzar un techo separado por aproximadamente dos bloques de vacío, siempre que:
@@ -344,13 +346,13 @@ Desde el techo:
 
 - no debe empujar al jugador verticalmente contra el bloque;
 - primero debe separarlo de la cara inferior;
-- puede aplicar impulso horizontal según la mirada;
+- puede aplicar impulso horizontal según `W/A/S/D`, orientado por la mirada;
 - puede incluir una pequeña componente descendente inicial para evitar colisión con la cabeza;
 - `Pick Climber` no participa porque es incompatible con `Strong Grip`.
 
 Los valores exactos se ajustarán en pruebas.
 
-Implementado en `0.1.23-beta`: el impulso horizontal base es `0.45`; se suma la velocidad pendular y hasta `0.20` por amplitud, con límite total `0.78` bloques/tick.
+Implementado en `0.1.23-beta` y corregido en `0.1.25-beta`: el impulso horizontal base es `0.65`, la misma magnitud que el salto desde pared, pero solo se aplica en la dirección de `W/A/S/D` que siga pulsada, orientada por la cámara. La integración mantiene por separado la velocidad restringida de la hitbox y un momento pendular de liberación de hasta `0.38`; llegar al radio máximo puede detener el desplazamiento físico sin destruir la energía acumulada. Una inercia contraria reduce el salto y una coincidente lo refuerza, con límite total `1.03` bloques/tick. Sin input ni balanceo acumulado, Espacio libera sin velocidad horizontal. El destino servidor-validado se sincroniza cada tick mediante posición directa interpolable y se confirma con teletransporte absoluto cada cinco ticks.
 
 ### 7.3 Shift mantenido
 
@@ -437,6 +439,8 @@ En un anclaje de techo:
 
 La pose de pared existente no debe reutilizarse sin adaptación: el techo requiere una transformación específica.
 
+Implementado en `0.1.25-beta`: el render cancela únicamente la mano activa, eleva brazo y picota mediante una transformación específica de techo y conserva el render vanilla de la mano libre. La entrada usa la misma curva suave de 4 ticks de la pose clavada; una transferencia con `F` conserva el UUID y el instante inicial, por lo que no reinicia la animación. No requiere dependencia de Artifacts ni modifica la física servidor-autoritativa.
+
 ### 9.2 Tercera persona
 
 El modelo del jugador debe mostrar:
@@ -450,6 +454,8 @@ El modelo del jugador debe mostrar:
 - pose visible para otros jugadores en multijugador.
 
 La implementación debe usar un estado sincronizado de pose, no deducirla solamente del item en la mano.
+
+Implementado localmente en `0.1.25-beta`: la vista en tercera persona consulta el tipo de anclaje y la mano activa sincronizados, aplica una pose elevada al brazo correcto y deja que la capa vanilla del objeto alinee la picota con la mano. La pose anterior del modelo se restaura al terminar cada render para no afectar al brazo libre ni a jugadores sin anclaje. Aún queda pendiente propagar este estado a clientes que observan a otro jugador en multijugador.
 
 ### 9.3 Balanceo visual
 

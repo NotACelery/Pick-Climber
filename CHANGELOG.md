@@ -96,6 +96,22 @@
 
 # Changelog
 
+## 0.1.25-beta
+
+- Añade una pose elevada propia para el brazo y la picota activos al usar Strong Grip en primera persona.
+- Corrige la vista local en tercera persona: el brazo activo se eleva y la picota sigue la transformación del modelo en lugar de permanecer abajo.
+- Corrige puntos válidos de pared rechazados bajo un techo: si la altura ideal solapa la hitbox con el bloque superior, se elige la altura libre más cercana dentro del mismo alcance.
+- El icono y el servidor comparten el mismo destino corregido; una posición que realmente colisione continúa siendo inválida y no consume recursos.
+- Corrige la liberación de techo con Espacio: el impulso voluntario usa `W/A/S/D` orientado por cámara en vez de empujar siempre hacia donde se mira.
+- Iguala ese impulso voluntario a los `0.65` del salto desde pared y amplía el límite combinado para que la inercia alineada lo refuerce sin quedar recortada prematuramente.
+- La solicitud de liberación incluye atómicamente `W/A/S/D` y cámara del instante de Espacio; el servidor ya no depende del último paquete periódico para calcular el salto. Protocolo interno actualizado a versión 12.
+- Corrige la aplicación final del salto de techo: el servidor envía explícitamente al cliente el vector calculado tras desenganchar, evitando que la física local descarte tanto el impulso direccional como la inercia del balanceo.
+- Separa la velocidad limitada de la hitbox del momento de liberación: el balanceo acumula hasta `0.38` bloques/tick en cualquier dirección y el límite del radio ya no elimina esa energía antes del salto.
+- Suaviza el balanceo aplicando cada destino servidor-validado desde el payload de techo y reserva el teletransporte absoluto para confirmaciones periódicas, evitando dos correcciones duras por tick.
+- La pose entra suavemente durante 4 ticks, queda fija sin acumular swing vanilla y se refleja para ambas manos y jugadores zurdos.
+- Transferir el mismo pico con `F` mueve la pose al otro brazo sin reiniciar su transición ni recrear el anclaje.
+- La pose de pared y el render de la mano libre permanecen sin cambios; el hotfix de liberación no modifica durabilidad ni cooldown.
+
 ## 0.1.24-beta
 
 - Reduce 30 % el radio del balanceo Strong Grip, de `0.95` a `0.665` bloques.

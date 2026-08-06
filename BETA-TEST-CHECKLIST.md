@@ -1,4 +1,4 @@
-# Checklist 0.1.24-beta — fluidez y alcance de Strong Grip
+# Checklist 0.1.25-beta — pose elevada de Strong Grip
 
 ## Tags de superficies
 
@@ -69,11 +69,45 @@
 - [ ] W/A/S/D acelera según cámara sin superar 0.665 bloques respecto del centro ni atravesar bloques.
 - [ ] Al soltar W/A/S/D cerca de la amplitud máxima, el retorno avanza suavemente cada tick sin pausas ni saltos visibles de 0.05 bloques.
 - [ ] Soltar movimiento amortigua el balanceo y el retorno al centro no genera aceleración infinita.
-- [ ] Espacio libera hacia la dirección horizontal de cámara y conserva la velocidad del balanceo.
+- [ ] Espacio libera hacia la dirección de `W/A/S/D` orientada por la cámara y conserva la velocidad del balanceo.
 - [ ] Liberar cerca de la amplitud máxima cubre más distancia que liberar desde reposo, sin superar el límite de velocidad.
+- [ ] Espacio sin `W/A/S/D` ni balanceo acumulado libera con velocidad horizontal cero.
+- [ ] Con W, A, S o D pulsada, Espacio impulsa en esa dirección relativa a la cámara, no simplemente hacia la mirada.
+- [ ] Liberar con el balanceo a favor aumenta el impulso resultante; hacerlo con la inercia contraria lo reduce o desvía mediante suma vectorial.
+- [ ] Liberar con acumulación baja, media y máxima produce tres alcances distinguibles; el momento pendular nunca supera `0.38` ni el total `1.03` bloques/tick.
+- [ ] Alcanzar el límite de 0.665 bloques no borra el momento acumulado ni convierte el salto siguiente en el impulso fijo de reposo.
+- [ ] Con una direccional pulsada, Espacio aporta `0.65` bloques/tick horizontales —igual que el wall jump— antes de sumar vectorialmente el balanceo.
+- [ ] Pulsar o cambiar de direccional en el mismo tick que Espacio usa esa dirección exacta; no cae en peso muerto por conservar un input periódico anterior.
+- [ ] El impulso calculado se observa inmediatamente en el cliente tras soltar el techo, sin un tick de caída en peso muerto ni pérdida de la velocidad pendular servidor-autoritativa.
+- [ ] Soltar la direccional justo antes de Espacio conserva solamente la inercia real del balanceo, sin añadir el impulso base de `0.65`.
 - [ ] Doble Shift libera con velocidad horizontal exactamente cero.
 - [ ] Clic izquierdo con el pico activo en la principal libera con velocidad horizontal cero; la mano principal libre no rompe un ancla secundaria.
 - [ ] F conserva ancla, velocidad, contador de desgaste y mano correcta durante el balanceo.
+- [ ] El balanceo y retorno se ven continuos entre confirmaciones absolutas de cinco ticks, sin tirones periódicos ni desincronización acumulada.
+- [ ] Desde un anclaje de techo, apuntar cerca, al centro y al borde de una pared contigua muestra el icono siempre que exista una altura final libre dentro de 1.5 bloques.
+- [ ] El clic confirma exactamente los mismos puntos que anuncia el icono; no aparece icono en posiciones donde la hitbox siga atravesando techo, suelo o pared.
+- [ ] Cambiar de techo a pared bajo un techo bajo no eleva al jugador dentro del bloque ni exige apuntar artificialmente al borde exterior.
+- [ ] Apuntar más de media altura de jugador por encima o debajo del destino seguro no usa la corrección para saltarse el límite vertical.
+
+## Pose elevada de techo en primera persona
+
+- [ ] Al confirmar un anclaje de techo, brazo y picota activos suben suavemente durante 4 ticks y quedan fijos sobre la cámara.
+- [ ] La picota apunta visualmente hacia el techo sin acumular encima el swing vanilla.
+- [ ] Mano principal, secundaria y jugador zurdo reflejan correctamente la pose.
+- [ ] La mano libre conserva colocar, usar, minar, atacar y sus animaciones vanilla.
+- [ ] `F` transfiere la pose al otro brazo sin reiniciar la entrada, duplicar brazos, cobrar desgaste ni recrear grietas.
+- [ ] Cambiar a un punto de techo nuevo reinicia brevemente la entrada solo para el nuevo anclaje.
+- [ ] Soltarse con Espacio, doble Shift o clic izquierdo restaura inmediatamente el render normal.
+- [ ] La pose clavada de pared permanece visualmente idéntica a 0.1.24.
+
+## Pose elevada local en tercera persona
+
+- [ ] En `F5`, solamente el brazo que sostiene el anclaje de techo apunta hacia arriba y la picota acompaña su rotación.
+- [ ] Con dos picotas, la herramienta libre permanece en su pose normal.
+- [ ] Mano principal, secundaria, `F` y jugador zurdo elevan el brazo correcto.
+- [ ] Soltarse por cualquiera de las rutas restaura ambos brazos sin conservar la pose de techo.
+- [ ] Un anclaje de pared no activa la pose elevada de tercera persona.
+- [ ] Pendiente futuro: confirmar la pose desde un segundo cliente multijugador cuando se sincronice el estado remoto.
 
 ## Regresión 0.1.14 — bloques con menú vanilla
 

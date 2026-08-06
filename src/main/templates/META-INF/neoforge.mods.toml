@@ -8,7 +8,7 @@ version="${mod_version}"
 displayName="${mod_name}"
 logoFile="pickclimber_logo.png"
 authors="NotACelery"
-description="Permite usar picos como puntos de apoyo para engancharse y escalar paredes. Beta experimental para Minecraft 1.21.1."
+description="Use pickaxes as anchor points to latch onto surfaces, climb walls, brake falls, and swing from ceilings. Experimental beta for Minecraft 1.21.1."
 
 [[dependencies.${mod_id}]]
 modId="neoforge"

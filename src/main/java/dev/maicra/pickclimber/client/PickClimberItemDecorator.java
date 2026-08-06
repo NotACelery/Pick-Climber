@@ -10,7 +10,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.IItemDecorator;
 
-/** Renderiza el cooldown individual real del ItemStack dentro de su slot. */
+/** Renders the ItemStack's actual individual cooldown inside its slot. */
 public final class PickClimberItemDecorator implements IItemDecorator {
     public static final PickClimberItemDecorator INSTANCE = new PickClimberItemDecorator();
 
@@ -38,8 +38,8 @@ public final class PickClimberItemDecorator implements IItemDecorator {
         int top = yOffset + Mth.floor(16.0F * (1.0F - fraction));
         int bottom = top + Mth.ceil(16.0F * fraction);
 
-        // Integer.MAX_VALUE es exactamente el blanco translúcido empleado por
-        // Minecraft para el overlay vanilla de cooldown (0x7FFFFFFF).
+        // Integer.MAX_VALUE is the exact translucent white used by Minecraft for
+        // the vanilla cooldown overlay (0x7FFFFFFF).
         guiGraphics.fill(
                 RenderType.guiOverlay(),
                 xOffset,

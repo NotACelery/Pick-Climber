@@ -1,7 +1,7 @@
 @echo off
 setlocal EnableExtensions
 cd /d "%~dp0"
-title Pick Climber - Compilacion beta
+title Pick Climber - Beta build
 
 set "GRADLE_VERSION=9.2.1"
 set "DIST_ROOT=%CD%\.gradle-dist"
@@ -11,13 +11,13 @@ set "JAVA_EXE="
 set "BUILD_FAILED=0"
 
  echo ============================================================
- echo        PICK CLIMBER - COMPILACION BETA 0.1.24
+ echo        PICK CLIMBER - BETA BUILD 0.1.25
  echo ============================================================
- echo Directorio: %CD%
+ echo Directory: %CD%
  echo.
 
 rem ------------------------------------------------------------
-rem 1. Buscar Java: PATH, JAVA_HOME y runtimes administrados por Prism.
+rem 1. Find Java through PATH, JAVA_HOME, or Prism-managed runtimes.
 rem ------------------------------------------------------------
 where java.exe >nul 2>nul
 if not errorlevel 1 (
@@ -29,7 +29,7 @@ if not defined JAVA_EXE if defined JAVA_HOME if exist "%JAVA_HOME%\bin\java.exe"
 )
 
 if not defined JAVA_EXE (
-    echo Java no esta en PATH. Buscando una instalacion de Prism Launcher...
+    echo Java is not in PATH. Searching for a Prism Launcher installation...
     for /f "usebackq delims=" %%J in (`powershell -NoProfile -ExecutionPolicy Bypass -Command "$roots=@($env:APPDATA+'\PrismLauncher\java',$env:LOCALAPPDATA+'\PrismLauncher\java',$env:LOCALAPPDATA+'\Programs\PrismLauncher\java',$env:ProgramFiles+'\PrismLauncher\java',$env:ProgramFiles+'\Eclipse Adoptium',$env:ProgramFiles+'\Java'); foreach($root in $roots){if(Test-Path -LiteralPath $root){$found=Get-ChildItem -LiteralPath $root -Filter java.exe -File -Recurse -ErrorAction SilentlyContinue ^| Where-Object {$_.FullName -match '\\bin\\java\.exe$'} ^| Select-Object -First 1; if($found){$found.FullName; break}}}"`) do if not defined JAVA_EXE set "JAVA_EXE=%%J"
 )
 
@@ -40,23 +40,23 @@ for %%I in ("%JAVA_EXE%") do set "JAVA_BIN=%%~dpI"
 for %%I in ("%JAVA_BIN%..") do set "JAVA_HOME=%%~fI"
 set "PATH=%JAVA_HOME%\bin;%PATH%"
 
-echo Java encontrado:
+echo Java found:
 echo   %JAVA_EXE%
 "%JAVA_EXE%" -version
 echo.
 if errorlevel 1 goto :java_broken
 
 rem ------------------------------------------------------------
-rem 2. Descargar Gradle si aun no esta disponible localmente.
+rem 2. Download Gradle if it is not available locally yet.
 rem ------------------------------------------------------------
 if not exist "%DIST_DIR%\bin\gradle.bat" (
-    echo Gradle %GRADLE_VERSION% no esta descargado.
+    echo Gradle %GRADLE_VERSION% has not been downloaded.
     if not exist "%DIST_ROOT%" mkdir "%DIST_ROOT%"
     if errorlevel 1 goto :mkdir_failed
 
     if exist "%DIST_ZIP%" del /q "%DIST_ZIP%"
 
-    echo Descargando Gradle %GRADLE_VERSION%...
+    echo Downloading Gradle %GRADLE_VERSION%...
     where curl.exe >nul 2>nul
     if not errorlevel 1 (
         curl.exe -L --fail --retry 3 --output "%DIST_ZIP%" "https://services.gradle.org/distributions/gradle-%GRADLE_VERSION%-bin.zip"
@@ -67,7 +67,7 @@ if not exist "%DIST_DIR%\bin\gradle.bat" (
     if not exist "%DIST_ZIP%" goto :download_failed
 
     echo.
-    echo Descomprimiendo Gradle...
+    echo Extracting Gradle...
     powershell -NoProfile -ExecutionPolicy Bypass -Command "Expand-Archive -LiteralPath '%DIST_ZIP%' -DestinationPath '%DIST_ROOT%' -Force"
     if errorlevel 1 goto :extract_failed
 )
@@ -75,11 +75,11 @@ if not exist "%DIST_DIR%\bin\gradle.bat" (
 if not exist "%DIST_DIR%\bin\gradle.bat" goto :gradle_missing
 
 rem ------------------------------------------------------------
-rem 3. Compilar. --stacktrace deja informacion util si falla.
+rem 3. Build. --stacktrace leaves useful diagnostics on failure.
 rem ------------------------------------------------------------
 echo.
-echo Compilando Pick Climber...
-echo La primera compilacion puede descargar dependencias de NeoForge.
+echo Building Pick Climber...
+echo The first build may download NeoForge dependencies.
 echo.
 call "%DIST_DIR%\bin\gradle.bat" --no-daemon clean build --stacktrace
 if errorlevel 1 goto :build_failed
@@ -91,71 +91,71 @@ if not defined JAR_FILE goto :jar_missing
 
 echo.
 echo ============================================================
-echo COMPILACION TERMINADA CORRECTAMENTE
-echo JAR generado:
+echo BUILD COMPLETED SUCCESSFULLY
+echo Generated JAR:
 echo   %CD%\%JAR_FILE%
 echo ============================================================
 goto :success
 
 :java_missing
 echo.
-echo ERROR: No encontre Java para ejecutar Gradle.
+echo ERROR: Java was not found to run Gradle.
 echo.
-echo Prism puede ejecutar Minecraft con un Java interno sin agregarlo al PATH.
-echo Soluciones:
-echo   1. En Prism: Ajustes ^> Java ^> abrir o copiar la ruta de Java.
-echo   2. Instalar Java 21, por ejemplo Eclipse Temurin 21.
-echo   3. Abrir CMD aqui y ejecutar:
-echo        set "JAVA_HOME=C:\ruta\a\java-21"
+echo Prism can run Minecraft with an internal Java runtime without adding it to PATH.
+echo Solutions:
+echo   1. In Prism: Settings ^> Java ^> open or copy the Java path.
+echo   2. Install Java 21, for example Eclipse Temurin 21.
+echo   3. Open CMD here and run:
+echo        set "JAVA_HOME=C:\path\to\java-21"
 echo        build-beta.bat
 goto :failure
 
 :java_broken
-echo ERROR: La instalacion de Java encontrada no puede ejecutarse.
+echo ERROR: The Java installation found cannot be executed.
 goto :failure
 
 :mkdir_failed
-echo ERROR: No pude crear la carpeta "%DIST_ROOT%".
+echo ERROR: Could not create the "%DIST_ROOT%" directory.
 goto :failure
 
 :download_failed
 echo.
-echo ERROR: No se pudo descargar Gradle.
-echo Revisa internet, antivirus, proxy o firewall.
+echo ERROR: Gradle could not be downloaded.
+echo Check the internet connection, antivirus, proxy, or firewall.
 echo URL:
 echo https://services.gradle.org/distributions/gradle-%GRADLE_VERSION%-bin.zip
 goto :failure
 
 :extract_failed
-echo ERROR: Gradle se descargo, pero no pudo descomprimirse.
-echo Borra la carpeta .gradle-dist y vuelve a ejecutar este archivo.
+echo ERROR: Gradle was downloaded but could not be extracted.
+echo Delete the .gradle-dist directory and run this file again.
 goto :failure
 
 :gradle_missing
-echo ERROR: No existe "%DIST_DIR%\bin\gradle.bat" despues de descomprimir.
+echo ERROR: "%DIST_DIR%\bin\gradle.bat" does not exist after extraction.
 goto :failure
 
 :build_failed
 echo.
 echo ============================================================
-echo LA COMPILACION FALLO
- echo Copia desde "FAILURE: Build failed" hasta el final y enviamelo.
+echo BUILD FAILED
+ echo Copy everything from "FAILURE: Build failed" to the end and send it.
 echo ============================================================
 goto :failure
 
 :jar_missing
-echo ERROR: Gradle termino, pero no encontre ningun JAR en build\libs\.
+echo ERROR: Gradle finished, but no JAR was found in build\libs\.
 goto :failure
 
 :failure
 set "BUILD_FAILED=1"
 echo.
-echo La ventana quedara abierta para que puedas leer o copiar el error.
+echo This window will remain open so the error can be read or copied.
 pause
 endlocal & exit /b 1
 
 :success
 echo.
-echo Puedes copiar el JAR a la carpeta mods de la instancia de Prism Launcher.
+echo You can copy the JAR to the Prism Launcher instance's mods directory.
 pause
 endlocal & exit /b 0

@@ -19,10 +19,9 @@ public final class ClientModEvents {
 
     @SubscribeEvent
     public static void registerItemDecorations(RegisterItemDecorationsEvent event) {
-        // Los tags aún pueden no estar enlazados cuando se dispara este evento.
-        // Se registra el decorador en todos los ítems y él mismo filtra
-        // #minecraft:pickaxes al renderizar. Esto conserva compatibilidad con
-        // picos de otros mods sin depender de una lista fija.
+        // Tags may not be bound yet when this event fires. Register the decorator
+        // for every item and let it filter #minecraft:pickaxes while rendering.
+        // This preserves compatibility with modded pickaxes without a fixed list.
         for (Item item : BuiltInRegistries.ITEM) {
             event.register(item, PickClimberItemDecorator.INSTANCE);
         }

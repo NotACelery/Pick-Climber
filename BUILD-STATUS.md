@@ -1,6 +1,6 @@
 # Estado de compilación
 
-Versión preparada: `0.1.24-beta`
+Versión preparada: `0.1.25-beta`
 
 Objetivo: Minecraft 1.21.1, NeoForge 21.1.235 y Java 21.
 
@@ -17,15 +17,22 @@ Cambios funcionales:
 - El descenso sin Sturdy Latch en superficie inestable usa `-0.128` bloques/tick, 60 % más rápido que antes.
 - UUIDs duplicados entre dos picotas equipadas se separan antes del agarre dual o cambio de punto, conservando el desgaste y cooldown por herramienta.
 - Strong Grip I añade anclaje estático de techo con coste inicial de 20 y desgaste de 1 por segundo; techo inestable requiere Sturdy Latch.
-- Balanceo de techo limitado y servidor-autoritativo; Espacio conserva inercia/amplitud y las liberaciones pasivas anulan velocidad horizontal.
+- Balanceo de techo limitado y servidor-autoritativo; Espacio conserva hasta `0.38` de momento acumulado y las liberaciones pasivas anulan velocidad horizontal.
 - Radio de balanceo reducido a `0.665`; corrección de techo con umbral mínimo para evitar acumulación visible de desplazamientos lentos.
-- Protocolo 11: identifica anclajes de techo y sincroniza input/cámara sin delegar física al cliente.
+- Pose elevada de primera persona para brazo y picota activos bajo techo, con transición de 4 ticks y transferencia estable mediante `F`.
+- Pose elevada local en tercera persona para el brazo activo; la capa vanilla alinea la picota y el brazo libre conserva su postura.
+- Resolución de altura libre para cambios techo/pared: evita falsos rechazos por solape con bloques adyacentes sin aceptar hitboxes en colisión ni ampliar el alcance.
+- Liberación de techo basada en input: `W/A/S/D` aporta el impulso voluntario y se combina vectorialmente con un momento pendular independiente de la velocidad restringida de la hitbox.
+- El impulso voluntario de techo comparte ahora la magnitud horizontal `0.65` del wall jump; el límite combinado `1.03` solo protege contra estados fuera del presupuesto físico máximo.
+- La velocidad final de liberación del techo se sincroniza explícitamente después del detach, pues no puede predecirse desde el estado cliente sin delegar la inercia autoritativa del balanceo.
+- Los destinos de techo validados se aplican suavemente en cliente cada tick; el servidor usa `setPos` para pasos intermedios y conserva `teleport` cada cinco ticks como confirmación dura.
+- Protocolo 12: identifica anclajes de techo y sincroniza input/cámara; la liberación transporta además la intención exacta del instante de Espacio sin delegar física al cliente.
 
 Validación realizada en este entorno:
 
 - `cmd /c build-beta.bat` terminó con `BUILD SUCCESSFUL` usando Java 21.
-- El JAR generado corresponde a la versión 0.1.24-beta.
-- La lógica de tags, frenado y descenso compila contra NeoForge 21.1.235.
+- El JAR generado corresponde a la versión 0.1.25-beta.
+- La lógica de tags, frenado, descenso y render elevado compila contra NeoForge 21.1.235.
 - Las pruebas físicas dentro de Minecraft siguen pendientes.
 
 ```text
@@ -35,5 +42,5 @@ build-beta.bat
 Resultado esperado:
 
 ```text
-build/libs/pickclimber-1.21.1-0.1.24-beta.jar
+build/libs/pickclimber-1.21.1-0.1.25-beta.jar
 ```

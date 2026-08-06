@@ -20,9 +20,9 @@ public final class CommonEvents {
 
     @SubscribeEvent
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
-        // Solo el servidor puede declarar incoherente y limpiar un anclaje. Se
-        // recupera antes de seleccionar mano para no tomar decisiones sobre un
-        // estado físico que ya dejó de existir.
+        // Only the server may declare an anchor incoherent and clean it up.
+        // Recover before selecting a hand so decisions are not made against a
+        // physical state that no longer exists.
         if (event.getEntity() instanceof ServerPlayer serverPlayer
                 && ClimbManager.isAttached(serverPlayer)
                 && !ClimbManager.isAttachmentCoherent(serverPlayer)) {
@@ -35,12 +35,12 @@ public final class CommonEvents {
         );
 
         if (preferredHand == null || event.getHand() != preferredHand) {
-            // No cancelar es intencional. En particular, cuando la secundaria
-            // es la preferida, la interacción completa de la principal se prueba
-            // primero. Si coloca/usa algo, el pipeline termina; si devuelve PASS,
-            // Minecraft continúa y dispara este evento para la secundaria.
-            // En bloques con menú, ClimbingHandSelector también devuelve null
-            // salvo que el jugador mantenga Shift, preservando el uso vanilla.
+            // Not cancelling is intentional. In particular, when the off hand is
+            // preferred, the main hand gets its full interaction first. If it
+            // places or uses something, the pipeline ends; if it returns PASS,
+            // Minecraft continues and fires this event for the off hand.
+            // On menu blocks, ClimbingHandSelector also returns null unless the
+            // player holds Shift, preserving vanilla use.
             return;
         }
 
@@ -56,14 +56,14 @@ public final class CommonEvents {
     public static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
         if (!ClimbManager.isAttached(event.getEntity())
                 || ClimbManager.activeHand(event.getEntity()) != InteractionHand.MAIN_HAND) {
-            // Con el ancla en la secundaria, el clic izquierdo pertenece por
-            // completo a la principal: minar y atacar no sueltan al jugador.
+            // With the anchor in the off hand, left click belongs entirely to
+            // the main hand: mining and attacking do not detach the player.
             return;
         }
 
-        // Comportamiento intencional: intentar minar con el mismo pico que está
-        // sosteniendo al jugador retira la herramienta del ancla. La otra mano
-        // sigue pudiendo minar y atacar sin producir este detach.
+        // Intentional behavior: mining with the same pickaxe supporting the
+        // player removes that tool from the anchor. The other hand can still
+        // mine and attack without causing this detach.
         event.setCanceled(true);
         if (event.getEntity() instanceof ServerPlayer serverPlayer) {
             ClimbManager.detachServer(serverPlayer, false);
