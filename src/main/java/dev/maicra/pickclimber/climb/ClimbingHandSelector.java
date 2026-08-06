@@ -29,7 +29,7 @@ public final class ClimbingHandSelector {
             preferred = InteractionHand.MAIN_HAND;
         }
 
-        if (preferred == null || mustPreserveVanillaMenuUse(player, hit)) {
+        if (preferred == null || preservesVanillaMenuUse(player, hit)) {
             return null;
         }
 
@@ -45,7 +45,7 @@ public final class ClimbingHandSelector {
      * of furnaces, chests, or tables and keeps the visual indicator consistent
      * with the actual click.
      */
-    private static boolean mustPreserveVanillaMenuUse(Player player, BlockHitResult hit) {
+    public static boolean preservesVanillaMenuUse(Player player, BlockHitResult hit) {
         if (player.isSecondaryUseActive()) {
             return false;
         }

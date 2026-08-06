@@ -96,6 +96,15 @@
 
 # Changelog
 
+## 0.1.27-beta
+
+- Reemplaza el indicador genérico de cuerda por una banda compacta y localizada bajo la mira.
+- Distingue anclaje firme, superficie inestable, superficie no escalable, obstrucción, cooldown y destino fuera del alcance real.
+- Los techos informan por separado si requieren Strong Grip o Strong Grip + Sturdy Latch.
+- La evaluación visual reutiliza las mismas comprobaciones de herramienta, cara, hitbox, distancia y prioridad de manos del enganche sin ejecutar física ni consumir recursos.
+- Los bloques con menú conservan el indicador oculto durante uso normal y lo habilitan con Shift.
+- No modifica protocolo 13, física, alcance, durabilidad, cooldown ni selección autoritativa del servidor.
+
 ## 0.1.26-beta
 
 - Añade los tags de objeto `pickclimber:climbing_tools` y `pickclimber:excluded_climbing_tools` para compatibilidad configurable con herramientas de otros mods.

@@ -1,6 +1,6 @@
 # Estado de compilación
 
-Versión preparada: `0.1.26-beta`
+Versión preparada: `0.1.27-beta`
 
 Objetivo: Minecraft 1.21.1, NeoForge 21.1.235 y Java 21.
 
@@ -31,11 +31,13 @@ Cambios funcionales:
 - Compatibilidad opcional explícita con `eternal_starlight:thermal_springstone_hammer`; la picota de madera queda excluida.
 - Compatibilidad manual confirmada con Eternal Starlight y Twilight Forest, incluida transferencia de mano y encantamientos.
 - La pose remota se refresca cada 20 ticks, se limpia explícitamente al terminar y expira en cliente tras 40 ticks sin sincronización.
+- Indicador localizado bajo la mira con estados para superficie firme, inestable, prohibida, obstruida, fuera de alcance, cooldown y requisitos de encantamiento de techo.
+- La evaluación del HUD reutiliza la validación real y no altera autoridad, payloads o física.
 
 Validación realizada en este entorno:
 
 - `cmd /c build-beta.bat` terminó con `BUILD SUCCESSFUL` usando Java 21.
-- El JAR generado corresponde a la versión 0.1.26-beta.
+- El JAR generado corresponde a la versión 0.1.27-beta.
 - La lógica de tags, frenado, descenso y render elevado compila contra NeoForge 21.1.235.
 - Las pruebas físicas dentro de Minecraft siguen pendientes.
 
@@ -46,5 +48,5 @@ build-beta.bat
 Resultado esperado:
 
 ```text
-build/libs/pickclimber-1.21.1-0.1.26-beta.jar
+build/libs/pickclimber-1.21.1-0.1.27-beta.jar
 ```

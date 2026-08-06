@@ -1,4 +1,19 @@
-# Checklist 0.1.26-beta — compatibilidad de herramientas
+# Checklist 0.1.27-beta — indicadores de anclaje
+
+## Indicadores de anclaje
+
+- [ ] Piedra y hielo muestran `ANCHOR READY` en verde cuando el destino es válido.
+- [ ] Arena, grava, concreto en polvo y nieve muestran `UNSTABLE SURFACE` en ámbar.
+- [ ] Bedrock y demás bloques prohibidos muestran `UNCLIMBABLE` en rojo sin permitir el clic.
+- [ ] Un destino cuya hitbox colisiona muestra `ANCHOR OBSTRUCTED` en rojo.
+- [ ] Un destino situado a más de 1.5 bloques del ancla actual muestra `OUT OF RANGE` en amarillo.
+- [ ] Una herramienta en cooldown muestra `TOOL RECOVERING` en gris y cambia a disponible al terminar.
+- [ ] Un techo firme sin Strong Grip muestra `STRONG GRIP REQUIRED` en violeta.
+- [ ] Un techo inestable con Strong Grip pero sin Sturdy Latch muestra `STURDY LATCH REQUIRED` en cian.
+- [ ] Con los encantamientos requeridos, esos techos cambian a firme o inestable según su superficie.
+- [ ] Un bloque con menú no muestra la banda durante clic normal y sí la evalúa al mantener Shift.
+- [ ] Mano secundaria, principal y dos herramientas muestran el estado correspondiente a la herramienta que finalmente selecciona el servidor.
+- [ ] Ocultar la interfaz con F1 oculta también el indicador.
 
 ## Tags de herramientas
 

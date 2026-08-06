@@ -326,6 +326,106 @@ public final class ClimbManager {
     }
 
     /**
+     * Mirrors anchor validation into a read-only HUD result. This method never
+     * creates identity, consumes cooldown, damages tools, or changes physics.
+     */
+    public static AnchorIndicatorStatus anchorIndicatorStatus(Player player, BlockHitResult hit) {
+        if (!player.isAlive()
+                || player.isSpectator()
+                || player.isFallFlying()
+                || hit.getDirection() == Direction.UP
+                || ClimbingHandSelector.preservesVanillaMenuUse(player, hit)) {
+            return AnchorIndicatorStatus.NONE;
+        }
+
+        boolean hasClimbingTool = false;
+        for (InteractionHand hand : InteractionHand.values()) {
+            if (isClimbingTool(player.getItemInHand(hand))) {
+                hasClimbingTool = true;
+                break;
+            }
+        }
+        if (!hasClimbingTool) {
+            return AnchorIndicatorStatus.NONE;
+        }
+
+        BlockState state = player.level().getBlockState(hit.getBlockPos());
+        AnchorSurface surface = AnchorSurfaceClassifier.classify(state);
+        if (surface == AnchorSurface.UNCLIMBABLE) {
+            return AnchorIndicatorStatus.UNCLIMBABLE;
+        }
+
+        for (InteractionHand hand : InteractionHand.values()) {
+            if (canAttemptAnchor(player, hand, hit)) {
+                return surface == AnchorSurface.UNSTABLE
+                        ? AnchorIndicatorStatus.UNSTABLE
+                        : AnchorIndicatorStatus.READY;
+            }
+        }
+
+        if (player.getEyePosition().distanceToSqr(hit.getLocation()) > MAX_HIT_DISTANCE_SQR) {
+            return AnchorIndicatorStatus.OUT_OF_RANGE;
+        }
+        if (!hasValidAnchorFace(player, state, hit.getBlockPos(), hit.getDirection())) {
+            return AnchorIndicatorStatus.OBSTRUCTED;
+        }
+
+        Vec3 target = resolveCollisionSafeTargetPosition(player, hit);
+        if (target == null) {
+            return AnchorIndicatorStatus.OBSTRUCTED;
+        }
+        if (currentAttachmentTarget(player).distanceToSqr(target) > MAX_ANCHOR_MOVE_SQR) {
+            return AnchorIndicatorStatus.OUT_OF_RANGE;
+        }
+
+        boolean ceilingAttempt = hit.getDirection() == Direction.DOWN;
+        if (ceilingAttempt) {
+            boolean hasStrongGrip = false;
+            boolean hasRequiredEnchantments = false;
+            for (InteractionHand hand : InteractionHand.values()) {
+                ItemStack stack = player.getItemInHand(hand);
+                if (!isClimbingTool(stack) || !ModEnchantments.hasStrongGrip(player.level(), stack)) {
+                    continue;
+                }
+                hasStrongGrip = true;
+                if (surface != AnchorSurface.UNSTABLE
+                        || ModEnchantments.hasSturdyLatch(player.level(), stack)) {
+                    hasRequiredEnchantments = true;
+                }
+            }
+            if (!hasStrongGrip) {
+                return AnchorIndicatorStatus.REQUIRES_STRONG_GRIP;
+            }
+            if (!hasRequiredEnchantments) {
+                return AnchorIndicatorStatus.REQUIRES_STURDY_LATCH;
+            }
+        }
+
+        for (InteractionHand hand : InteractionHand.values()) {
+            ItemStack stack = player.getItemInHand(hand);
+            if (!isClimbingTool(stack)) {
+                continue;
+            }
+            if (ceilingAttempt
+                    && (!ModEnchantments.hasStrongGrip(player.level(), stack)
+                    || surface == AnchorSurface.UNSTABLE
+                    && !ModEnchantments.hasSturdyLatch(player.level(), stack))) {
+                continue;
+            }
+
+            boolean duplicatedActiveIdentity = hasDuplicatedActiveIdentity(player, hand, stack);
+            boolean occupied = isActiveTool(player, stack) && activeHand(player) == hand;
+            boolean coolingDown = !duplicatedActiveIdentity
+                    && ToolIdentity.isCoolingDown(stack, player.level().getGameTime());
+            if (occupied || coolingDown) {
+                return AnchorIndicatorStatus.COOLDOWN;
+            }
+        }
+
+        return AnchorIndicatorStatus.OBSTRUCTED;
+    }
+
+    /**
      * Chooses exclusively between a boost and an attachment.
      *
      * Positive velocity alone never authorizes a boost: a recent, unconsumed

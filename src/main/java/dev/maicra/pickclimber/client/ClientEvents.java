@@ -1,16 +1,15 @@
 package dev.maicra.pickclimber.client;
 
 import dev.maicra.pickclimber.PickClimber;
+import dev.maicra.pickclimber.climb.AnchorIndicatorStatus;
 import dev.maicra.pickclimber.climb.ClimbManager;
-import dev.maicra.pickclimber.climb.ClimbingHandSelector;
 import dev.maicra.pickclimber.network.DetachRequestPayload;
 import dev.maicra.pickclimber.network.SlideInputPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -23,7 +22,6 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 @EventBusSubscriber(modid = PickClimber.MOD_ID, value = Dist.CLIENT)
 public final class ClientEvents {
-    private static final ItemStack RANGE_ICON = new ItemStack(Items.STRING);
     private static boolean hadPlayerLastTick;
     private static boolean wasAttachedLastTick;
     private static boolean jumpWasDown;
@@ -195,14 +193,18 @@ public final class ClientEvents {
             return;
         }
 
-        InteractionHand preferredHand = ClimbingHandSelector.preferred(player, hit);
-        if (preferredHand == null) {
+        AnchorIndicatorStatus status = ClimbManager.anchorIndicatorStatus(player, hit);
+        if (status == AnchorIndicatorStatus.NONE) {
             return;
         }
 
-        int x = gui.guiWidth() / 2 - 8;
+        Component label = Component.translatable(status.translationKey());
+        int width = minecraft.font.width(label) + 10;
+        int x = gui.guiWidth() / 2 - width / 2;
         int y = gui.guiHeight() / 2 + 10;
-        gui.renderItem(RANGE_ICON, x, y);
+        gui.fill(x, y, x + width, y + 12, 0xB0000000);
+        gui.fill(x, y, x + 2, y + 12, 0xFF000000 | status.color());
+        gui.drawString(minecraft.font, label, x + 5, y + 2, status.color(), false);
     }
 
 }

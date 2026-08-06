@@ -222,9 +222,9 @@ Las pruebas de interacción específica con bloques y máquinas modded se realiz
 - Evaluar una pose equivalente en tercera persona para paredes.
 - Validar la pose elevada de Strong Grip con dos clientes en multijugador, incluyendo `F`, detach, dimensión y desconexión.
 - Probar `IItemDecorator` con otras escalas de GUI y mods de interfaz.
-- Evaluar indicadores distintos para superficies firmes, inestables y no escalables.
-- Considerar variantes del icono de alcance según el tipo de superficie.
-- Añadir indicadores para techos que requieren Strong Grip o Strong Grip + Sturdy Latch.
+- **Implementado en 0.1.27:** indicador diferenciado para superficies firmes, inestables, no escalables, obstrucción, cooldown y alcance.
+- **Implementado en 0.1.27:** requisitos separados para Strong Grip y Strong Grip + Sturdy Latch en techos.
+- Evaluar sonidos suaves de tensión y partículas diferenciadas para nieve, hielo y frenado.
 
 ## Orden de trabajo previsto
 
@@ -238,4 +238,5 @@ Las pruebas de interacción específica con bloques y máquinas modded se realiz
 8. Implementar pose elevada y doble pulsación de Shift.
 9. Implementar balanceo y maniobras con dos picotas.
 10. **Compatibilidad base completada en 0.1.26:** tags de herramientas y pruebas con Eternal Starlight/Twilight Forest.
-11. **Siguiente:** validar pose remota y pulir indicadores de superficie, requisitos de techo, sonidos y partículas.
+11. **Completado en 0.1.27:** indicadores de superficie, requisitos de techo, cooldown, obstrucción y alcance.
+12. **Siguiente:** validar pose remota y pulir sonidos, partículas y poses corporales adicionales.

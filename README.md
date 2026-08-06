@@ -1,4 +1,4 @@
-# Pick Climber — Beta experimental 0.1.26
+# Pick Climber — Beta experimental 0.1.27
 
 Mod para **Minecraft 1.21.1**, **NeoForge 21.1.235** y **Java 21**.
 
@@ -138,6 +138,20 @@ Todos los controles, cooldowns, UUID, desgaste y render consultan el mismo clasi
 
 Compatibilidad validada manualmente con las picotas de Eternal Starlight y Twilight Forest. La picota de madera queda excluida de la escalada, mientras cambio de mano y encantamientos continúan funcionando con herramientas compatibles.
 
+## Indicador de anclaje
+
+Al apuntar con una herramienta de escalada, una banda compacta bajo la mira informa el resultado antes del clic:
+
+- verde: anclaje firme disponible;
+- ámbar: superficie inestable;
+- rojo: superficie no escalable u obstruida;
+- violeta: requiere Strong Grip;
+- cian: requiere Sturdy Latch además de Strong Grip;
+- gris: herramienta todavía en cooldown;
+- amarillo: destino fuera del alcance real.
+
+El indicador reutiliza las comprobaciones de cara, colisión, encantamientos y distancia del enganche. Los bloques con menú continúan ocultándolo durante el clic normal y lo muestran al mantener Shift.
+
 ## Compilar en Windows
 
 1. Instala Java 21.
@@ -145,7 +159,7 @@ Compatibilidad validada manualmente con las picotas de Eternal Starlight y Twili
 3. El JAR aparecerá en:
 
 ```text
-build/libs/pickclimber-1.21.1-0.1.26-beta.jar
+build/libs/pickclimber-1.21.1-0.1.27-beta.jar
 ```
 
 Retira versiones anteriores antes de instalar esta beta.

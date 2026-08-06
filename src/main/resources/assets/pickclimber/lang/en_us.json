@@ -1,5 +1,13 @@
 {
   "enchantment.pickclimber.pick_climber": "Pick Climber",
   "enchantment.pickclimber.sturdy_latch": "Sturdy Latch",
-  "enchantment.pickclimber.strong_grip": "Strong Grip"
+  "enchantment.pickclimber.strong_grip": "Strong Grip",
+  "gui.pickclimber.anchor.ready": "ANCHOR READY",
+  "gui.pickclimber.anchor.unstable": "UNSTABLE SURFACE",
+  "gui.pickclimber.anchor.unclimbable": "UNCLIMBABLE",
+  "gui.pickclimber.anchor.requires_strong_grip": "STRONG GRIP REQUIRED",
+  "gui.pickclimber.anchor.requires_sturdy_latch": "STURDY LATCH REQUIRED",
+  "gui.pickclimber.anchor.cooldown": "TOOL RECOVERING",
+  "gui.pickclimber.anchor.out_of_range": "OUT OF RANGE",
+  "gui.pickclimber.anchor.obstructed": "ANCHOR OBSTRUCTED"
 }

@@ -1,5 +1,13 @@
 {
   "enchantment.pickclimber.pick_climber": "Pick Climber",
   "enchantment.pickclimber.sturdy_latch": "Anclaje Robusto",
-  "enchantment.pickclimber.strong_grip": "Agarre Fuerte"
+  "enchantment.pickclimber.strong_grip": "Agarre Fuerte",
+  "gui.pickclimber.anchor.ready": "ANCLA DISPONIBLE",
+  "gui.pickclimber.anchor.unstable": "SUPERFICIE INESTABLE",
+  "gui.pickclimber.anchor.unclimbable": "NO ESCALABLE",
+  "gui.pickclimber.anchor.requires_strong_grip": "REQUIERE AGARRE FUERTE",
+  "gui.pickclimber.anchor.requires_sturdy_latch": "REQUIERE ANCLAJE ROBUSTO",
+  "gui.pickclimber.anchor.cooldown": "HERRAMIENTA RECUPERÁNDOSE",
+  "gui.pickclimber.anchor.out_of_range": "FUERA DE ALCANCE",
+  "gui.pickclimber.anchor.obstructed": "ANCLA OBSTRUIDA"
 }

@@ -535,6 +535,8 @@ El indicador de alcance deberá poder distinguir:
 
 No es obligatorio que todos usen iconos nuevos en la primera implementación, pero el estado no debe inducir a gastar durabilidad en un intento imposible.
 
+Implementado en `0.1.27-beta`: una banda localizada bajo la mira diferencia anclaje firme, superficie inestable, no escalable, obstrucción, cooldown y fuera de alcance. Los techos sin los encantamientos necesarios muestran por separado Strong Grip o Sturdy Latch como requisito. La evaluación comparte cara, colisión, radio y prioridad de herramientas con el intento real, pero no ejecuta acciones ni consume recursos.
+
 ## 13. Roturas y recuperación segura
 
 ### 13.1 Rotura del pico
@@ -631,7 +633,7 @@ Este sistema no debe comenzar antes de completar sus dependencias.
 13. **Completado:** doble pulsación de Shift para caída vertical; queda validación modded de Shift mantenido.
 14. **Completado:** balanceo restringido.
 15. **Completado y validado:** transferencias de techo, rodeo de bordes y cruce de huecos.
-16. **Siguiente fase:** pulir indicadores, sonidos y partículas; completar pruebas modded y multijugador.
+16. **Indicadores completados en 0.1.27; siguiente fase:** pulir sonidos y partículas; completar pruebas modded y multijugador.
 
 ## 17. Criterios de aceptación
 
