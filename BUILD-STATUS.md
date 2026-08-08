@@ -1,6 +1,6 @@
 # Estado de compilación
 
-Versión preparada: `0.1.27-beta`
+Versión preparada: `1.0.0`
 
 Objetivo: Minecraft 1.21.1, NeoForge 21.1.235 y Java 21.
 
@@ -36,13 +36,16 @@ Cambios funcionales:
 - El HUD se limita a 3 bloques, muestra `OUT OF RANGE` entre 1.5 y 3 y solo evalúa obstrucción dentro del alcance físico.
 - El String teñido queda como único indicador permanente bajo la mira; los intentos rechazados explican en la barra de acción el encantamiento, cooldown, alcance, bloque, entidad o espacio que impide el anclaje.
 - Un Strong Grip ya ocupado en el techo no cuenta como herramienta candidata para el siguiente punto; la picota libre determina el requisito mostrado.
+- La metadata declara `celerbi` como autor y traduce la descripción de la lista de mods mediante los recursos `en_us`, `es_es` y `es_cl`.
 
 Validación realizada en este entorno:
 
 - `cmd /c build-beta.bat` terminó con `BUILD SUCCESSFUL` usando Java 21.
-- El JAR generado corresponde a la versión 0.1.27-beta.
+- El JAR generado corresponde a la versión 1.0.0.
+- `bash -n build-beta.sh` validó el script Linux y `.gitattributes` fija sus finales de línea en LF.
+- La metadata empaquetada declara versión 1.0.0, autor `celerbi`, licencia All Rights Reserved, Minecraft 1.21.1, NeoForge 21.1.235 mínimo y ejecución en ambos lados; el JAR contiene la descripción localizada en `en_us`, `es_es` y `es_cl`.
 - La lógica de tags, frenado, descenso y render elevado compila contra NeoForge 21.1.235.
-- Las pruebas físicas dentro de Minecraft siguen pendientes.
+- La regresión final específica del JAR 1.0.0 dentro de Minecraft sigue pendiente antes de publicarlo.
 
 ```text
 build-beta.bat
@@ -51,5 +54,5 @@ build-beta.bat
 Resultado esperado:
 
 ```text
-build/libs/pickclimber-1.21.1-0.1.27-beta.jar
+build/libs/pickclimber-1.21.1-1.0.0.jar
 ```

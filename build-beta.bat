@@ -1,8 +1,6 @@
 @echo off
 setlocal EnableExtensions
 cd /d "%~dp0"
-title Pick Climber - Beta build
-
 set "GRADLE_VERSION=9.2.1"
 set "DIST_ROOT=%CD%\.gradle-dist"
 set "DIST_DIR=%DIST_ROOT%\gradle-%GRADLE_VERSION%"
@@ -10,11 +8,23 @@ set "DIST_ZIP=%DIST_ROOT%\gradle-%GRADLE_VERSION%-bin.zip"
 set "JAVA_EXE="
 set "BUILD_FAILED=0"
 
- echo ============================================================
- echo        PICK CLIMBER - BETA BUILD 0.1.27
- echo ============================================================
- echo Directory: %CD%
- echo.
+if not exist "gradle.properties" goto :metadata_missing
+for /f "usebackq tokens=1,* delims==" %%A in ("gradle.properties") do (
+    if "%%A"=="mod_version" set "MOD_VERSION=%%B"
+    if "%%A"=="minecraft_version" set "MINECRAFT_VERSION=%%B"
+)
+if not defined MOD_VERSION goto :metadata_missing
+if not defined MINECRAFT_VERSION goto :metadata_missing
+
+set "EXPECTED_JAR=build\libs\pickclimber-%MINECRAFT_VERSION%-%MOD_VERSION%.jar"
+title Pick Climber - %MOD_VERSION% build
+
+echo ============================================================
+echo        PICK CLIMBER - RELEASE BUILD %MOD_VERSION%
+echo        MINECRAFT %MINECRAFT_VERSION%
+echo ============================================================
+echo Directory: %CD%
+echo.
 
 rem ------------------------------------------------------------
 rem 1. Find Java through PATH, JAVA_HOME, or Prism-managed runtimes.
@@ -84,10 +94,8 @@ echo.
 call "%DIST_DIR%\bin\gradle.bat" --no-daemon clean build --stacktrace
 if errorlevel 1 goto :build_failed
 
-set "JAR_FILE="
-for /f "delims=" %%F in ('dir /b /a-d "build\libs\*.jar" 2^>nul') do if not defined JAR_FILE set "JAR_FILE=build\libs\%%F"
-
-if not defined JAR_FILE goto :jar_missing
+if not exist "%EXPECTED_JAR%" goto :jar_missing
+set "JAR_FILE=%EXPECTED_JAR%"
 
 echo.
 echo ============================================================
@@ -96,6 +104,11 @@ echo Generated JAR:
 echo   %CD%\%JAR_FILE%
 echo ============================================================
 goto :success
+
+:metadata_missing
+echo.
+echo ERROR: gradle.properties does not define mod_version and minecraft_version.
+goto :failure
 
 :java_missing
 echo.
@@ -144,7 +157,8 @@ echo ============================================================
 goto :failure
 
 :jar_missing
-echo ERROR: Gradle finished, but no JAR was found in build\libs\.
+echo ERROR: Gradle finished, but the expected JAR was not found:
+echo   %CD%\%EXPECTED_JAR%
 goto :failure
 
 :failure

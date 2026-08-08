@@ -1,4 +1,4 @@
-# Checklist 0.1.27-beta — indicadores de anclaje
+# Checklist de release 1.0.0 — indicadores y regresiones
 
 ## Indicadores de anclaje
 
