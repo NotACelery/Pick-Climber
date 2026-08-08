@@ -1,5 +1,6 @@
 package dev.maicra.pickclimber.client;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import dev.maicra.pickclimber.PickClimber;
 import dev.maicra.pickclimber.climb.AnchorIndicatorStatus;
 import dev.maicra.pickclimber.climb.ClimbManager;
@@ -9,8 +10,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -22,6 +25,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 @EventBusSubscriber(modid = PickClimber.MOD_ID, value = Dist.CLIENT)
 public final class ClientEvents {
+    private static final ItemStack RANGE_ICON = new ItemStack(Items.STRING);
     private static boolean hadPlayerLastTick;
     private static boolean wasAttachedLastTick;
     private static boolean jumpWasDown;
@@ -189,7 +193,8 @@ public final class ClientEvents {
     }
 
     private static void renderReachIndicator(Minecraft minecraft, Player player, GuiGraphics gui) {
-        if (!(minecraft.hitResult instanceof BlockHitResult hit)) {
+        if (!(minecraft.hitResult instanceof BlockHitResult hit)
+                || hit.getType() != HitResult.Type.BLOCK) {
             return;
         }
 
@@ -198,13 +203,25 @@ public final class ClientEvents {
             return;
         }
 
-        Component label = Component.translatable(status.translationKey());
-        int width = minecraft.font.width(label) + 10;
-        int x = gui.guiWidth() / 2 - width / 2;
-        int y = gui.guiHeight() / 2 + 10;
-        gui.fill(x, y, x + width, y + 12, 0xB0000000);
-        gui.fill(x, y, x + 2, y + 12, 0xFF000000 | status.color());
-        gui.drawString(minecraft.font, label, x + 5, y + 2, status.color(), false);
+        int iconX = gui.guiWidth() / 2 - 8;
+        int iconY = gui.guiHeight() / 2 + 10;
+        int argb = 0xFF000000 | status.color();
+
+        float red = ((status.color() >> 16) & 0xFF) / 255.0F;
+        float green = ((status.color() >> 8) & 0xFF) / 255.0F;
+        float blue = (status.color() & 0xFF) / 255.0F;
+        RenderSystem.setShaderColor(red, green, blue, 1.0F);
+        gui.renderItem(RANGE_ICON, iconX, iconY);
+        gui.flush();
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+
+        // The frame guarantees readable state color even with resource packs
+        // whose item shader ignores the global tint.
+        gui.fill(iconX - 1, iconY - 1, iconX + 17, iconY, argb);
+        gui.fill(iconX - 1, iconY + 16, iconX + 17, iconY + 17, argb);
+        gui.fill(iconX - 1, iconY, iconX, iconY + 16, argb);
+        gui.fill(iconX + 16, iconY, iconX + 17, iconY + 16, argb);
+
     }
 
 }

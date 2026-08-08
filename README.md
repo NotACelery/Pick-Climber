@@ -103,7 +103,7 @@ Durante el frenado o descenso, `W/A/S/D` permite desplazarse por el plano de la 
 
 `Sturdy Latch I` convierte una superficie inestable en un anclaje firme: en caída leve queda fijo al engancharse; en caída fuerte conserva primero todo el frenado y queda fijo al terminar. También convierte su cooldown inicial de 40 a 20 ticks, igual que una superficie firme.
 
-El frenado cobra 15 de durabilidad inicial. Si hay dos picotas equipadas, ambas participan, pagan ese coste y el frenado aplica dos pasos por tick, reduciendo aproximadamente a la mitad el recorrido. Por cada bloque vertical completo realmente deslizado durante `BRAKING`, cada pico participante recibe 10 de desgaste adicional; Unbreaking sigue interviniendo en cada cobro. Sin Sturdy Latch, el descenso controlado por bloques inestables es 60 % más rápido (`0.128` bloques/tick).
+El frenado cobra 15 de durabilidad inicial. Si hay dos picotas equipadas, ambas participan, pagan ese coste y el frenado aplica dos pasos por tick, reduciendo aproximadamente a la mitad el recorrido. Por cada bloque vertical completo realmente deslizado durante `BRAKING`, cada pico participante recibe 10 de desgaste adicional; Unbreaking sigue interviniendo en cada cobro. Sin Sturdy Latch, el descenso controlado por bloques inestables es 70 % más rápido que la base original (`0.136` bloques/tick).
 
 Mientras una picota sostiene el ancla, la otra puede crear un nuevo punto dentro de 1.5 bloques del punto actual. Las dos herramientas mantienen UUID y cooldown propios; si dos copias llegan con el mismo UUID, el servidor separa la identidad de la segunda antes de cobrar o anclar.
 
@@ -142,15 +142,18 @@ Compatibilidad validada manualmente con las picotas de Eternal Starlight y Twili
 
 Al apuntar con una herramienta de escalada, una banda compacta bajo la mira informa el resultado antes del clic:
 
-- verde: anclaje firme disponible;
-- ámbar: superficie inestable;
+- verde: anclaje firme disponible, incluidas superficies inestables reforzadas con Sturdy Latch;
+- cian: agarre inestable sin Sturdy Latch o techo inestable que lo requiere;
 - rojo: superficie no escalable u obstruida;
 - violeta: requiere Strong Grip;
-- cian: requiere Sturdy Latch además de Strong Grip;
 - gris: herramienta todavía en cooldown;
 - amarillo: destino fuera del alcance real.
 
-El indicador reutiliza las comprobaciones de cara, colisión, encantamientos y distancia del enganche. Los bloques con menú continúan ocultándolo durante el clic normal y lo muestran al mantener Shift.
+El String coloreado solo aparece sobre un bloque real situado a 3 bloques o menos. Entre 1.5 y 3 bloques usa el color de `OUT OF RANGE`; por encima de 3 se oculta para no interferir con minería o exploración. `ANCHOR OBSTRUCTED` queda reservado para caras situadas dentro del radio real de 1.5 bloques pero sin apoyo físico o sin espacio final.
+
+El indicador reutiliza las comprobaciones de cara, colisión, encantamientos y distancia del enganche. Los bloques con menú continúan ocultándolo durante el clic normal y lo muestran al mantener Shift. Si el clic derecho intenta una acción rechazada, la barra de acción explica el motivo: encantamiento ausente, cooldown, alcance, bloque sin apoyo, entidad o falta de espacio para la hitbox. Las superficies inestables sin Sturdy Latch no muestran rechazo porque el agarre controlado sigue siendo válido.
+
+Al cambiar de punto desde un techo, los requisitos se evalúan sobre la picota libre: una picota con Strong Grip que ya sostiene el ancla no puede ocultar que la segunda herramienta carece del encantamiento.
 
 ## Compilar en Windows
 

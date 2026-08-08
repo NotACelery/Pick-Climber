@@ -7,6 +7,7 @@ import dev.maicra.pickclimber.network.RemoteAnchorPosePayload;
 import dev.maicra.pickclimber.network.SlideInputPayload;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -59,6 +60,7 @@ public final class ClimbManager {
     private static final float PINNED_POSE_RAMP_TICKS = 4.0F;
 
     private static final double MAX_HIT_DISTANCE_SQR = 25.0D;
+    private static final double MAX_INDICATOR_DISTANCE_SQR = 9.0D;
     private static final double MAX_ANCHOR_MOVE_SQR = 2.25D; // 1.5 actual blocks.
     private static final double MAX_DRIFT_DISTANCE_SQR = 16.0D;
     private static final double ATTACHMENT_COHERENCE_DISTANCE_SQR = 1.0D;
@@ -73,7 +75,7 @@ public final class ClimbManager {
     private static final double BRAKING_STOP_SPEED = -0.08D;
     private static final double BRAKING_DRAG = 0.75D;
     private static final double BRAKING_RECOVERY = 0.035D;
-    private static final double UNSTABLE_SLIDE_SPEED = -0.128D;
+    private static final double UNSTABLE_SLIDE_SPEED = -0.136D;
     /** Prevents crossing or skipping blocks while absorbing an extreme fall. */
     private static final double MAX_BRAKING_MOVE_PER_TICK = 0.60D;
     private static final double CONTACT_BLOCK_EPSILON = 1.0E-3D;
@@ -330,9 +332,11 @@ public final class ClimbManager {
      * creates identity, consumes cooldown, damages tools, or changes physics.
      */
     public static AnchorIndicatorStatus anchorIndicatorStatus(Player player, BlockHitResult hit) {
-        if (!player.isAlive()
+        if (!player.level().isClientSide()
+                || !player.isAlive()
                 || player.isSpectator()
                 || player.isFallFlying()
+                || hit.getType() != net.minecraft.world.phys.HitResult.Type.BLOCK
                 || hit.getDirection() == Direction.UP
                 || ClimbingHandSelector.preservesVanillaMenuUse(player, hit)) {
             return AnchorIndicatorStatus.NONE;
@@ -349,21 +353,33 @@ public final class ClimbManager {
             return AnchorIndicatorStatus.NONE;
         }
 
+        // Minecraft represents a crosshair miss as a BlockHitResult too. Check
+        // the exact hit point before classifying its synthetic position so the
+        // HUD never follows the crosshair into the distance.
+        if (player.getEyePosition().distanceToSqr(hit.getLocation()) > MAX_INDICATOR_DISTANCE_SQR) {
+            return AnchorIndicatorStatus.NONE;
+        }
+
         BlockState state = player.level().getBlockState(hit.getBlockPos());
         AnchorSurface surface = AnchorSurfaceClassifier.classify(state);
         if (surface == AnchorSurface.UNCLIMBABLE) {
             return AnchorIndicatorStatus.UNCLIMBABLE;
         }
 
-        for (InteractionHand hand : InteractionHand.values()) {
-            if (canAttemptAnchor(player, hand, hit)) {
-                return surface == AnchorSurface.UNSTABLE
-                        ? AnchorIndicatorStatus.UNSTABLE
-                        : AnchorIndicatorStatus.READY;
-            }
+        InteractionHand preferredHand = ClimbingHandSelector.preferred(player, hit);
+        if (preferredHand != null) {
+            ItemStack preferredTool = player.getItemInHand(preferredHand);
+            return surface == AnchorSurface.UNSTABLE
+                    && !ModEnchantments.hasSturdyLatch(player.level(), preferredTool)
+                    ? AnchorIndicatorStatus.UNSTABLE
+                    : AnchorIndicatorStatus.READY;
         }
 
-        if (player.getEyePosition().distanceToSqr(hit.getLocation()) > MAX_HIT_DISTANCE_SQR) {
+        // Range is measured from the current anchor target before collision
+        // correction. A valid block two blocks away must report range, not an
+        // obstruction caused by trying to resolve an unreachable final hitbox.
+        Vec3 idealTarget = calculateTargetPosition(player, hit);
+        if (currentAttachmentTarget(player).distanceToSqr(idealTarget) > MAX_ANCHOR_MOVE_SQR) {
             return AnchorIndicatorStatus.OUT_OF_RANGE;
         }
         if (!hasValidAnchorFace(player, state, hit.getBlockPos(), hit.getDirection())) {
@@ -380,11 +396,17 @@ public final class ClimbManager {
 
         boolean ceilingAttempt = hit.getDirection() == Direction.DOWN;
         if (ceilingAttempt) {
+            boolean hasUnoccupiedClimbingTool = false;
             boolean hasStrongGrip = false;
             boolean hasRequiredEnchantments = false;
             for (InteractionHand hand : InteractionHand.values()) {
                 ItemStack stack = player.getItemInHand(hand);
-                if (!isClimbingTool(stack) || !ModEnchantments.hasStrongGrip(player.level(), stack)) {
+                if (!isClimbingTool(stack)
+                        || isActiveTool(player, stack) && activeHand(player) == hand) {
+                    continue;
+                }
+                hasUnoccupiedClimbingTool = true;
+                if (!ModEnchantments.hasStrongGrip(player.level(), stack)) {
                     continue;
                 }
                 hasStrongGrip = true;
@@ -393,10 +415,10 @@ public final class ClimbManager {
                     hasRequiredEnchantments = true;
                 }
             }
-            if (!hasStrongGrip) {
+            if (hasUnoccupiedClimbingTool && !hasStrongGrip) {
                 return AnchorIndicatorStatus.REQUIRES_STRONG_GRIP;
             }
-            if (!hasRequiredEnchantments) {
+            if (hasStrongGrip && !hasRequiredEnchantments) {
                 return AnchorIndicatorStatus.REQUIRES_STURDY_LATCH;
             }
         }
@@ -423,6 +445,42 @@ public final class ClimbManager {
         }
 
         return AnchorIndicatorStatus.OBSTRUCTED;
+    }
+
+    /**
+     * Returns localized action-bar feedback for a rejected block interaction.
+     * Unstable anchors intentionally return no warning: they remain valid and
+     * merely use their controlled sliding behavior without Sturdy Latch.
+     */
+    public static Component anchorAttemptFailureMessage(Player player, BlockHitResult hit) {
+        AnchorIndicatorStatus status = anchorIndicatorStatus(player, hit);
+        return switch (status) {
+            case REQUIRES_STRONG_GRIP -> Component.translatable(
+                    "message.pickclimber.requires_strong_grip"
+            );
+            case COOLDOWN -> Component.translatable("message.pickclimber.anchor.cooldown");
+            case OUT_OF_RANGE -> Component.translatable("message.pickclimber.anchor.out_of_range");
+            case UNCLIMBABLE -> Component.translatable(
+                    "message.pickclimber.anchor.blocked_by",
+                    player.level().getBlockState(hit.getBlockPos()).getBlock().getName()
+            );
+            case OBSTRUCTED -> anchorObstructionMessage(player, hit);
+            case NONE, READY, UNSTABLE, REQUIRES_STURDY_LATCH -> null;
+        };
+    }
+
+    private static Component anchorObstructionMessage(Player player, BlockHitResult hit) {
+        BlockState state = player.level().getBlockState(hit.getBlockPos());
+        if (!hasValidAnchorFace(player, state, hit.getBlockPos(), hit.getDirection())) {
+            return Component.translatable(
+                    "message.pickclimber.anchor.blocked_by",
+                    state.getBlock().getName()
+            );
+        }
+        if (resolveCollisionSafeTargetPosition(player, hit) == null) {
+            return Component.translatable("message.pickclimber.anchor.not_enough_space");
+        }
+        return Component.translatable("message.pickclimber.anchor.obstructed");
     }
 
     /**

@@ -103,7 +103,16 @@
 - Los techos informan por separado si requieren Strong Grip o Strong Grip + Sturdy Latch.
 - La evaluación visual reutiliza las mismas comprobaciones de herramienta, cara, hitbox, distancia y prioridad de manos del enganche sin ejecutar física ni consumir recursos.
 - Los bloques con menú conservan el indicador oculto durante uso normal y lo habilitan con Shift.
-- No modifica protocolo 13, física, alcance, durabilidad, cooldown ni selección autoritativa del servidor.
+- El String vuelve a ser el único indicador permanente bajo la mira, teñido y enmarcado por estado; se retira el texto diagnóstico inferior tras validar visualmente los colores.
+- Suprime completamente el HUD sobre `MISS`, entidades y bloques situados a más de 3 bloques del punto de vista.
+- Evalúa el radio de 1.5 bloques antes de buscar una hitbox corregida, evitando confundir destinos lejanos con `ANCHOR OBSTRUCTED`.
+- Un agarre inestable sin Sturdy Latch usa cian; con Sturdy Latch pasa a verde porque el resultado será firme.
+- Los requisitos de un nuevo punto de techo se calculan sobre la picota libre; el pico Strong Grip ya ocupado no convierte erróneamente el estado en cooldown.
+- Un clic derecho rechazado muestra en la barra de acción el motivo localizado: Strong Grip, cooldown, alcance, bloque obstructivo, falta de espacio o entidad.
+- Los avisos de Sturdy Latch no generan mensaje de rechazo porque el descenso inestable permitido conserva su comportamiento diferenciado.
+- Limita el HUD a 3 bloques: muestra `OUT OF RANGE` entre 1.5 y 3, se oculta más lejos y solo evalúa `ANCHOR OBSTRUCTED` dentro del alcance físico.
+- Ajusta el descenso inestable sin Sturdy Latch de `0.128` a `0.136` bloques/tick, 70 % más rápido que la base original.
+- No modifica protocolo 13, alcance físico de anclaje, durabilidad, cooldown ni selección autoritativa del servidor.
 
 ## 0.1.26-beta
 

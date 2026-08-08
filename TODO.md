@@ -222,8 +222,10 @@ Las pruebas de interacción específica con bloques y máquinas modded se realiz
 - Evaluar una pose equivalente en tercera persona para paredes.
 - Validar la pose elevada de Strong Grip con dos clientes en multijugador, incluyendo `F`, detach, dimensión y desconexión.
 - Probar `IItemDecorator` con otras escalas de GUI y mods de interfaz.
-- **Implementado en 0.1.27:** indicador diferenciado para superficies firmes, inestables, no escalables, obstrucción, cooldown y alcance.
+- **Implementado en 0.1.27:** String coloreado para superficies firmes, inestables, no escalables, obstrucción, cooldown y alcance; texto diagnóstico inferior retirado tras la validación visual.
 - **Implementado en 0.1.27:** requisitos separados para Strong Grip y Strong Grip + Sturdy Latch en techos.
+- **Ajustado en 0.1.27:** HUD visible hasta 3 bloques y descenso inestable a `0.136` bloques/tick sin Sturdy Latch.
+- **Ajustado en 0.1.27:** los cambios de punto de techo evalúan Strong Grip en la herramienta libre y los clics rechazados explican el motivo en la barra de acción; Sturdy Latch conserva aviso visual sin mensaje de rechazo.
 - Evaluar sonidos suaves de tensión y partículas diferenciadas para nieve, hielo y frenado.
 
 ## Orden de trabajo previsto

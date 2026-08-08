@@ -3,17 +3,27 @@
 ## Indicadores de anclaje
 
 - [ ] Piedra y hielo muestran `ANCHOR READY` en verde cuando el destino es válido.
-- [ ] Arena, grava, concreto en polvo y nieve muestran `UNSTABLE SURFACE` en ámbar.
+- [ ] Arena, grava, concreto en polvo y nieve sin Sturdy Latch muestran `UNSTABLE GRIP` en cian.
+- [ ] Las mismas superficies con Sturdy Latch muestran `ANCHOR READY` en verde.
 - [ ] Bedrock y demás bloques prohibidos muestran `UNCLIMBABLE` en rojo sin permitir el clic.
 - [ ] Un destino cuya hitbox colisiona muestra `ANCHOR OBSTRUCTED` en rojo.
-- [ ] Un destino situado a más de 1.5 bloques del ancla actual muestra `OUT OF RANGE` en amarillo.
+- [ ] Un destino situado entre 1.5 y 3 bloques del jugador/ancla muestra `OUT OF RANGE` en amarillo.
 - [ ] Una herramienta en cooldown muestra `TOOL RECOVERING` en gris y cambia a disponible al terminar.
 - [ ] Un techo firme sin Strong Grip muestra `STRONG GRIP REQUIRED` en violeta.
+- [ ] Hacer clic en ese techo muestra el mensaje localizado de Strong Grip en la barra de acción.
+- [ ] Colgado con una picota Strong Grip y otra sin el encantamiento, apuntar a un nuevo techo muestra `STRONG GRIP REQUIRED`, no `TOOL RECOVERING`.
 - [ ] Un techo inestable con Strong Grip pero sin Sturdy Latch muestra `STURDY LATCH REQUIRED` en cian.
+- [ ] Los estados inestables relacionados con Sturdy Latch no generan mensaje de rechazo al hacer clic.
 - [ ] Con los encantamientos requeridos, esos techos cambian a firme o inestable según su superficie.
 - [ ] Un bloque con menú no muestra la banda durante clic normal y sí la evalúa al mantener Shift.
 - [ ] Mano secundaria, principal y dos herramientas muestran el estado correspondiente a la herramienta que finalmente selecciona el servidor.
 - [ ] Ocultar la interfaz con F1 oculta también el indicador.
+- [ ] Apuntar al vacío, una entidad o un impacto situado a más de 3 bloques no muestra icono ni texto.
+- [ ] Un bloque real entre 1.5 y 3 bloques muestra `OUT OF RANGE`, no `ANCHOR OBSTRUCTED`.
+- [ ] Cuerda, vegetación seleccionable y caras sin soporte muestran `ANCHOR OBSTRUCTED` únicamente dentro de 1.5 bloques.
+- [ ] Clic derecho rechazado informa en la barra de acción si falta alcance, cooldown, apoyo de bloque o espacio para la hitbox.
+- [ ] Clic derecho sobre una entidad con una herramienta de escalada equipada informa que no se puede anclar a entidades sin cancelar su interacción vanilla.
+- [ ] El mensaje de obstrucción incluye el nombre localizado del bloque cuando una planta, cuerda u otro bloque sin apoyo intercepta el clic.
 
 ## Tags de herramientas
 
@@ -86,7 +96,7 @@
 - [ ] Unbreaking puede evitar tanto el coste inicial como cada tramo adicional de 10.
 - [ ] Si se rompe el pico activo durante el frenado, el anclaje termina sin conservar gravedad o grietas.
 - [ ] Si el pico de apoyo se rompe o se retira, el pico activo continúa sin cobrar a una herramienta distinta.
-- [ ] Sin Sturdy Latch, arena, grava, concreto en polvo y nieve descienden a `0.128` bloques/tick.
+- [ ] Sin Sturdy Latch, arena, grava, concreto en polvo y nieve descienden a `0.136` bloques/tick.
 - [ ] Con dos picotas con UUID distintos o copiados, cada bloque de BRAKING cobra el tramo adicional a ambas herramientas.
 - [ ] Mientras una picota está anclada, la otra crea un nuevo punto a hasta 1.5 bloques sin soltar la actual; ambas conservan cooldown individual.
 

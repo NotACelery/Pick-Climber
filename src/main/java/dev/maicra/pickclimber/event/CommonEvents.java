@@ -3,6 +3,7 @@ package dev.maicra.pickclimber.event;
 import dev.maicra.pickclimber.PickClimber;
 import dev.maicra.pickclimber.climb.ClimbManager;
 import dev.maicra.pickclimber.climb.ClimbingHandSelector;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -29,6 +30,17 @@ public final class CommonEvents {
             ClimbManager.recoverStaleAttachment(serverPlayer);
         }
 
+        if (event.getEntity().level().isClientSide()
+                && event.getHand() == InteractionHand.MAIN_HAND) {
+            Component feedback = ClimbManager.anchorAttemptFailureMessage(
+                    event.getEntity(),
+                    event.getHitVec()
+            );
+            if (feedback != null) {
+                event.getEntity().displayClientMessage(feedback, true);
+            }
+        }
+
         InteractionHand preferredHand = ClimbingHandSelector.preferred(
                 event.getEntity(),
                 event.getHitVec()
@@ -50,6 +62,20 @@ public final class CommonEvents {
         if (event.getEntity() instanceof ServerPlayer serverPlayer) {
             ClimbManager.useClimbingTool(serverPlayer, preferredHand, event.getHitVec());
         }
+    }
+
+    @SubscribeEvent
+    public static void onRightClickEntity(PlayerInteractEvent.EntityInteractSpecific event) {
+        if (!event.getEntity().level().isClientSide()
+                || !ClimbManager.isClimbingTool(event.getItemStack())
+                || event.getHand() == InteractionHand.OFF_HAND
+                && ClimbManager.isClimbingTool(event.getEntity().getMainHandItem())) {
+            return;
+        }
+        event.getEntity().displayClientMessage(
+                Component.translatable("message.pickclimber.anchor.entity"),
+                true
+        );
     }
 
     @SubscribeEvent

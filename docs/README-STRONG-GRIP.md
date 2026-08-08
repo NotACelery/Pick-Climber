@@ -537,6 +537,10 @@ No es obligatorio que todos usen iconos nuevos en la primera implementación, pe
 
 Implementado en `0.1.27-beta`: una banda localizada bajo la mira diferencia anclaje firme, superficie inestable, no escalable, obstrucción, cooldown y fuera de alcance. Los techos sin los encantamientos necesarios muestran por separado Strong Grip o Sturdy Latch como requisito. La evaluación comparte cara, colisión, radio y prioridad de herramientas con el intento real, pero no ejecuta acciones ni consume recursos.
 
+Refinado en la misma beta: el String teñido se mantiene como único indicador permanente y el texto diagnóstico inferior se retira tras validar sus colores. Se muestra hasta 3 bloques: entre 1.5 y 3 usa el estado de fuera de alcance y más lejos se oculta. La obstrucción solo se evalúa dentro del radio físico de 1.5 bloques. Un agarre inestable sin Sturdy Latch es cian y pasa a verde al reforzarse.
+
+Un clic derecho rechazado informa el motivo mediante la barra de acción localizada: Strong Grip ausente, cooldown, fuera de alcance, bloque sin apoyo, entidad o falta de espacio para el jugador. Sturdy Latch conserva únicamente su aviso visual porque una superficie inestable válida cambia el comportamiento del agarre en vez de rechazarlo. Durante un anclaje de techo, el requisito de Strong Grip para un nuevo punto se consulta en la picota libre; la herramienta que ya sostiene al jugador permanece ocupada y no enmascara el requisito como cooldown.
+
 ## 13. Roturas y recuperación segura
 
 ### 13.1 Rotura del pico
