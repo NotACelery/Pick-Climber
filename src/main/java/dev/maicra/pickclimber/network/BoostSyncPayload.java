@@ -7,7 +7,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
-/** Sincroniza al cliente el impulso autorizado por el servidor y su cooldown visual. */
+/** Synchronizes a server-authorized boost or release velocity and its visual cooldown. */
 public record BoostSyncPayload(
         double velocityX,
         double velocityY,

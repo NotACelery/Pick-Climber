@@ -7,7 +7,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
-/** Entrada de cámara y movimiento solicitada durante un anclaje deslizante. */
+/** Camera and movement input requested while attached to a sliding anchor. */
 public record SlideInputPayload(
         float forward,
         float strafe,

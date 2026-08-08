@@ -96,6 +96,54 @@
 
 # Changelog
 
+## 0.1.27-beta
+
+- Reemplaza el indicador genérico de cuerda por una banda compacta y localizada bajo la mira.
+- Distingue anclaje firme, superficie inestable, superficie no escalable, obstrucción, cooldown y destino fuera del alcance real.
+- Los techos informan por separado si requieren Strong Grip o Strong Grip + Sturdy Latch.
+- La evaluación visual reutiliza las mismas comprobaciones de herramienta, cara, hitbox, distancia y prioridad de manos del enganche sin ejecutar física ni consumir recursos.
+- Los bloques con menú conservan el indicador oculto durante uso normal y lo habilitan con Shift.
+- El String vuelve a ser el único indicador permanente bajo la mira, teñido y enmarcado por estado; se retira el texto diagnóstico inferior tras validar visualmente los colores.
+- Suprime completamente el HUD sobre `MISS`, entidades y bloques situados a más de 3 bloques del punto de vista.
+- Evalúa el radio de 1.5 bloques antes de buscar una hitbox corregida, evitando confundir destinos lejanos con `ANCHOR OBSTRUCTED`.
+- Un agarre inestable sin Sturdy Latch usa cian; con Sturdy Latch pasa a verde porque el resultado será firme.
+- Los requisitos de un nuevo punto de techo se calculan sobre la picota libre; el pico Strong Grip ya ocupado no convierte erróneamente el estado en cooldown.
+- Un clic derecho rechazado muestra en la barra de acción el motivo localizado: Strong Grip, cooldown, alcance, bloque obstructivo, falta de espacio o entidad.
+- Los avisos de Sturdy Latch no generan mensaje de rechazo porque el descenso inestable permitido conserva su comportamiento diferenciado.
+- Limita el HUD a 3 bloques: muestra `OUT OF RANGE` entre 1.5 y 3, se oculta más lejos y solo evalúa `ANCHOR OBSTRUCTED` dentro del alcance físico.
+- Ajusta el descenso inestable sin Sturdy Latch de `0.128` a `0.136` bloques/tick, 70 % más rápido que la base original.
+- No modifica protocolo 13, alcance físico de anclaje, durabilidad, cooldown ni selección autoritativa del servidor.
+
+## 0.1.26-beta
+
+- Añade los tags de objeto `pickclimber:climbing_tools` y `pickclimber:excluded_climbing_tools` para compatibilidad configurable con herramientas de otros mods.
+- Toda la elegibilidad durante escalada, cooldown y render pasa por un clasificador central; una exclusión siempre prevalece sobre una inclusión.
+- `climbing_tools` hereda `#minecraft:pickaxes` para conservar compatibilidad general e incluye de forma opcional la maza-picota `eternal_starlight:thermal_springstone_hammer`.
+- La picota de madera se incluye en `excluded_climbing_tools` y deja de poder iniciar o mantener anclajes.
+- La integración con Eternal Starlight es opcional mediante tag y no añade dependencias de carga.
+- Valida manualmente las picotas de Eternal Starlight y Twilight Forest, la exclusión de madera, el cambio de mano y los encantamientos.
+- Sincroniza la pose elevada de Strong Grip con los clientes que observan al jugador mediante un payload visual mínimo e independiente de la física.
+- La pose remota se actualiza al enganchar, cambiar con `F`, pasar entre techo y pared o soltarse; una renovación periódica cubre observadores tardíos y un timeout evita estados huérfanos.
+- Protocolo interno actualizado a versión 13.
+- Documenta como validadas las maniobras Strong Grip con dos picotas, cambio con `F`, salto con momento, cruce de huecos y transición alrededor de bordes.
+- No modifica física, distancias, durabilidad, cooldown ni balance de encantamientos.
+
+## 0.1.25-beta
+
+- Añade una pose elevada propia para el brazo y la picota activos al usar Strong Grip en primera persona.
+- Corrige la vista local en tercera persona: el brazo activo se eleva y la picota sigue la transformación del modelo en lugar de permanecer abajo.
+- Corrige puntos válidos de pared rechazados bajo un techo: si la altura ideal solapa la hitbox con el bloque superior, se elige la altura libre más cercana dentro del mismo alcance.
+- El icono y el servidor comparten el mismo destino corregido; una posición que realmente colisione continúa siendo inválida y no consume recursos.
+- Corrige la liberación de techo con Espacio: el impulso voluntario usa `W/A/S/D` orientado por cámara en vez de empujar siempre hacia donde se mira.
+- Iguala ese impulso voluntario a los `0.65` del salto desde pared y amplía el límite combinado para que la inercia alineada lo refuerce sin quedar recortada prematuramente.
+- La solicitud de liberación incluye atómicamente `W/A/S/D` y cámara del instante de Espacio; el servidor ya no depende del último paquete periódico para calcular el salto. Protocolo interno actualizado a versión 12.
+- Corrige la aplicación final del salto de techo: el servidor envía explícitamente al cliente el vector calculado tras desenganchar, evitando que la física local descarte tanto el impulso direccional como la inercia del balanceo.
+- Separa la velocidad limitada de la hitbox del momento de liberación: el balanceo acumula hasta `0.38` bloques/tick en cualquier dirección y el límite del radio ya no elimina esa energía antes del salto.
+- Suaviza el balanceo aplicando cada destino servidor-validado desde el payload de techo y reserva el teletransporte absoluto para confirmaciones periódicas, evitando dos correcciones duras por tick.
+- La pose entra suavemente durante 4 ticks, queda fija sin acumular swing vanilla y se refleja para ambas manos y jugadores zurdos.
+- Transferir el mismo pico con `F` mueve la pose al otro brazo sin reiniciar su transición ni recrear el anclaje.
+- La pose de pared y el render de la mano libre permanecen sin cambios; el hotfix de liberación no modifica durabilidad ni cooldown.
+
 ## 0.1.24-beta
 
 - Reduce 30 % el radio del balanceo Strong Grip, de `0.95` a `0.665` bloques.

@@ -1,5 +1,20 @@
 {
-  "enchantment.pickclimber.pick_climber": "Pick Climber",
-  "enchantment.pickclimber.sturdy_latch": "Anclaje Robusto",
-  "enchantment.pickclimber.strong_grip": "Agarre Fuerte"
+  "enchantment.pickclimber.pick_climber": "Escalada",
+  "enchantment.pickclimber.sturdy_latch": "Firmeza",
+  "enchantment.pickclimber.strong_grip": "Adherencia",
+  "gui.pickclimber.anchor.ready": "ANCLA DISPONIBLE",
+  "gui.pickclimber.anchor.unstable": "AGARRE INESTABLE",
+  "gui.pickclimber.anchor.unclimbable": "NO ESCALABLE",
+  "gui.pickclimber.anchor.requires_strong_grip": "REQUIERE ADHERENCIA",
+  "gui.pickclimber.anchor.requires_sturdy_latch": "REQUIERE FIRMEZA",
+  "gui.pickclimber.anchor.cooldown": "HERRAMIENTA RECUPERÁNDOSE",
+  "gui.pickclimber.anchor.out_of_range": "FUERA DE ALCANCE",
+  "gui.pickclimber.anchor.obstructed": "ANCLA OBSTRUIDA",
+  "message.pickclimber.requires_strong_grip": "Se requiere Adherencia para anclarse al techo",
+  "message.pickclimber.anchor.cooldown": "La herramienta de escalada aún se está recuperando",
+  "message.pickclimber.anchor.out_of_range": "El punto de anclaje está fuera de alcance",
+  "message.pickclimber.anchor.blocked_by": "No se puede anclar: bloqueado por %s",
+  "message.pickclimber.anchor.not_enough_space": "No se puede anclar: no hay espacio suficiente para el jugador",
+  "message.pickclimber.anchor.obstructed": "No se puede anclar en esta posición",
+  "message.pickclimber.anchor.entity": "No se puede anclar a una entidad"
 }

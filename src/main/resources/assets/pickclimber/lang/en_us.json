@@ -1,5 +1,20 @@
 {
   "enchantment.pickclimber.pick_climber": "Pick Climber",
   "enchantment.pickclimber.sturdy_latch": "Sturdy Latch",
-  "enchantment.pickclimber.strong_grip": "Strong Grip"
+  "enchantment.pickclimber.strong_grip": "Strong Grip",
+  "gui.pickclimber.anchor.ready": "ANCHOR READY",
+  "gui.pickclimber.anchor.unstable": "UNSTABLE GRIP",
+  "gui.pickclimber.anchor.unclimbable": "UNCLIMBABLE",
+  "gui.pickclimber.anchor.requires_strong_grip": "STRONG GRIP REQUIRED",
+  "gui.pickclimber.anchor.requires_sturdy_latch": "STURDY LATCH REQUIRED",
+  "gui.pickclimber.anchor.cooldown": "TOOL RECOVERING",
+  "gui.pickclimber.anchor.out_of_range": "OUT OF RANGE",
+  "gui.pickclimber.anchor.obstructed": "ANCHOR OBSTRUCTED",
+  "message.pickclimber.requires_strong_grip": "Strong Grip is required to anchor to ceilings",
+  "message.pickclimber.anchor.cooldown": "The climbing tool is still recovering",
+  "message.pickclimber.anchor.out_of_range": "The anchor point is out of range",
+  "message.pickclimber.anchor.blocked_by": "Cannot anchor: blocked by %s",
+  "message.pickclimber.anchor.not_enough_space": "Cannot anchor: not enough space for the player",
+  "message.pickclimber.anchor.obstructed": "Cannot anchor at this position",
+  "message.pickclimber.anchor.entity": "Cannot anchor into an entity"
 }

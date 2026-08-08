@@ -33,7 +33,8 @@ public record ServerClimbState(
         double brakingDistance,
         int chargedBrakingBlocks,
         Vec3 ceilingCenter,
-        Vec3 swingVelocity
+        Vec3 swingVelocity,
+        Vec3 swingReleaseMomentum
 ) {
     public ServerClimbState withActiveHand(InteractionHand hand) {
         return new ServerClimbState(
@@ -60,7 +61,8 @@ public record ServerClimbState(
                 brakingDistance,
                 chargedBrakingBlocks,
                 ceilingCenter,
-                swingVelocity
+                swingVelocity,
+                swingReleaseMomentum
         );
     }
 
@@ -99,7 +101,8 @@ public record ServerClimbState(
                 brakingDistance,
                 chargedBrakingBlocks,
                 ceilingCenter,
-                swingVelocity
+                swingVelocity,
+                swingReleaseMomentum
         );
     }
 
@@ -128,7 +131,8 @@ public record ServerClimbState(
                 brakingDistance,
                 chargedBrakingBlocks,
                 ceilingCenter,
-                swingVelocity
+                swingVelocity,
+                swingReleaseMomentum
         );
     }
 
@@ -138,7 +142,8 @@ public record ServerClimbState(
                 toolId, crackId, restoreNoGravity, restoreFlying, attachedAtGameTime,
                 surface, motion, slideVelocity, cooldownTicks, lateralForward, lateralStrafe,
                 contactOffset, direction, reinforcedLatch, brakingSupportToolId,
-                brakingDistance, chargedBrakingBlocks, ceilingCenter, swingVelocity
+                brakingDistance, chargedBrakingBlocks, ceilingCenter, swingVelocity,
+                swingReleaseMomentum
         );
     }
 
@@ -148,7 +153,7 @@ public record ServerClimbState(
                 toolId, crackId, restoreNoGravity, restoreFlying, attachedAtGameTime,
                 surface, motion, slideVelocity, cooldownTicks, lateralForward, lateralStrafe,
                 contactOffset, committedBrakeDirection, reinforcedLatch, brakingSupportToolId,
-                distance, chargedBlocks, ceilingCenter, swingVelocity
+                distance, chargedBlocks, ceilingCenter, swingVelocity, swingReleaseMomentum
         );
     }
 
@@ -158,17 +163,23 @@ public record ServerClimbState(
                 toolId, crackId, restoreNoGravity, restoreFlying, attachedAtGameTime,
                 surface, motion, slideVelocity, cooldownTicks, lateralForward, lateralStrafe,
                 contactOffset, committedBrakeDirection, reinforcedLatch, null,
-                brakingDistance, chargedBrakingBlocks, ceilingCenter, swingVelocity
+                brakingDistance, chargedBrakingBlocks, ceilingCenter, swingVelocity,
+                swingReleaseMomentum
         );
     }
 
-    public ServerClimbState withCeilingSwing(Vec3 target, Vec3 velocity) {
+    public ServerClimbState withCeilingSwing(
+            Vec3 target,
+            Vec3 velocity,
+            Vec3 releaseMomentum
+    ) {
         return new ServerClimbState(
                 anchorDimension, anchorBlock, anchorFace, target, activeHand,
                 toolId, crackId, restoreNoGravity, restoreFlying, attachedAtGameTime,
                 surface, motion, slideVelocity, cooldownTicks, lateralForward, lateralStrafe,
                 contactOffset, committedBrakeDirection, reinforcedLatch, brakingSupportToolId,
-                brakingDistance, chargedBrakingBlocks, ceilingCenter, velocity
+                brakingDistance, chargedBrakingBlocks, ceilingCenter, velocity,
+                releaseMomentum
         );
     }
 }

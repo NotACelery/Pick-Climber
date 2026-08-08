@@ -1,8 +1,8 @@
-# Pick Climber — Beta experimental 0.1.24
+# Pick Climber — Beta experimental 0.1.27
 
 Mod para **Minecraft 1.21.1**, **NeoForge 21.1.235** y **Java 21**.
 
-Convierte cualquier herramienta incluida en `#minecraft:pickaxes` en una herramienta de escalada, impulso y rescate.
+Convierte las herramientas incluidas en `#pickclimber:climbing_tools` en herramientas de escalada, impulso y rescate. `#pickclimber:excluded_climbing_tools` tiene prioridad y permite vetar herramientas concretas.
 
 ## Mecánica principal
 
@@ -103,13 +103,17 @@ Durante el frenado o descenso, `W/A/S/D` permite desplazarse por el plano de la 
 
 `Sturdy Latch I` convierte una superficie inestable en un anclaje firme: en caída leve queda fijo al engancharse; en caída fuerte conserva primero todo el frenado y queda fijo al terminar. También convierte su cooldown inicial de 40 a 20 ticks, igual que una superficie firme.
 
-El frenado cobra 15 de durabilidad inicial. Si hay dos picotas equipadas, ambas participan, pagan ese coste y el frenado aplica dos pasos por tick, reduciendo aproximadamente a la mitad el recorrido. Por cada bloque vertical completo realmente deslizado durante `BRAKING`, cada pico participante recibe 10 de desgaste adicional; Unbreaking sigue interviniendo en cada cobro. Sin Sturdy Latch, el descenso controlado por bloques inestables es 60 % más rápido (`0.128` bloques/tick).
+El frenado cobra 15 de durabilidad inicial. Si hay dos picotas equipadas, ambas participan, pagan ese coste y el frenado aplica dos pasos por tick, reduciendo aproximadamente a la mitad el recorrido. Por cada bloque vertical completo realmente deslizado durante `BRAKING`, cada pico participante recibe 10 de desgaste adicional; Unbreaking sigue interviniendo en cada cobro. Sin Sturdy Latch, el descenso controlado por bloques inestables es 70 % más rápido que la base original (`0.136` bloques/tick).
 
 Mientras una picota sostiene el ancla, la otra puede crear un nuevo punto dentro de 1.5 bloques del punto actual. Las dos herramientas mantienen UUID y cooldown propios; si dos copias llegan con el mismo UUID, el servidor separa la identidad de la segunda antes de cobrar o anclar.
 
+Al cambiar entre techo y pared, el destino mantiene el punto ideal siempre que la hitbox sea libre. Si ese cálculo introduciría parcialmente al jugador en un suelo o techo cercano, cliente y servidor buscan la altura libre más próxima sin superar el alcance de 1.5 bloques; un destino que siga colisionando continúa rechazándose sin coste.
+
 `Strong Grip I` habilita anclajes en la cara inferior de techos firmes. Cada anclaje nuevo cuesta 20 de durabilidad y permanecer suspendido cobra 1 cada 20 ticks; ambos costes respetan Unbreaking. Los techos inestables exigen además `Sturdy Latch I`. Strong Grip y Pick Climber son especializaciones excluyentes.
 
-Mientras cuelga, `W/A/S/D` impulsa un balanceo servidor-autoritativo de hasta 0.665 bloques, con aceleración, amortiguación, velocidad máxima y colisiones limitadas. Los desplazamientos pequeños se confirman cada tick para mantener fluido el retorno. Espacio libera horizontalmente hacia la cámara, conserva la velocidad tangencial y convierte parte de la amplitud acumulada en alcance. Doble Shift o clic izquierdo con el pico activo producen una liberación pasiva con velocidad horizontal cero.
+Mientras cuelga, `W/A/S/D` impulsa un balanceo servidor-autoritativo de hasta 0.665 bloques, con aceleración, amortiguación, velocidad máxima y colisiones limitadas. El cliente recibe cada tick el destino ya validado y el servidor conserva confirmaciones absolutas periódicas, reduciendo tirones sin delegar la física. Espacio suma hasta `0.38` bloques/tick de momento pendular acumulado al impulso de salto de `0.65` en la dirección de `W/A/S/D`: ambos vectores pueden reforzarse o contrarrestarse hasta el límite combinado de `1.03`. Sin direccional ni balanceo acumulado, la liberación no recibe velocidad horizontal. Doble Shift o clic izquierdo con el pico activo producen siempre una liberación pasiva con velocidad horizontal cero.
+
+En primera persona, el brazo y la picota activos adoptan una pose elevada propia de los anclajes de techo. La entrada dura 4 ticks, no acumula el swing vanilla y se refleja al brazo correcto; transferir el mismo pico con `F` mueve la pose sin reiniciarla. En tercera persona, el servidor sincroniza un estado visual mínimo con los clientes que observan al jugador para elevar el brazo activo y alinear la picota también en multijugador. La otra mano conserva su render normal.
 
 ## Controles vigentes
 
@@ -121,6 +125,36 @@ Mientras cuelga, `W/A/S/D` impulsa un balanceo servidor-autoritativo de hasta 0.
 - **Clic izquierdo con ancla secundaria**: minería o ataque vanilla con la principal.
 - **Clic izquierdo con el mismo pico activo**: desenganche pasivo sin impulso.
 
+## Compatibilidad de herramientas
+
+La selección de herramientas es data-driven:
+
+- `pickclimber:climbing_tools` incluye por defecto `#minecraft:pickaxes` y puede ampliarse desde datapacks o mods.
+- `pickclimber:excluded_climbing_tools` siempre gana si un objeto aparece en ambos tags.
+- La picota de madera está excluida por defecto.
+- `eternal_starlight:thermal_springstone_hammer` se declara como integración opcional y no obliga a instalar Eternal Starlight.
+
+Todos los controles, cooldowns, UUID, desgaste y render consultan el mismo clasificador central durante la escalada.
+
+Compatibilidad validada manualmente con las picotas de Eternal Starlight y Twilight Forest. La picota de madera queda excluida de la escalada, mientras cambio de mano y encantamientos continúan funcionando con herramientas compatibles.
+
+## Indicador de anclaje
+
+Al apuntar con una herramienta de escalada, una banda compacta bajo la mira informa el resultado antes del clic:
+
+- verde: anclaje firme disponible, incluidas superficies inestables reforzadas con Sturdy Latch;
+- cian: agarre inestable sin Sturdy Latch o techo inestable que lo requiere;
+- rojo: superficie no escalable u obstruida;
+- violeta: requiere Strong Grip;
+- gris: herramienta todavía en cooldown;
+- amarillo: destino fuera del alcance real.
+
+El String coloreado solo aparece sobre un bloque real situado a 3 bloques o menos. Entre 1.5 y 3 bloques usa el color de `OUT OF RANGE`; por encima de 3 se oculta para no interferir con minería o exploración. `ANCHOR OBSTRUCTED` queda reservado para caras situadas dentro del radio real de 1.5 bloques pero sin apoyo físico o sin espacio final.
+
+El indicador reutiliza las comprobaciones de cara, colisión, encantamientos y distancia del enganche. Los bloques con menú continúan ocultándolo durante el clic normal y lo muestran al mantener Shift. Si el clic derecho intenta una acción rechazada, la barra de acción explica el motivo: encantamiento ausente, cooldown, alcance, bloque sin apoyo, entidad o falta de espacio para la hitbox. Las superficies inestables sin Sturdy Latch no muestran rechazo porque el agarre controlado sigue siendo válido.
+
+Al cambiar de punto desde un techo, los requisitos se evalúan sobre la picota libre: una picota con Strong Grip que ya sostiene el ancla no puede ocultar que la segunda herramienta carece del encantamiento.
+
 ## Compilar en Windows
 
 1. Instala Java 21.
@@ -128,7 +162,7 @@ Mientras cuelga, `W/A/S/D` impulsa un balanceo servidor-autoritativo de hasta 0.
 3. El JAR aparecerá en:
 
 ```text
-build/libs/pickclimber-1.21.1-0.1.24-beta.jar
+build/libs/pickclimber-1.21.1-0.1.27-beta.jar
 ```
 
 Retira versiones anteriores antes de instalar esta beta.
@@ -141,7 +175,7 @@ La especificación de `Strong Grip`, `Sturdy Latch`, nieve, hielo, anclajes de t
 docs/README-STRONG-GRIP.md
 ```
 
-No está implementada todavía.
+El documento se conserva como especificación y registro de las fases implementadas.
 
 ## Identidad visual
 

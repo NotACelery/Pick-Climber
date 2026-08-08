@@ -1,6 +1,6 @@
 # Strong Grip, Sturdy Latch y movimiento de techo
 
-> **Estado:** anclaje estático y balanceo base implementados; poses y maniobras avanzadas siguen pendientes.
+> **Estado:** anclaje estático, balanceo base y poses elevadas locales implementados; la sincronización visual multijugador y maniobras avanzadas siguen pendientes.
 >
 > Este documento conserva el comportamiento obligatorio y distingue lo implementado de las fases pendientes.
 >
@@ -300,6 +300,8 @@ El nuevo punto:
 - transfiere la pose elevada al nuevo brazo;
 - conserva una transición física controlada.
 
+Implementado en `0.1.25-beta`: al pasar de techo a una cara lateral, el destino conserva primero la altura derivada del punto exacto de impacto. Si esa posición introduce la hitbox en el techo o suelo adyacente, se busca por pasos la altura libre más cercana hacia la posición actual. La corrección máxima es media altura del jugador, el resultado sigue sujeto al radio real de 1.5 bloques y cliente/servidor ejecutan la misma comprobación.
+
 ### 6.2 Cruce de huecos
 
 El balanceo debe permitir intentar alcanzar un techo separado por aproximadamente dos bloques de vacío, siempre que:
@@ -344,13 +346,13 @@ Desde el techo:
 
 - no debe empujar al jugador verticalmente contra el bloque;
 - primero debe separarlo de la cara inferior;
-- puede aplicar impulso horizontal según la mirada;
+- puede aplicar impulso horizontal según `W/A/S/D`, orientado por la mirada;
 - puede incluir una pequeña componente descendente inicial para evitar colisión con la cabeza;
 - `Pick Climber` no participa porque es incompatible con `Strong Grip`.
 
 Los valores exactos se ajustarán en pruebas.
 
-Implementado en `0.1.23-beta`: el impulso horizontal base es `0.45`; se suma la velocidad pendular y hasta `0.20` por amplitud, con límite total `0.78` bloques/tick.
+Implementado en `0.1.23-beta` y corregido en `0.1.25-beta`: el impulso horizontal base es `0.65`, la misma magnitud que el salto desde pared, pero solo se aplica en la dirección de `W/A/S/D` que siga pulsada, orientada por la cámara. La integración mantiene por separado la velocidad restringida de la hitbox y un momento pendular de liberación de hasta `0.38`; llegar al radio máximo puede detener el desplazamiento físico sin destruir la energía acumulada. Una inercia contraria reduce el salto y una coincidente lo refuerza, con límite total `1.03` bloques/tick. Sin input ni balanceo acumulado, Espacio libera sin velocidad horizontal. El destino servidor-validado se sincroniza cada tick mediante posición directa interpolable y se confirma con teletransporte absoluto cada cinco ticks.
 
 ### 7.3 Shift mantenido
 
@@ -437,6 +439,8 @@ En un anclaje de techo:
 
 La pose de pared existente no debe reutilizarse sin adaptación: el techo requiere una transformación específica.
 
+Implementado en `0.1.25-beta`: el render cancela únicamente la mano activa, eleva brazo y picota mediante una transformación específica de techo y conserva el render vanilla de la mano libre. La entrada usa la misma curva suave de 4 ticks de la pose clavada; una transferencia con `F` conserva el UUID y el instante inicial, por lo que no reinicia la animación. No requiere dependencia de Artifacts ni modifica la física servidor-autoritativa.
+
 ### 9.2 Tercera persona
 
 El modelo del jugador debe mostrar:
@@ -450,6 +454,10 @@ El modelo del jugador debe mostrar:
 - pose visible para otros jugadores en multijugador.
 
 La implementación debe usar un estado sincronizado de pose, no deducirla solamente del item en la mano.
+
+Implementado localmente en `0.1.25-beta`: la vista en tercera persona consulta el tipo de anclaje y la mano activa sincronizados, aplica una pose elevada al brazo correcto y deja que la capa vanilla del objeto alinee la picota con la mano. La pose anterior del modelo se restaura al terminar cada render para no afectar al brazo libre ni a jugadores sin anclaje.
+
+Implementado para observadores en `0.1.26-beta`: un payload visual independiente transporta únicamente UUID del jugador, presencia del anclaje de techo y mano activa. Se actualiza al enganchar, transferir con `F`, cambiar entre techo y pared o soltar; además se renueva cada 20 ticks para observadores tardíos y expira tras 40 ticks sin sincronización. El payload no contiene ni modifica posición, velocidad, durabilidad, cooldown o física. La validación visual definitiva queda pendiente de una sesión con dos clientes.
 
 ### 9.3 Balanceo visual
 
@@ -526,6 +534,12 @@ El indicador de alcance deberá poder distinguir:
 - herramienta en cooldown.
 
 No es obligatorio que todos usen iconos nuevos en la primera implementación, pero el estado no debe inducir a gastar durabilidad en un intento imposible.
+
+Implementado en `0.1.27-beta`: una banda localizada bajo la mira diferencia anclaje firme, superficie inestable, no escalable, obstrucción, cooldown y fuera de alcance. Los techos sin los encantamientos necesarios muestran por separado Strong Grip o Sturdy Latch como requisito. La evaluación comparte cara, colisión, radio y prioridad de herramientas con el intento real, pero no ejecuta acciones ni consume recursos.
+
+Refinado en la misma beta: el String teñido se mantiene como único indicador permanente y el texto diagnóstico inferior se retira tras validar sus colores. Se muestra hasta 3 bloques: entre 1.5 y 3 usa el estado de fuera de alcance y más lejos se oculta. La obstrucción solo se evalúa dentro del radio físico de 1.5 bloques. Un agarre inestable sin Sturdy Latch es cian y pasa a verde al reforzarse.
+
+Un clic derecho rechazado informa el motivo mediante la barra de acción localizada: Strong Grip ausente, cooldown, fuera de alcance, bloque sin apoyo, entidad o falta de espacio para el jugador. Sturdy Latch conserva únicamente su aviso visual porque una superficie inestable válida cambia el comportamiento del agarre en vez de rechazarlo. Durante un anclaje de techo, el requisito de Strong Grip para un nuevo punto se consulta en la picota libre; la herramienta que ya sostiene al jugador permanece ocupada y no enmascara el requisito como cooldown.
 
 ## 13. Roturas y recuperación segura
 
@@ -610,20 +624,20 @@ Este sistema no debe comenzar antes de completar sus dependencias.
 
 1. **Completado en 0.1.14:** conservar el detach intencional y cerrar `Shift + clic derecho` sobre bloques interactivos vanilla.
 2. **Balance base completado en 0.1.14:** costes actuales de `Pick Climber`; la obtención final seguirá afinándose mediante pruebas.
-3. Implementar tags de superficies.
-4. Implementar frenado progresivo.
-5. Implementar desgaste proporcional a la caída.
-6. Implementar comportamiento inestable de arena, grava, concreto en polvo y nieve.
-7. Implementar `Sturdy Latch`.
-8. Implementar exclusividad `Pick Climber` / `Strong Grip`.
-9. Implementar enganche estático básico de techo.
-10. Implementar coste inicial y coste sostenido.
-11. Implementar pose elevada de primera persona.
-12. Implementar pose elevada de tercera persona.
-13. Implementar doble pulsación de Shift para caída vertical y conservar Shift mantenido como sneak vanilla.
-14. Implementar balanceo restringido.
-15. Implementar transferencias de techo y cruce de huecos.
-16. Pulir indicadores, sonidos, partículas y compatibilidad modded.
+3. **Completado:** tags de superficies.
+4. **Completado:** frenado progresivo.
+5. **Completado:** desgaste proporcional a la caída.
+6. **Completado:** comportamiento inestable de arena, grava, concreto en polvo y nieve.
+7. **Completado:** `Sturdy Latch`.
+8. **Completado:** exclusividad `Pick Climber` / `Strong Grip`.
+9. **Completado:** enganche estático básico de techo.
+10. **Completado:** coste inicial y coste sostenido.
+11. **Completado:** pose elevada de primera persona.
+12. **Implementado, pendiente de prueba multijugador:** pose elevada de tercera persona local y remota.
+13. **Completado:** doble pulsación de Shift para caída vertical; queda validación modded de Shift mantenido.
+14. **Completado:** balanceo restringido.
+15. **Completado y validado:** transferencias de techo, rodeo de bordes y cruce de huecos.
+16. **Indicadores completados en 0.1.27; siguiente fase:** pulir sonidos y partículas; completar pruebas modded y multijugador.
 
 ## 17. Criterios de aceptación
 

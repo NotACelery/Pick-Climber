@@ -1,6 +1,6 @@
 package dev.maicra.pickclimber.climb;
 
-/** Estado físico autoritativo de un anclaje de pared. */
+/** Server-authoritative physical state of a wall anchor. */
 public enum AnchorMotion {
     FIXED,
     BRAKING,

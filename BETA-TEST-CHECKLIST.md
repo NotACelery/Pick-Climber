@@ -1,4 +1,49 @@
-# Checklist 0.1.24-beta — fluidez y alcance de Strong Grip
+# Checklist 0.1.27-beta — indicadores de anclaje
+
+## Indicadores de anclaje
+
+- [ ] Piedra y hielo muestran `ANCHOR READY` en verde cuando el destino es válido.
+- [ ] Arena, grava, concreto en polvo y nieve sin Sturdy Latch muestran `UNSTABLE GRIP` en cian.
+- [ ] Las mismas superficies con Sturdy Latch muestran `ANCHOR READY` en verde.
+- [ ] Bedrock y demás bloques prohibidos muestran `UNCLIMBABLE` en rojo sin permitir el clic.
+- [ ] Un destino cuya hitbox colisiona muestra `ANCHOR OBSTRUCTED` en rojo.
+- [ ] Un destino situado entre 1.5 y 3 bloques del jugador/ancla muestra `OUT OF RANGE` en amarillo.
+- [ ] Una herramienta en cooldown muestra `TOOL RECOVERING` en gris y cambia a disponible al terminar.
+- [ ] Un techo firme sin Strong Grip muestra `STRONG GRIP REQUIRED` en violeta.
+- [ ] Hacer clic en ese techo muestra el mensaje localizado de Strong Grip en la barra de acción.
+- [ ] Colgado con una picota Strong Grip y otra sin el encantamiento, apuntar a un nuevo techo muestra `STRONG GRIP REQUIRED`, no `TOOL RECOVERING`.
+- [ ] Un techo inestable con Strong Grip pero sin Sturdy Latch muestra `STURDY LATCH REQUIRED` en cian.
+- [ ] Los estados inestables relacionados con Sturdy Latch no generan mensaje de rechazo al hacer clic.
+- [ ] Con los encantamientos requeridos, esos techos cambian a firme o inestable según su superficie.
+- [ ] Un bloque con menú no muestra la banda durante clic normal y sí la evalúa al mantener Shift.
+- [ ] Mano secundaria, principal y dos herramientas muestran el estado correspondiente a la herramienta que finalmente selecciona el servidor.
+- [ ] Ocultar la interfaz con F1 oculta también el indicador.
+- [ ] Apuntar al vacío, una entidad o un impacto situado a más de 3 bloques no muestra icono ni texto.
+- [ ] Un bloque real entre 1.5 y 3 bloques muestra `OUT OF RANGE`, no `ANCHOR OBSTRUCTED`.
+- [ ] Cuerda, vegetación seleccionable y caras sin soporte muestran `ANCHOR OBSTRUCTED` únicamente dentro de 1.5 bloques.
+- [ ] Clic derecho rechazado informa en la barra de acción si falta alcance, cooldown, apoyo de bloque o espacio para la hitbox.
+- [ ] Clic derecho sobre una entidad con una herramienta de escalada equipada informa que no se puede anclar a entidades sin cancelar su interacción vanilla.
+- [ ] El mensaje de obstrucción incluye el nombre localizado del bloque cuando una planta, cuerda u otro bloque sin apoyo intercepta el clic.
+
+## Tags de herramientas
+
+- [x] La picota de madera no muestra indicador ni permite engancharse.
+- [ ] Picotas vanilla de piedra, hierro, oro, diamante y netherita conservan todas las maniobras existentes.
+- [x] Las picotas de Eternal Starlight y Twilight Forest permiten escalar normalmente.
+- [x] Cambio de mano y encantamientos funcionan con las herramientas modded validadas.
+- [ ] Una herramienta añadida por datapack a `pickclimber:climbing_tools` recibe UUID, cooldown, desgaste y render de Pick Climber.
+- [ ] Una herramienta presente simultáneamente en ambos tags queda excluida.
+- [ ] Retirar Eternal Starlight no provoca errores de carga del tag opcional.
+
+## Pose elevada remota en multijugador
+
+- [ ] Con dos clientes, el observador ve elevado el brazo que sostiene el anclaje de techo.
+- [ ] `F` cambia inmediatamente el brazo elevado también para el observador.
+- [ ] Cambiar de techo a pared restaura la pose remota sin esperar el timeout.
+- [ ] Espacio, doble Shift, clic izquierdo, rotura del pico y pérdida del bloque limpian la pose remota.
+- [ ] Cambio de dimensión y desconexión no dejan el brazo elevado en el cliente observador.
+- [ ] Entrar en distancia de seguimiento mientras el otro jugador ya cuelga recibe la pose en un máximo de 20 ticks.
+- [ ] Un paquete de pose atrasado no altera posición, velocidad, cooldown, durabilidad ni grietas.
 
 ## Tags de superficies
 
@@ -51,7 +96,7 @@
 - [ ] Unbreaking puede evitar tanto el coste inicial como cada tramo adicional de 10.
 - [ ] Si se rompe el pico activo durante el frenado, el anclaje termina sin conservar gravedad o grietas.
 - [ ] Si el pico de apoyo se rompe o se retira, el pico activo continúa sin cobrar a una herramienta distinta.
-- [ ] Sin Sturdy Latch, arena, grava, concreto en polvo y nieve descienden a `0.128` bloques/tick.
+- [ ] Sin Sturdy Latch, arena, grava, concreto en polvo y nieve descienden a `0.136` bloques/tick.
 - [ ] Con dos picotas con UUID distintos o copiados, cada bloque de BRAKING cobra el tramo adicional a ambas herramientas.
 - [ ] Mientras una picota está anclada, la otra crea un nuevo punto a hasta 1.5 bloques sin soltar la actual; ambas conservan cooldown individual.
 
@@ -69,11 +114,45 @@
 - [ ] W/A/S/D acelera según cámara sin superar 0.665 bloques respecto del centro ni atravesar bloques.
 - [ ] Al soltar W/A/S/D cerca de la amplitud máxima, el retorno avanza suavemente cada tick sin pausas ni saltos visibles de 0.05 bloques.
 - [ ] Soltar movimiento amortigua el balanceo y el retorno al centro no genera aceleración infinita.
-- [ ] Espacio libera hacia la dirección horizontal de cámara y conserva la velocidad del balanceo.
+- [ ] Espacio libera hacia la dirección de `W/A/S/D` orientada por la cámara y conserva la velocidad del balanceo.
 - [ ] Liberar cerca de la amplitud máxima cubre más distancia que liberar desde reposo, sin superar el límite de velocidad.
+- [ ] Espacio sin `W/A/S/D` ni balanceo acumulado libera con velocidad horizontal cero.
+- [ ] Con W, A, S o D pulsada, Espacio impulsa en esa dirección relativa a la cámara, no simplemente hacia la mirada.
+- [ ] Liberar con el balanceo a favor aumenta el impulso resultante; hacerlo con la inercia contraria lo reduce o desvía mediante suma vectorial.
+- [ ] Liberar con acumulación baja, media y máxima produce tres alcances distinguibles; el momento pendular nunca supera `0.38` ni el total `1.03` bloques/tick.
+- [ ] Alcanzar el límite de 0.665 bloques no borra el momento acumulado ni convierte el salto siguiente en el impulso fijo de reposo.
+- [ ] Con una direccional pulsada, Espacio aporta `0.65` bloques/tick horizontales —igual que el wall jump— antes de sumar vectorialmente el balanceo.
+- [ ] Pulsar o cambiar de direccional en el mismo tick que Espacio usa esa dirección exacta; no cae en peso muerto por conservar un input periódico anterior.
+- [ ] El impulso calculado se observa inmediatamente en el cliente tras soltar el techo, sin un tick de caída en peso muerto ni pérdida de la velocidad pendular servidor-autoritativa.
+- [ ] Soltar la direccional justo antes de Espacio conserva solamente la inercia real del balanceo, sin añadir el impulso base de `0.65`.
 - [ ] Doble Shift libera con velocidad horizontal exactamente cero.
 - [ ] Clic izquierdo con el pico activo en la principal libera con velocidad horizontal cero; la mano principal libre no rompe un ancla secundaria.
 - [ ] F conserva ancla, velocidad, contador de desgaste y mano correcta durante el balanceo.
+- [ ] El balanceo y retorno se ven continuos entre confirmaciones absolutas de cinco ticks, sin tirones periódicos ni desincronización acumulada.
+- [ ] Desde un anclaje de techo, apuntar cerca, al centro y al borde de una pared contigua muestra el icono siempre que exista una altura final libre dentro de 1.5 bloques.
+- [ ] El clic confirma exactamente los mismos puntos que anuncia el icono; no aparece icono en posiciones donde la hitbox siga atravesando techo, suelo o pared.
+- [ ] Cambiar de techo a pared bajo un techo bajo no eleva al jugador dentro del bloque ni exige apuntar artificialmente al borde exterior.
+- [ ] Apuntar más de media altura de jugador por encima o debajo del destino seguro no usa la corrección para saltarse el límite vertical.
+
+## Pose elevada de techo en primera persona
+
+- [ ] Al confirmar un anclaje de techo, brazo y picota activos suben suavemente durante 4 ticks y quedan fijos sobre la cámara.
+- [ ] La picota apunta visualmente hacia el techo sin acumular encima el swing vanilla.
+- [ ] Mano principal, secundaria y jugador zurdo reflejan correctamente la pose.
+- [ ] La mano libre conserva colocar, usar, minar, atacar y sus animaciones vanilla.
+- [ ] `F` transfiere la pose al otro brazo sin reiniciar la entrada, duplicar brazos, cobrar desgaste ni recrear grietas.
+- [ ] Cambiar a un punto de techo nuevo reinicia brevemente la entrada solo para el nuevo anclaje.
+- [ ] Soltarse con Espacio, doble Shift o clic izquierdo restaura inmediatamente el render normal.
+- [ ] La pose clavada de pared permanece visualmente idéntica a 0.1.24.
+
+## Pose elevada en tercera persona
+
+- [ ] En `F5`, solamente el brazo que sostiene el anclaje de techo apunta hacia arriba y la picota acompaña su rotación.
+- [ ] Con dos picotas, la herramienta libre permanece en su pose normal.
+- [ ] Mano principal, secundaria, `F` y jugador zurdo elevan el brazo correcto.
+- [ ] Soltarse por cualquiera de las rutas restaura ambos brazos sin conservar la pose de techo.
+- [ ] Un anclaje de pared no activa la pose elevada de tercera persona.
+- [ ] Confirmar la pose desde un segundo cliente multijugador mediante el estado remoto de protocolo 13.
 
 ## Regresión 0.1.14 — bloques con menú vanilla
 

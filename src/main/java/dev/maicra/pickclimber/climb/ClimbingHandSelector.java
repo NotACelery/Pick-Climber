@@ -6,15 +6,15 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
 /**
- * Centraliza la prioridad entre manos sin alterar el pipeline de interacción.
+ * Centralizes hand priority without altering the interaction pipeline.
  *
- * La mano secundaria gana entre herramientas disponibles. La principal conserva
- * su oportunidad vanilla completa y, si devuelve PASS, Minecraft continúa con
- * la secundaria, donde Pick Climber puede consumir el clic.
+ * The off hand wins among available tools. The main hand retains its full vanilla
+ * opportunity and, if it returns PASS, Minecraft continues with the off hand,
+ * where Pick Climber may consume the click.
  *
- * Los bloques que exponen un menú conservan su clic derecho vanilla. Para usar
- * una de sus caras como ancla hay que mantener Shift, igual que al colocar un
- * bloque sobre un cofre, horno o mesa de crafteo sin abrir su interfaz.
+ * Blocks exposing a menu preserve vanilla right-click behavior. Hold Shift to
+ * use one of their faces as an anchor, just as when placing a block against a
+ * chest, furnace, or crafting table without opening its interface.
  */
 public final class ClimbingHandSelector {
     private ClimbingHandSelector() {
@@ -29,7 +29,7 @@ public final class ClimbingHandSelector {
             preferred = InteractionHand.MAIN_HAND;
         }
 
-        if (preferred == null || mustPreserveVanillaMenuUse(player, hit)) {
+        if (preferred == null || preservesVanillaMenuUse(player, hit)) {
             return null;
         }
 
@@ -37,15 +37,15 @@ public final class ClimbingHandSelector {
     }
 
     /**
-     * Un menú vanilla/modded identificado mediante {@link BlockState#getMenuProvider}
-     * mantiene prioridad mientras el jugador no use la acción secundaria (Shift).
+     * A vanilla or modded menu identified through {@link BlockState#getMenuProvider}
+     * keeps priority unless the player uses the secondary action (Shift).
      *
-     * La consulta no ejecuta la interacción ni abre el menú; solo comprueba que
-     * el bloque declare un proveedor. De este modo no hay listas hardcodeadas de
-     * hornos, cofres o mesas y el indicador visual comparte la misma regla que el
-     * clic real.
+     * This query neither executes the interaction nor opens the menu; it only
+     * checks whether the block declares a provider. This avoids hardcoded lists
+     * of furnaces, chests, or tables and keeps the visual indicator consistent
+     * with the actual click.
      */
-    private static boolean mustPreserveVanillaMenuUse(Player player, BlockHitResult hit) {
+    public static boolean preservesVanillaMenuUse(Player player, BlockHitResult hit) {
         if (player.isSecondaryUseActive()) {
             return false;
         }

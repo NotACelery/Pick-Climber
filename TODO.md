@@ -146,15 +146,35 @@ Pendiente validar junto con Strong Grip el presupuesto final de yunque y la excl
 - Balanceo restringido de techo con radio inicial de `0.95`, reducido 30 % a `0.665` en 0.1.24; aceleración, amortiguación y velocidad máxima autoritativas del servidor.
 - El retorno lento confirma desplazamientos pequeños cada tick y evita acumularlos en saltos de `0.05` bloques.
 - Colisiones comprobadas antes de confirmar cada posición del arco pendular.
-- Espacio conserva la inercia, suma impulso según cámara y convierte amplitud acumulada en alcance adicional limitado.
+- Espacio conserva hasta `0.38` de momento pendular acumulado y suma `0.65` solo en la dirección de `W/A/S/D` orientada por cámara.
 - Doble Shift y clic izquierdo con el pico activo liberan verticalmente con velocidad horizontal cero.
+
+### Completado en 0.1.25
+
+- Pose elevada de primera persona para el brazo y la picota activos en anclajes de techo.
+- Entrada suave de 4 ticks, orientación reflejada por brazo y supresión del swing vanilla superpuesto.
+- La transferencia con `F` mueve la pose sin reiniciar la transición del mismo pico.
+- La vista local en tercera persona eleva el brazo activo y alinea la picota sostenida mediante la pose del modelo.
+- Los cambios de techo a pared resuelven una altura libre cercana cuando el destino ideal solaparía la hitbox con el techo, manteniendo paridad entre indicador y servidor.
+- Espacio usa la direccional pulsada para el impulso de techo y la combina vectorialmente con el momento pendular acumulado; el límite del radio no elimina esa energía de liberación.
+- El destino de balanceo validado se aplica suavemente mediante el sync de techo, con teletransporte absoluto periódico como confirmación autoritativa.
 
 Pendiente en fases posteriores:
 
-- Pose elevada del brazo y pico en primera y tercera persona.
-- Maniobras avanzadas con dos picotas `Strong Grip`.
-- Posibilidad de rodear bordes y alcanzar techos separados por aproximadamente dos bloques de vacío desde una posición balanceada válida.
-- Shift mantenido conserva agachado e interacciones vanilla.
+- Validar que Shift mantenido conserve agachado e interacciones vanilla también sobre máquinas modded.
+
+Validado manualmente en 0.1.25:
+
+- Cambio con `F`, transferencia visual del brazo y nuevo enganche con una segunda picota durante el balanceo.
+- Liberación pasiva y salto con momento pendular acumulado.
+- Extensión efectiva del alcance desde una posición balanceada válida, cruce de huecos y transición alrededor de bordes hacia una pared superior.
+- Un nuevo enganche termina intencionalmente el momento previo porque confirma una nueva posición autoritativa.
+
+Implementado en 0.1.26, pendiente de validación con dos clientes:
+
+- La pose elevada de techo se sincroniza con observadores mediante un payload visual separado de la física.
+- El cambio con `F`, el cambio techo/pared y el desenganche actualizan o limpian la mano elevada remota.
+- Una renovación periódica permite que un cliente que empieza a observar tarde reciba la pose; un timeout evita estados visuales huérfanos.
 
 Este bloque es **mandatorio**, pero no tiene prioridad inmediata sobre la estabilización y las físicas base.
 
@@ -171,32 +191,42 @@ Este bloque es **mandatorio**, pero no tiene prioridad inmediata sobre la estabi
 
 ## Compatibilidad de herramientas
 
-Crear:
+### Completado en 0.1.26
 
 ```text
 pickclimber:climbing_tools
 pickclimber:excluded_climbing_tools
 ```
 
+- La elegibilidad se resuelve en un clasificador central compartido por lógica, render y cooldown.
+- `climbing_tools` incluye `#minecraft:pickaxes` y una entrada opcional explícita para `eternal_starlight:thermal_springstone_hammer`.
+- `excluded_climbing_tools` excluye la picota de madera y siempre tiene prioridad sobre inclusión.
+- Ambos tags admiten ampliación desde datapacks y modpacks.
+
+Validado manualmente:
+
+- Picotas de Eternal Starlight y Twilight Forest.
+- Exclusión funcional de la picota de madera.
+- Cambio de mano y encantamientos con herramientas compatibles.
+
 Objetivos:
 
-- Twilight Forest.
-- Eternal Starlight.
-- Picos de otros mods.
-- Herramientas híbridas.
-- Mazas o herramientas que funcionen como pico sin pertenecer a `#minecraft:pickaxes`.
-- Lista configurable para modpacks.
+- Probar herramientas híbridas añadidas únicamente por `pickclimber:climbing_tools`, sin pertenecer a `#minecraft:pickaxes`.
+- Probar extensión y exclusión simultáneas mediante datapack.
+- Validar bloques con menú y máquinas de mods sin listas hardcodeadas.
 
 Las pruebas de interacción específica con bloques y máquinas modded se realizarán después de cerrar el comportamiento vanilla.
 
 ## Visuales posteriores
 
 - Evaluar una pose equivalente en tercera persona para paredes.
-- Implementar la pose elevada de Strong Grip en primera y tercera persona.
+- Validar la pose elevada de Strong Grip con dos clientes en multijugador, incluyendo `F`, detach, dimensión y desconexión.
 - Probar `IItemDecorator` con otras escalas de GUI y mods de interfaz.
-- Evaluar indicadores distintos para superficies firmes, inestables y no escalables.
-- Considerar variantes del icono de alcance según el tipo de superficie.
-- Añadir indicadores para techos que requieren Strong Grip o Strong Grip + Sturdy Latch.
+- **Implementado en 0.1.27:** String coloreado para superficies firmes, inestables, no escalables, obstrucción, cooldown y alcance; texto diagnóstico inferior retirado tras la validación visual.
+- **Implementado en 0.1.27:** requisitos separados para Strong Grip y Strong Grip + Sturdy Latch en techos.
+- **Ajustado en 0.1.27:** HUD visible hasta 3 bloques y descenso inestable a `0.136` bloques/tick sin Sturdy Latch.
+- **Ajustado en 0.1.27:** los cambios de punto de techo evalúan Strong Grip en la herramienta libre y los clics rechazados explican el motivo en la barra de acción; Sturdy Latch conserva aviso visual sin mensaje de rechazo.
+- Evaluar sonidos suaves de tensión y partículas diferenciadas para nieve, hielo y frenado.
 
 ## Orden de trabajo previsto
 
@@ -209,4 +239,6 @@ Las pruebas de interacción específica con bloques y máquinas modded se realiz
 7. Implementar `Strong Grip`, exclusividad y anclajes básicos de techo.
 8. Implementar pose elevada y doble pulsación de Shift.
 9. Implementar balanceo y maniobras con dos picotas.
-10. Compatibilidad general de herramientas, pruebas modded y pulido visual.
+10. **Compatibilidad base completada en 0.1.26:** tags de herramientas y pruebas con Eternal Starlight/Twilight Forest.
+11. **Completado en 0.1.27:** indicadores de superficie, requisitos de techo, cooldown, obstrucción y alcance.
+12. **Siguiente:** validar pose remota y pulir sonidos, partículas y poses corporales adicionales.

@@ -8,7 +8,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 
-/** Claves y consultas de los encantamientos propios de Pick Climber. */
+/** Resource keys and queries for Pick Climber enchantments. */
 public final class ModEnchantments {
     public static final ResourceKey<Enchantment> PICK_CLIMBER = ResourceKey.create(
             Registries.ENCHANTMENT,

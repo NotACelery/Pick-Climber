@@ -12,7 +12,7 @@ public final class ModNetworking {
     }
 
     public static void registerPayloads(RegisterPayloadHandlersEvent event) {
-        PayloadRegistrar registrar = event.registrar("11");
+        PayloadRegistrar registrar = event.registrar("13");
 
         registrar.playToClient(
                 AnchorSyncPayload.TYPE,
@@ -24,6 +24,12 @@ public final class ModNetworking {
                 BoostSyncPayload.TYPE,
                 BoostSyncPayload.STREAM_CODEC,
                 ModNetworking::handleBoostSync
+        );
+
+        registrar.playToClient(
+                RemoteAnchorPosePayload.TYPE,
+                RemoteAnchorPosePayload.STREAM_CODEC,
+                ModNetworking::handleRemoteAnchorPose
         );
 
         registrar.playToServer(
@@ -49,8 +55,20 @@ public final class ModNetworking {
         ClimbManager.applyClientBoost(player, payload);
     }
 
+    private static void handleRemoteAnchorPose(RemoteAnchorPosePayload payload, IPayloadContext context) {
+        ClimbManager.applyRemoteAnchorPose(context.player(), payload);
+    }
+
     private static void handleDetachRequest(DetachRequestPayload payload, IPayloadContext context) {
         if (context.player() instanceof ServerPlayer serverPlayer) {
+            // The input that triggered Space travels in the same request so the
+            // jump vector does not depend on the periodic payload's tick.
+            ClimbManager.updateSlideInput(serverPlayer, new SlideInputPayload(
+                    payload.forward(),
+                    payload.strafe(),
+                    payload.yaw(),
+                    payload.pitch()
+            ));
             ClimbManager.detachServer(serverPlayer, payload.jump());
         }
     }
