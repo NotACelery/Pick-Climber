@@ -6,6 +6,15 @@ GRADLE_VERSION="9.2.1"
 DIST_ROOT="$PWD/.gradle-dist"
 DIST_DIR="$DIST_ROOT/gradle-$GRADLE_VERSION"
 DIST_ZIP="$DIST_ROOT/gradle-$GRADLE_VERSION-bin.zip"
+MOD_VERSION="$(sed -n 's/^mod_version=//p' gradle.properties | head -n 1)"
+MINECRAFT_VERSION="$(sed -n 's/^minecraft_version=//p' gradle.properties | head -n 1)"
+
+if [ -z "$MOD_VERSION" ] || [ -z "$MINECRAFT_VERSION" ]; then
+    echo "ERROR: gradle.properties does not define mod_version and minecraft_version." >&2
+    exit 1
+fi
+
+EXPECTED_JAR="$PWD/build/libs/pickclimber-$MINECRAFT_VERSION-$MOD_VERSION.jar"
 
 if ! command -v java >/dev/null 2>&1; then
     echo "ERROR: Java is not installed or is not in PATH. Java 21 is required." >&2
@@ -19,6 +28,13 @@ if [ ! -x "$DIST_DIR/bin/gradle" ]; then
     unzip -q -o "$DIST_ZIP" -d "$DIST_ROOT"
 fi
 
-echo "Building Pick Climber beta 0.1.27..."
+echo "Building Pick Climber release $MOD_VERSION for Minecraft $MINECRAFT_VERSION..."
 "$DIST_DIR/bin/gradle" clean build
-echo "DONE: check build/libs/"
+
+if [ ! -f "$EXPECTED_JAR" ]; then
+    echo "ERROR: Gradle finished, but the expected JAR was not found:" >&2
+    echo "  $EXPECTED_JAR" >&2
+    exit 1
+fi
+
+echo "DONE: $EXPECTED_JAR"

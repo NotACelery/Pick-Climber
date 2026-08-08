@@ -96,6 +96,16 @@
 
 # Changelog
 
+## 1.0.0
+
+- Primera release pública estable de Pick Climber para Minecraft 1.21.1 y NeoForge 21.1.235.
+- Consolida escalada de paredes, frenado progresivo, superficies inestables, maniobras con dos picotas y movimiento de techo.
+- Incluye Pick Climber I–III, Sturdy Latch I y Strong Grip I con sus compatibilidades y especializaciones vigentes.
+- Publica indicadores de anclaje, mensajes localizados, poses elevadas y selección data-driven de herramientas y superficies.
+- Declara `celerbi` como autor y localiza la descripción de la lista de mods en inglés, español general y español de Chile.
+- Los scripts de Windows y Linux leen la versión desde `gradle.properties` y verifican el JAR exacto antes de declarar éxito.
+- No modifica el protocolo 13 ni el balance físico validado en 0.1.27-beta.
+
 ## 0.1.27-beta
 
 - Reemplaza el indicador genérico de cuerda por una banda compacta y localizada bajo la mira.

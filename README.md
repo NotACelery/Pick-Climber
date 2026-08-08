@@ -1,4 +1,4 @@
-# Pick Climber — Beta experimental 0.1.27
+# Pick Climber — Release 1.0.0
 
 Mod para **Minecraft 1.21.1**, **NeoForge 21.1.235** y **Java 21**.
 
@@ -158,14 +158,14 @@ Al cambiar de punto desde un techo, los requisitos se evalúan sobre la picota l
 ## Compilar en Windows
 
 1. Instala Java 21.
-2. Ejecuta `build-beta.bat`.
+2. Ejecuta `build-beta.bat`; el script lee automáticamente la versión y Minecraft desde `gradle.properties`.
 3. El JAR aparecerá en:
 
 ```text
-build/libs/pickclimber-1.21.1-0.1.27-beta.jar
+build/libs/pickclimber-1.21.1-1.0.0.jar
 ```
 
-Retira versiones anteriores antes de instalar esta beta.
+Retira versiones anteriores antes de instalar la release.
 
 ## Diseño futuro obligatorio
 

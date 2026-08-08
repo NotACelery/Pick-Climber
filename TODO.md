@@ -219,6 +219,7 @@ Las pruebas de interacción específica con bloques y máquinas modded se realiz
 
 ## Visuales posteriores
 
+- **Release 1.0.0:** baseline público cerrado sobre las funciones validadas de 0.1.27-beta.
 - Evaluar una pose equivalente en tercera persona para paredes.
 - Validar la pose elevada de Strong Grip con dos clientes en multijugador, incluyendo `F`, detach, dimensión y desconexión.
 - Probar `IItemDecorator` con otras escalas de GUI y mods de interfaz.

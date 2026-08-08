@@ -7,8 +7,8 @@ modId="${mod_id}"
 version="${mod_version}"
 displayName="${mod_name}"
 logoFile="pickclimber_logo.png"
-authors="NotACelery"
-description="Use pickaxes as anchor points to latch onto surfaces, climb walls, brake falls, and swing from ceilings. Experimental beta for Minecraft 1.21.1."
+authors="${mod_authors}"
+description="${mod_description}"
 
 [[dependencies.${mod_id}]]
 modId="neoforge"
