@@ -1,3 +1,12 @@
+## 1.0.1 - 2026-08-20
+
+### Interaction priority hotfix
+
+- Pick Climber now waits until NeoForge's post-block interaction phase before anchoring.
+- Blocks that consume right click for their own GUI or interaction keep priority, including Easy Villagers Farmers and Easy Farmer's Delight Compat Farmers.
+- Off-hand climbing-tool priority is preserved when the targeted block does not handle the click.
+- Shift-right-click can still reach Pick Climber when Minecraft skips the block interaction while sneaking.
+
 ## 0.1.14-beta
 
 - Los bloques que declaran un `MenuProvider` conservan el clic derecho vanilla mientras el jugador no mantenga Shift.

@@ -1,4 +1,4 @@
-# Pick Climber — Release 1.0.0
+# Pick Climber — Release 1.0.1
 
 Mod para **Minecraft 1.21.1**, **NeoForge 21.1.235** y **Java 21**.
 
@@ -14,16 +14,17 @@ Convierte las herramientas incluidas en `#pickclimber:climbing_tools` en herrami
 - 15 puntos de durabilidad por enganche o impulso exitoso, respetando `Unbreaking`.
 - Pick Climber I–III mejora el impulso y el wall jump.
 
-## Bloques interactivos vanilla
+## Bloques interactivos y prioridad del clic derecho
 
-La beta 0.1.14 distingue entre usar un bloque con menú y convertir su cara en un punto de apoyo:
+Desde 1.0.1, Pick Climber espera hasta que el bloque tenga su oportunidad normal de manejar el clic antes de intentar engancharse:
 
-- **Clic derecho normal** sobre horno, mesa de crafteo, cofre u otro bloque que declare un menú: conserva la interacción vanilla.
-- **Shift + clic derecho** con una picota disponible: intenta engancharse a la cara vertical válida sin abrir la interfaz.
+- **Clic derecho normal** sobre un bloque que abre una interfaz o consume la interacción: el bloque conserva el clic y Pick Climber no se engancha.
+- Esto funciona también con bloques modded que abren su GUI directamente desde la interacción, como los Farmers de Easy Villagers y Easy Farmer's Delight Compat.
+- Si el bloque no utiliza el clic, Pick Climber puede convertir la cara válida en un punto de apoyo.
+- **Shift + clic derecho** sigue permitiendo engancharse cuando Minecraft omite la interacción normal del bloque al usar la acción secundaria.
 - Un intento inválido no consume durabilidad ni inicia cooldown.
-- El indicador de alcance usa la misma regla: sobre un bloque con menú solo aparece al mantener Shift.
 
-La detección utiliza el `MenuProvider` del propio bloque. No existe una lista hardcodeada de hornos, cofres o mesas.
+La prioridad se resuelve mediante el propio pipeline de interacción de NeoForge, sin listas hardcodeadas de bloques o mods. El indicador conserva además la detección preventiva de los bloques que exponen un `MenuProvider` directamente.
 
 ## Prioridad de manos y mano principal libre
 
@@ -162,7 +163,7 @@ Al cambiar de punto desde un techo, los requisitos se evalúan sobre la picota l
 3. El JAR aparecerá en:
 
 ```text
-build/libs/pickclimber-1.21.1-1.0.0.jar
+build/libs/pickclimber-1.21.1-1.0.1.jar
 ```
 
 Retira versiones anteriores antes de instalar la release.

@@ -12,9 +12,10 @@ import net.minecraft.world.phys.BlockHitResult;
  * opportunity and, if it returns PASS, Minecraft continues with the off hand,
  * where Pick Climber may consume the click.
  *
- * Blocks exposing a menu preserve vanilla right-click behavior. Hold Shift to
- * use one of their faces as an anchor, just as when placing a block against a
- * chest, furnace, or crafting table without opening its interface.
+ * Runtime right-click priority is enforced later in NeoForge's ITEM_AFTER_BLOCK
+ * phase, so every block gets its normal interaction before Pick Climber anchors.
+ * The menu-provider check here is retained only as a conservative HUD/selection
+ * hint for blocks that expose a provider directly.
  */
 public final class ClimbingHandSelector {
     private ClimbingHandSelector() {

@@ -2,16 +2,18 @@ package dev.maicra.pickclimber.event;
 
 import dev.maicra.pickclimber.PickClimber;
 import dev.maicra.pickclimber.climb.ClimbManager;
-import dev.maicra.pickclimber.climb.ClimbingHandSelector;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.event.entity.living.LivingEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 @EventBusSubscriber(modid = PickClimber.MOD_ID)
@@ -21,46 +23,66 @@ public final class CommonEvents {
 
     @SubscribeEvent
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
-        // Only the server may declare an anchor incoherent and clean it up.
-        // Recover before selecting a hand so decisions are not made against a
-        // physical state that no longer exists.
+        // Keep stale-state recovery at the start of the normal interaction
+        // pipeline, but never consume the click here. Blocks must get their own
+        // useItemOn/useWithoutItem handling before Pick Climber considers an
+        // anchor. This is important for modded machines that open menus without
+        // exposing BlockState#getMenuProvider.
         if (event.getEntity() instanceof ServerPlayer serverPlayer
                 && ClimbManager.isAttached(serverPlayer)
                 && !ClimbManager.isAttachmentCoherent(serverPlayer)) {
             ClimbManager.recoverStaleAttachment(serverPlayer);
         }
+    }
 
-        if (event.getEntity().level().isClientSide()
-                && event.getHand() == InteractionHand.MAIN_HAND) {
-            Component feedback = ClimbManager.anchorAttemptFailureMessage(
-                    event.getEntity(),
-                    event.getHitVec()
-            );
-            if (feedback != null) {
-                event.getEntity().displayClientMessage(feedback, true);
-            }
-        }
-
-        InteractionHand preferredHand = ClimbingHandSelector.preferred(
-                event.getEntity(),
-                event.getHitVec()
-        );
-
-        if (preferredHand == null || event.getHand() != preferredHand) {
-            // Not cancelling is intentional. In particular, when the off hand is
-            // preferred, the main hand gets its full interaction first. If it
-            // places or uses something, the pipeline ends; if it returns PASS,
-            // Minecraft continues and fires this event for the off hand.
-            // On menu blocks, ClimbingHandSelector also returns null unless the
-            // player holds Shift, preserving vanilla use.
+    @SubscribeEvent
+    public static void onUseItemOnBlock(UseItemOnBlockEvent event) {
+        if (event.getUsePhase() != UseItemOnBlockEvent.UsePhase.ITEM_AFTER_BLOCK) {
             return;
         }
 
-        event.setCancellationResult(InteractionResult.SUCCESS);
-        event.setCanceled(true);
+        Player player = event.getPlayer();
+        if (player == null) {
+            return;
+        }
 
-        if (event.getEntity() instanceof ServerPlayer serverPlayer) {
-            ClimbManager.useClimbingTool(serverPlayer, preferredHand, event.getHitVec());
+        var context = event.getUseOnContext();
+        BlockHitResult hit = new BlockHitResult(
+                context.getClickLocation(),
+                context.getClickedFace(),
+                context.getClickedPos(),
+                context.isInside()
+        );
+
+        InteractionHand hand = event.getHand();
+
+        // Preserve the original off-hand priority. If both hands can anchor, the
+        // main-hand item gets its normal useOn opportunity and the interaction
+        // pipeline proceeds to the off hand, where Pick Climber consumes it.
+        if (hand == InteractionHand.MAIN_HAND
+                && ClimbManager.canAttemptAnchor(player, InteractionHand.OFF_HAND, hit)) {
+            return;
+        }
+
+        if (!ClimbManager.canAttemptAnchor(player, hand, hit)) {
+            // Feedback belongs here, after block interaction passed. A chest,
+            // Farmer, machine, etc. that consumed the click therefore opens
+            // normally without a misleading Pick Climber warning.
+            if (player.level().isClientSide() && hand == InteractionHand.MAIN_HAND) {
+                Component feedback = ClimbManager.anchorAttemptFailureMessage(player, hit);
+                if (feedback != null) {
+                    player.displayClientMessage(feedback, true);
+                }
+            }
+            return;
+        }
+
+        // ITEM_AFTER_BLOCK is only reached after the target block declined the
+        // interaction. Pick Climber can now safely take ownership of this click.
+        event.cancelWithResult(ItemInteractionResult.SUCCESS);
+
+        if (player instanceof ServerPlayer serverPlayer) {
+            ClimbManager.useClimbingTool(serverPlayer, hand, hit);
         }
     }
 
