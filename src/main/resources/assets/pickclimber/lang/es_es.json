@@ -17,5 +17,7 @@
   "message.pickclimber.anchor.blocked_by": "No se puede anclar: bloqueado por %s",
   "message.pickclimber.anchor.not_enough_space": "No se puede anclar: no hay espacio suficiente para el jugador",
   "message.pickclimber.anchor.obstructed": "No se puede anclar en esta posición",
-  "message.pickclimber.anchor.entity": "No se puede anclar a una entidad"
+  "message.pickclimber.anchor.entity": "No se puede anclar a una entidad",
+  "itemGroup.pickclimber": "Pick Climber",
+  "item.pickclimber.climbing_pick_icon": "Icono de Pick Climber"
 }

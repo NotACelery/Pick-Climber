@@ -2,10 +2,12 @@ package dev.maicra.pickclimber.event;
 
 import dev.maicra.pickclimber.PickClimber;
 import dev.maicra.pickclimber.climb.ClimbManager;
+import dev.maicra.pickclimber.climb.ClimbingHandSelector;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -32,6 +34,28 @@ public final class CommonEvents {
                 && ClimbManager.isAttached(serverPlayer)
                 && !ClimbManager.isAttachmentCoherent(serverPlayer)) {
             ClimbManager.recoverStaleAttachment(serverPlayer);
+        }
+
+        Player player = event.getEntity();
+        if (!player.isSecondaryUseActive()) {
+            return;
+        }
+
+        // Shift + RMB is the explicit force-anchor gesture. Resolve the preferred
+        // hand here, before the block can consume the interaction. This is the
+        // only path allowed to pre-empt a machine/chest/Farmer interaction.
+        // If the target is not a genuinely valid anchor, preferred() returns null
+        // and vanilla/modded Shift interaction proceeds untouched.
+        InteractionHand preferredHand = ClimbingHandSelector.preferred(player, event.getHitVec());
+        if (preferredHand == null) {
+            return;
+        }
+
+        event.setCancellationResult(InteractionResult.SUCCESS);
+        event.setCanceled(true);
+
+        if (player instanceof ServerPlayer serverPlayer) {
+            ClimbManager.useClimbingTool(serverPlayer, preferredHand, event.getHitVec());
         }
     }
 

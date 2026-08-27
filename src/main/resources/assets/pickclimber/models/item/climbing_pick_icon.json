@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "pickclimber:item/climbing_pick_icon"
+  }
+}

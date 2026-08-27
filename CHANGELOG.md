@@ -1,3 +1,11 @@
+## 1.0.1 - post-release source patch
+
+### Branding / icon integration
+
+- Replaced the packaged mod logo with the new pixel-art climbing-pick icon.
+- Added a Pick Climber creative tab for the mod enchantments, using the same new icon in-game.
+- The same icon is now used for NeoForge/FML mod details and launcher mod menus through `logoFile`.
+
 ## 1.0.1 - 2026-08-20
 
 ### Interaction priority hotfix
@@ -5,7 +13,8 @@
 - Pick Climber now waits until NeoForge's post-block interaction phase before anchoring.
 - Blocks that consume right click for their own GUI or interaction keep priority, including Easy Villagers Farmers and Easy Farmer's Delight Compat Farmers.
 - Off-hand climbing-tool priority is preserved when the targeted block does not handle the click.
-- Shift-right-click can still reach Pick Climber when Minecraft skips the block interaction while sneaking.
+- Shift-right-click is an explicit force-anchor override: when a valid climbing tool and anchor face are available, Pick Climber takes priority even if the target block normally consumes Shift interaction.
+- Invalid anchor attempts do not steal the block's normal Shift interaction.
 
 ## 0.1.14-beta
 

@@ -14,6 +14,11 @@ Convierte las herramientas incluidas en `#pickclimber:climbing_tools` en herrami
 - 15 puntos de durabilidad por enganche o impulso exitoso, respetando `Unbreaking`.
 - Pick Climber I–III mejora el impulso y el wall jump.
 
+## Icono y presentación
+
+- El mod usa el icono oficial `src/main/resources/pickclimber_logo.png` para la ficha del mod en NeoForge/FML y para launchers que leen `logoFile`.
+- También añade una pestaña creativa propia con los libros encantados de Pick Climber y un icono dedicado basado en la misma ilustración.
+
 ## Bloques interactivos y prioridad del clic derecho
 
 Desde 1.0.1, Pick Climber espera hasta que el bloque tenga su oportunidad normal de manejar el clic antes de intentar engancharse:
@@ -21,7 +26,8 @@ Desde 1.0.1, Pick Climber espera hasta que el bloque tenga su oportunidad normal
 - **Clic derecho normal** sobre un bloque que abre una interfaz o consume la interacción: el bloque conserva el clic y Pick Climber no se engancha.
 - Esto funciona también con bloques modded que abren su GUI directamente desde la interacción, como los Farmers de Easy Villagers y Easy Farmer's Delight Compat.
 - Si el bloque no utiliza el clic, Pick Climber puede convertir la cara válida en un punto de apoyo.
-- **Shift + clic derecho** sigue permitiendo engancharse cuando Minecraft omite la interacción normal del bloque al usar la acción secundaria.
+- **Shift + clic derecho** es el override explícito de enganche: si existe una herramienta y una cara válidas, Pick Climber toma prioridad aunque el bloque normalmente consuma su propia interacción con Shift.
+- Si la cara no es un anchor válido, Pick Climber no roba el Shift-click y el bloque conserva su comportamiento normal.
 - Un intento inválido no consume durabilidad ni inicia cooldown.
 
 La prioridad se resuelve mediante el propio pipeline de interacción de NeoForge, sin listas hardcodeadas de bloques o mods. El indicador conserva además la detección preventiva de los bloques que exponen un `MenuProvider` directamente.

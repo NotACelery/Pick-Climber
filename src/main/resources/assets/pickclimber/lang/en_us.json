@@ -17,5 +17,7 @@
   "message.pickclimber.anchor.blocked_by": "Cannot anchor: blocked by %s",
   "message.pickclimber.anchor.not_enough_space": "Cannot anchor: not enough space for the player",
   "message.pickclimber.anchor.obstructed": "Cannot anchor at this position",
-  "message.pickclimber.anchor.entity": "Cannot anchor into an entity"
+  "message.pickclimber.anchor.entity": "Cannot anchor into an entity",
+  "itemGroup.pickclimber": "Pick Climber",
+  "item.pickclimber.climbing_pick_icon": "Pick Climber Icon"
 }
