@@ -1,4 +1,4 @@
-# Checklist de release 1.0.0 — indicadores y regresiones
+# Checklist de release 1.0.1 — indicadores y regresiones
 
 ## Indicadores de anclaje
 

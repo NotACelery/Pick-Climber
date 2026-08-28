@@ -11,10 +11,6 @@ import net.minecraft.world.InteractionHand;
 
 import java.util.UUID;
 
-/**
- * Minimal observer-only state for third-person ceiling poses. It never carries
- * position, velocity, durability, or any other server-authoritative physics.
- */
 public record RemoteAnchorPosePayload(
         UUID playerId,
         boolean ceilingAnchor,

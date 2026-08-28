@@ -16,11 +16,6 @@ import net.neoforged.neoforge.client.event.RenderPlayerEvent;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-/**
- * Applies the raised pose to local and remotely synchronized player models while
- * Strong Grip maintains a ceiling anchor. A vanilla ArmPose is used because
- * ItemInHandLayer inherits the same transformation for the pickaxe.
- */
 @EventBusSubscriber(modid = PickClimber.MOD_ID, value = Dist.CLIENT)
 public final class CeilingPlayerPoseRenderer {
     private static final Map<PlayerRenderer, ArmPoseSnapshot> PREVIOUS_POSES = new IdentityHashMap<>();

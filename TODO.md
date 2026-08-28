@@ -242,4 +242,4 @@ Las pruebas de interacción específica con bloques y máquinas modded se realiz
 9. Implementar balanceo y maniobras con dos picotas.
 10. **Compatibilidad base completada en 0.1.26:** tags de herramientas y pruebas con Eternal Starlight/Twilight Forest.
 11. **Completado en 0.1.27:** indicadores de superficie, requisitos de techo, cooldown, obstrucción y alcance.
-12. **Siguiente:** validar pose remota y pulir sonidos, partículas y poses corporales adicionales.
+12. **Siguiente:** validar con dos clientes la pose remota ya implementada y pulir sonidos, partículas y poses corporales adicionales.

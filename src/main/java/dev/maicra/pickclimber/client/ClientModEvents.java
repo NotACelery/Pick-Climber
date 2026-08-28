@@ -19,9 +19,6 @@ public final class ClientModEvents {
 
     @SubscribeEvent
     public static void registerItemDecorations(RegisterItemDecorationsEvent event) {
-        // Tags may not be bound yet when this event fires. Register the decorator
-        // for every item and let the climbing-tool tags filter while rendering.
-        // This preserves compatibility with modded tools without a fixed list.
         for (Item item : BuiltInRegistries.ITEM) {
             event.register(item, PickClimberItemDecorator.INSTANCE);
         }

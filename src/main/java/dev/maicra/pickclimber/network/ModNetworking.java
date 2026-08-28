@@ -61,8 +61,6 @@ public final class ModNetworking {
 
     private static void handleDetachRequest(DetachRequestPayload payload, IPayloadContext context) {
         if (context.player() instanceof ServerPlayer serverPlayer) {
-            // The input that triggered Space travels in the same request so the
-            // jump vector does not depend on the periodic payload's tick.
             ClimbManager.updateSlideInput(serverPlayer, new SlideInputPayload(
                     payload.forward(),
                     payload.strafe(),

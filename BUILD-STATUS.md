@@ -1,11 +1,13 @@
 # Estado de compilación
 
-Versión preparada: `1.0.0`
+Versión preparada: `1.0.1`
 
 Objetivo: Minecraft 1.21.1, NeoForge 21.1.235 y Java 21.
 
-Cambios funcionales:
+Baseline funcional vigente:
 
+- 1.0.1 conserva la prioridad de interacción de bloques y usa Shift + clic derecho como override explícito de anclaje.
+- 1.0.1 incorpora la identidad visual actual y la pestaña creativa del mod.
 - Clasificación data-driven de superficies estables, inestables y no escalables.
 - Frenado progresivo servidor-autoritativo para caídas rápidas.
 - Descenso controlado en superficies inestables y comprobación de colisión antes de cada desplazamiento.
@@ -41,11 +43,11 @@ Cambios funcionales:
 Validación realizada en este entorno:
 
 - `cmd /c build-beta.bat` terminó con `BUILD SUCCESSFUL` usando Java 21.
-- El JAR generado corresponde a la versión 1.0.0.
+- La última compilación documentada en este archivo corresponde a la línea 1.0.x; tras la limpieza de source 1.0.1 debe repetirse el build y QA in-game antes de publicación.
 - `bash -n build-beta.sh` validó el script Linux y `.gitattributes` fija sus finales de línea en LF.
-- La metadata empaquetada declara versión 1.0.0, autor `celerbi`, licencia All Rights Reserved, Minecraft 1.21.1, NeoForge 21.1.235 mínimo y ejecución en ambos lados; el JAR contiene la descripción localizada en `en_us`, `es_es` y `es_cl`.
+- La metadata de 1.0.1 debe declarar versión 1.0.1, autor `celerbi`, licencia All Rights Reserved, Minecraft 1.21.1, NeoForge 21.1.235 mínimo y ejecución en ambos lados; el JAR contiene la descripción localizada en `en_us`, `es_es` y `es_cl`.
 - La lógica de tags, frenado, descenso y render elevado compila contra NeoForge 21.1.235.
-- La regresión final específica del JAR 1.0.0 dentro de Minecraft sigue pendiente antes de publicarlo.
+- La regresión final específica del JAR 1.0.1 dentro de Minecraft sigue pendiente antes de publicarlo.
 
 ```text
 build-beta.bat
@@ -54,5 +56,13 @@ build-beta.bat
 Resultado esperado:
 
 ```text
-build/libs/pickclimber-1.21.1-1.0.0.jar
+build/libs/pickclimber-1.21.1-1.0.1.jar
 ```
+
+## Estado del source 1.0.1
+
+- El árbol Java fue normalizado manteniendo la misma lógica ejecutable.
+- La documentación técnica se centraliza en `docs/DEVELOPMENT.md`.
+- Los comentarios explicativos fueron retirados del runtime Java y trasladados a documentación.
+- `SOURCE-MANIFEST.json` debe corresponder a esta base 1.0.1.
+- El build y la regresión in-game siguen siendo obligatorios antes de publicar cualquier artefacto generado desde esta limpieza.

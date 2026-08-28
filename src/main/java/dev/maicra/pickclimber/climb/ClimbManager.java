@@ -48,20 +48,18 @@ public final class ClimbManager {
     public static final int ANCHOR_COOLDOWN_TICKS = 20;
     public static final int UNSTABLE_ANCHOR_COOLDOWN_TICKS = 40;
 
-    /** Velocity remains a secondary check and never authorizes a boost by itself. */
     public static final double RISING_VELOCITY_THRESHOLD = 0.08D;
     private static final int JUMP_BOOST_WINDOW_TICKS = 8;
     private static final double BASE_BOOST_HEIGHT = 1.0D;
     private static final double BOOST_HEIGHT_PER_ENCHANTMENT_LEVEL = 0.5D;
     private static final double WALL_JUMP_HEIGHT_PER_ENCHANTMENT_LEVEL = 0.5D;
 
-    /** Stable vanilla animation point where the pickaxe is furthest forward. */
     private static final float PINNED_SWING_PROGRESS = 0.5F;
     private static final float PINNED_POSE_RAMP_TICKS = 4.0F;
 
     private static final double MAX_HIT_DISTANCE_SQR = 25.0D;
     private static final double MAX_INDICATOR_DISTANCE_SQR = 9.0D;
-    private static final double MAX_ANCHOR_MOVE_SQR = 2.25D; // 1.5 actual blocks.
+    private static final double MAX_ANCHOR_MOVE_SQR = 2.25D;
     private static final double MAX_DRIFT_DISTANCE_SQR = 16.0D;
     private static final double ATTACHMENT_COHERENCE_DISTANCE_SQR = 1.0D;
     private static final int WALL_TARGET_COLLISION_STEPS = 18;
@@ -76,7 +74,7 @@ public final class ClimbManager {
     private static final double BRAKING_DRAG = 0.75D;
     private static final double BRAKING_RECOVERY = 0.035D;
     private static final double UNSTABLE_SLIDE_SPEED = -0.136D;
-    /** Prevents crossing or skipping blocks while absorbing an extreme fall. */
+
     private static final double MAX_BRAKING_MOVE_PER_TICK = 0.60D;
     private static final double CONTACT_BLOCK_EPSILON = 1.0E-3D;
 
@@ -89,7 +87,6 @@ public final class ClimbManager {
     private ClimbManager() {
     }
 
-    /** Records only real jumps fired by LivingJumpEvent on the server. */
     public static void recordRealJump(ServerPlayer player) {
         LAST_REAL_JUMP.put(player.getUUID(), player.level().getGameTime());
     }
@@ -135,7 +132,6 @@ public final class ClimbManager {
         return state == null ? null : state.activeHand();
     }
 
-    /** Reports whether the current synchronized state belongs to a block's underside. */
     public static boolean isCeilingAnchor(Player player) {
         if (player.level().isClientSide()) {
             ClientClimbState state = CLIENT_STATES.get(player.getUUID());
@@ -146,7 +142,6 @@ public final class ClimbManager {
         return state != null && state.anchorFace() == Direction.DOWN;
     }
 
-    /** Checks the pickaxe UUID rather than only its item type or hand. */
     public static boolean isActiveTool(Player player, ItemStack stack) {
         if (stack.isEmpty()) {
             return false;
@@ -164,23 +159,10 @@ public final class ClimbManager {
         return activeId != null && ToolIdentity.matches(stack, activeId);
     }
 
-    /**
-     * Visual fraction of the individual cooldown persisted on the ItemStack.
-     *
-     * The timer starts when attachment is confirmed and continues decreasing
-     * while the pickaxe remains the active anchor. The attached state neither
-     * freezes nor replaces the cooldown; it uses a separate dedicated indicator.
-     */
     public static float visualCooldownFraction(Player player, ItemStack stack) {
         return ToolIdentity.cooldownFraction(stack, player.level().getGameTime());
     }
 
-    /**
-     * Returns the fixed swing progress used to represent the pinned pickaxe.
-     * A negative value means this stack is not the client's active pickaxe.
-     * Entry animates for a few ticks and then freezes completely, independently
-     * of the vanilla animation that keeps advancing.
-     */
     public static float pinnedPoseProgress(Player player, ItemStack stack, float partialTick) {
         float blend = pinnedPoseBlend(player, stack, partialTick, false);
         if (blend < 0.0F) {
@@ -190,11 +172,6 @@ public final class ClimbManager {
         return PINNED_SWING_PROGRESS * blend;
     }
 
-    /**
-     * Returns normalized entry progress for the raised pose while the active
-     * pickaxe maintains a ceiling anchor. A negative value selects the wall pose
-     * or vanilla rendering instead.
-     */
     public static float ceilingPoseProgress(Player player, ItemStack stack, float partialTick) {
         return pinnedPoseBlend(player, stack, partialTick, true);
     }
@@ -218,16 +195,11 @@ public final class ClimbManager {
 
         float age = (float) (player.level().getGameTime() - state.poseStartedGameTime()) + partialTick;
         float blend = Mth.clamp(age / PINNED_POSE_RAMP_TICKS, 0.0F, 1.0F);
-        // Smooth curve: enters quickly while avoiding a harsh visual snap from idle.
+
         blend = 1.0F - (1.0F - blend) * (1.0F - blend);
         return blend;
     }
 
-    /**
-     * Checks that the logical anchor state matches the player's physical
-     * position. Used to recover transitional states where the client still
-     * believes it is attached while it is already falling.
-     */
     public static boolean isAttachmentCoherent(Player player) {
         if (player.level().isClientSide()) {
             ClientClimbState state = CLIENT_STATES.get(player.getUUID());
@@ -244,8 +216,6 @@ public final class ClimbManager {
 
     public static void recoverStaleAttachment(Player player) {
         if (player.level().isClientSide()) {
-            // The client never recovers or alters physical state autonomously.
-            // Wait for the authoritative server decision to avoid races.
             return;
         }
 
@@ -258,8 +228,6 @@ public final class ClimbManager {
     }
 
     public static boolean canAttemptAnchor(Player player, InteractionHand hand, BlockHitResult hit) {
-        // Creative flight does not invalidate attachment: the mechanic must also
-        // work as a safety catch while the player is falling.
         if (!player.isAlive() || player.isSpectator() || player.isFallFlying()) {
             return false;
         }
@@ -281,17 +249,10 @@ public final class ClimbManager {
 
         boolean duplicatedActiveIdentity = hasDuplicatedActiveIdentity(player, hand, stack);
         if (duplicatedActiveIdentity && !player.level().isClientSide()) {
-            // Identity belongs to the ItemStack, not the hand. Two simultaneous
-            // stacks with the same UUID are copies, so the candidate must regain
-            // an individual identity and cooldown before validation.
             ToolIdentity.assign(stack, UUID.randomUUID());
             ToolIdentity.clearCooldown(stack);
         }
 
-        // An attached pickaxe remains occupied even if its internal cooldown
-        // finishes while pinned to the wall. Only the hand holding the anchor is
-        // occupied. If another pickaxe inherited the same UUID through copying,
-        // it is still a separate tool and must be able to create the next point.
         if (isActiveTool(player, stack) && activeHand(player) == hand) {
             return false;
         }
@@ -314,8 +275,6 @@ public final class ClimbManager {
             return false;
         }
 
-        // The indicator and click share the exact same 1.5-block rule. Previously,
-        // the icon depended only on vanilla interaction reach.
         Vec3 target = resolveCollisionSafeTargetPosition(player, hit);
         if (target == null) {
             return false;
@@ -327,10 +286,6 @@ public final class ClimbManager {
         return true;
     }
 
-    /**
-     * Mirrors anchor validation into a read-only HUD result. This method never
-     * creates identity, consumes cooldown, damages tools, or changes physics.
-     */
     public static AnchorIndicatorStatus anchorIndicatorStatus(Player player, BlockHitResult hit) {
         if (!player.level().isClientSide()
                 || !player.isAlive()
@@ -353,9 +308,6 @@ public final class ClimbManager {
             return AnchorIndicatorStatus.NONE;
         }
 
-        // Minecraft represents a crosshair miss as a BlockHitResult too. Check
-        // the exact hit point before classifying its synthetic position so the
-        // HUD never follows the crosshair into the distance.
         if (player.getEyePosition().distanceToSqr(hit.getLocation()) > MAX_INDICATOR_DISTANCE_SQR) {
             return AnchorIndicatorStatus.NONE;
         }
@@ -375,9 +327,6 @@ public final class ClimbManager {
                     : AnchorIndicatorStatus.READY;
         }
 
-        // Range is measured from the current anchor target before collision
-        // correction. A valid block two blocks away must report range, not an
-        // obstruction caused by trying to resolve an unreachable final hitbox.
         Vec3 idealTarget = calculateTargetPosition(player, hit);
         if (currentAttachmentTarget(player).distanceToSqr(idealTarget) > MAX_ANCHOR_MOVE_SQR) {
             return AnchorIndicatorStatus.OUT_OF_RANGE;
@@ -447,11 +396,6 @@ public final class ClimbManager {
         return AnchorIndicatorStatus.OBSTRUCTED;
     }
 
-    /**
-     * Returns localized action-bar feedback for a rejected block interaction.
-     * Unstable anchors intentionally return no warning: they remain valid and
-     * merely use their controlled sliding behavior without Sturdy Latch.
-     */
     public static Component anchorAttemptFailureMessage(Player player, BlockHitResult hit) {
         AnchorIndicatorStatus status = anchorIndicatorStatus(player, hit);
         return switch (status) {
@@ -483,14 +427,6 @@ public final class ClimbManager {
         return Component.translatable("message.pickclimber.anchor.obstructed");
     }
 
-    /**
-     * Chooses exclusively between a boost and an attachment.
-     *
-     * Positive velocity alone never authorizes a boost: a recent, unconsumed
-     * LivingJumpEvent must exist. This prevents network corrections, steps,
-     * teleports, or desynchronized states from being interpreted as a jump and
-     * launching a player who expected to remain attached.
-     */
     public static boolean useClimbingTool(ServerPlayer player, InteractionHand hand, BlockHitResult hit) {
         if (!canAttemptAnchor(player, hand, hit)) {
             return false;
@@ -563,8 +499,6 @@ public final class ClimbManager {
         double boostedY = velocityForAdditionalRise(currentVelocity.y, additionalHeight);
         Vec3 boostedVelocity = new Vec3(currentVelocity.x, boostedY, currentVelocity.z);
 
-        // This path never creates anchor state. The player preserves horizontal
-        // inertia and receives only the calculated vertical boost.
         player.setDeltaMovement(boostedVelocity);
         player.fallDistance = 0.0F;
         player.setOnGround(false);
@@ -603,9 +537,6 @@ public final class ClimbManager {
         if (previous != null
                 && previous.activeHand() != hand
                 && previous.toolId().equals(toolId)) {
-            // Distinct ItemStacks never share anchor identity. This can happen
-            // when duplicating a pickaxe with NBT; without separating them, the
-            // second pickaxe appears active and receives the wrong wear.
             toolId = UUID.randomUUID();
             ToolIdentity.assign(stack, toolId);
         }
@@ -625,8 +556,6 @@ public final class ClimbManager {
                 brokenItem -> player.onEquippedItemBroken(brokenItem, slot)
         );
 
-        // If the tool breaks while creating a new point, do not replace a
-        // previous anchor or generate artificial movement.
         if (stack.isEmpty()) {
             return false;
         }
@@ -670,8 +599,6 @@ public final class ClimbManager {
 
         if (previous != null) {
             clearAnchorVisuals(player, previous);
-            // The previous pickaxe started its cooldown when it attached.
-            // Switching tools neither restarts nor extends that timer.
         }
 
         ServerClimbState next = new ServerClimbState(
@@ -691,9 +618,7 @@ public final class ClimbManager {
                 cooldownTicksFor(surface, reinforcedLatch),
                 0.0F,
                 0.0F,
-                // The hit face lies exactly on an integer boundary. Move slightly
-                // inside the block so BlockPos does not resolve the air block on
-                // the player's side.
+
                 hit.getLocation().subtract(target).subtract(
                         hit.getDirection().getStepX() * CONTACT_BLOCK_EPSILON,
                         hit.getDirection().getStepY() * CONTACT_BLOCK_EPSILON,
@@ -713,10 +638,6 @@ public final class ClimbManager {
         LAST_REAL_JUMP.remove(player.getUUID());
         CONSUMED_JUMP.remove(player.getUUID());
 
-        // Atomic, authoritative transition. setPos alone is insufficient for a
-        // ServerPlayer: connection.teleport records a position pending confirmation
-        // and prevents the next client movement packet from restoring the previous
-        // position, the historical source of the snap or unintended boost.
         player.setDeltaMovement(Vec3.ZERO);
         player.getAbilities().flying = false;
         player.onUpdateAbilities();
@@ -735,9 +656,6 @@ public final class ClimbManager {
         showCracks(level, next);
         playAnchorSound(level, player, anchorState, next.anchorBlock());
 
-        // Cooldown begins immediately when attachment is confirmed, and its overlay
-        // decreases in real time while the pickaxe remains pinned. Releasing it
-        // neither starts nor restarts the timer.
         startCooldown(player, stack, next.cooldownTicks());
         if (initialMotion == AnchorMotion.BRAKING) {
             startEquippedEffortCooldown(player, hand);
@@ -783,8 +701,6 @@ public final class ClimbManager {
             return;
         }
 
-        // If the player attempts to reactivate creative flight while attached,
-        // the anchor retains control until release.
         if (player.getAbilities().flying) {
             player.getAbilities().flying = false;
             player.onUpdateAbilities();
@@ -821,19 +737,11 @@ public final class ClimbManager {
 
         long elapsed = player.level().getGameTime() - state.lastSyncGameTime();
         if (elapsed > CLIENT_SYNC_TIMEOUT_TICKS) {
-            // If the detach packet was lost, also clear the crack overlay locally
-            // so it does not remain orphaned for several seconds.
             CLIENT_STATES.remove(player.getUUID());
             clearClientCracks(player, state);
         }
     }
 
-    /**
-     * Reconciles vanilla hand swapping (`F`) by ItemStack UUID. It neither
-     * intercepts the key nor recreates the anchor: when the same pickaxe appears
-     * in the opposite hand, only active state and pose move. Durability, cooldown,
-     * sound, and cracks remain unchanged.
-     */
     private static ServerClimbState reconcileActiveHand(
             ServerPlayer player,
             ServerClimbState state
@@ -849,9 +757,6 @@ public final class ClimbManager {
         ItemStack other = player.getItemInHand(otherHand);
 
         if (!isClimbingTool(other) || !ToolIdentity.matches(other, state.toolId())) {
-            // Do not repair a missing UUID onto another pickaxe: changing slots
-            // must detach, not accidentally turn a different tool into the active
-            // anchor.
             return state;
         }
 
@@ -904,8 +809,6 @@ public final class ClimbManager {
             return false;
         }
 
-        // Unstable surfaces include snow layers and powder snow, whose vanilla
-        // geometry does not always declare a sturdy lateral face.
         return state.isFaceSturdy(player.level(), position, face)
                 || AnchorSurfaceClassifier.classify(state) == AnchorSurface.UNSTABLE;
     }
@@ -962,7 +865,6 @@ public final class ClimbManager {
                 : ANCHOR_COOLDOWN_TICKS;
     }
 
-    /** Updates anchor braking or descent exclusively on the server. */
     private static ServerClimbState advanceAnchorMotion(ServerPlayer player, ServerClimbState state) {
         if (player.level().getGameTime() <= state.attachedAtGameTime()) {
             return state;
@@ -976,9 +878,6 @@ public final class ClimbManager {
         if (state.motion() == AnchorMotion.BRAKING
                 && state.brakingSupportToolId() != null
                 && !hasBrakingSupport(player, state)) {
-            // The second pickaxe is no longer equipped or has broken. The main
-            // anchor continues safely, but no longer receives double braking or
-            // applies wear to an unrelated tool.
             state = state.withoutBrakingSupport();
         }
 
@@ -1001,8 +900,6 @@ public final class ClimbManager {
             nextVelocity = UNSTABLE_SLIDE_SPEED;
         }
 
-        // Internal velocity may be very high after a long fall, but physical
-        // travel is limited so every wall block can be inspected.
         double movementVelocity = Math.max(nextVelocity, -MAX_BRAKING_MOVE_PER_TICK);
         double lateralSpeed = Math.abs(movementVelocity) * 0.5D;
         if (state.motion() == AnchorMotion.BRAKING
@@ -1024,22 +921,18 @@ public final class ClimbManager {
             )) {
                 return null;
             }
-            // A collision while sliding never crosses blocks or forces an
-            // artificial fall. Stabilize at the last safe position.
+
             return state.withMotion(state.targetPosition(), AnchorMotion.FIXED, 0.0D);
         }
 
         BlockPos nextAnchorBlock = anchorBlockAt(player, state, nextTarget);
         BlockState nextBlockState = player.level().getBlockState(nextAnchorBlock);
         if (!hasValidAnchorFace(player, nextBlockState, nextAnchorBlock, state.anchorFace())) {
-            // When the unstable wall ends, no valid support remains. The server
-            // ends the anchor instead of continuing to use the initial block.
             return null;
         }
 
         AnchorSurface nextSurface = AnchorSurfaceClassifier.classify(nextBlockState);
-        // A firm wall does not cancel its own braking. Only a transition from
-        // unstable material to firm material should end descent.
+
         if (state.surface() == AnchorSurface.UNSTABLE
                 && nextSurface != AnchorSurface.UNSTABLE) {
             nextMotion = AnchorMotion.FIXED;
@@ -1072,10 +965,6 @@ public final class ClimbManager {
         return next;
     }
 
-    /**
-     * Restricted horizontal swing around the ceiling's center point. The server
-     * integrates input, return force, damping, radius, and collisions.
-     */
     private static ServerClimbState advanceCeilingSwing(ServerPlayer player, ServerClimbState state) {
         Vec3 center = state.ceilingCenter();
         Vec3 horizontalOffset = new Vec3(
@@ -1111,9 +1000,6 @@ public final class ClimbManager {
             }
         }
 
-        // The vanilla hitbox stays vertical and cannot tilt like a pendulum body.
-        // Raising it at the extremes would insert it into the ceiling, so the
-        // pivot is simulated on a horizontal plane at a safe height.
         Vec3 nextTarget = new Vec3(
                 center.x + nextOffset.x,
                 center.y,
@@ -1139,13 +1025,11 @@ public final class ClimbManager {
         return input.lengthSqr() > 1.0D ? input.normalize() : input;
     }
 
-    /** Two pickaxes approximately halve braking time and travel. */
     private static boolean hasBrakingSupport(ServerPlayer player, ServerClimbState state) {
         UUID supportToolId = state.brakingSupportToolId();
         return supportToolId != null && findEquippedToolById(player, supportToolId) != ItemStack.EMPTY;
     }
 
-    /** Charges additional wear only for blocks actually travelled while braking. */
     private static ServerClimbState applyBrakingWear(
             ServerPlayer player,
             ServerClimbState state,
@@ -1208,7 +1092,6 @@ public final class ClimbManager {
                 .orElse(false);
     }
 
-    /** Uses the anchor point as the real position while the server holds it fixed. */
     private static Vec3 currentAttachmentTarget(Player player) {
         if (player.level().isClientSide()) {
             ClientClimbState state = CLIENT_STATES.get(player.getUUID());
@@ -1235,8 +1118,6 @@ public final class ClimbManager {
             input = input.normalize();
         }
 
-        // Cancel the wall-normal component: the player may look and turn freely,
-        // but the anchor neither separates from nor crosses the wall.
         return switch (state.anchorFace().getAxis()) {
             case X -> new Vec3(0.0D, 0.0D, input.z);
             case Z -> new Vec3(input.x, 0.0D, 0.0D);
@@ -1255,9 +1136,6 @@ public final class ClimbManager {
         player.setOnGround(false);
         player.setDeltaMovement(Vec3.ZERO);
 
-        // Walls tolerate minimal drift. Swinging must confirm even small movements:
-        // accumulating 0.05 blocks caused slow return motion to arrive in visible
-        // multi-tick jumps.
         double correctionThresholdSqr = state.anchorFace() == Direction.DOWN
                 ? 1.0E-8D
                 : 2.5E-3D;
@@ -1265,9 +1143,6 @@ public final class ClimbManager {
             boolean smoothCeilingStep = state.anchorFace() == Direction.DOWN
                     && player.tickCount % SERVER_SYNC_INTERVAL != 0;
             if (smoothCeilingStep) {
-                // The target was collision-validated by the server and is sent to
-                // the client in the same tick. Keep periodic teleport confirmations
-                // without issuing a hard correction for every sub-block step.
                 player.setPos(target);
             } else {
                 player.connection.teleport(
@@ -1287,7 +1162,6 @@ public final class ClimbManager {
         detachServerInternal(player, jump, false);
     }
 
-    /** Receives client intent; the server decides velocity, plane, and collisions. */
     public static void updateSlideInput(ServerPlayer player, SlideInputPayload payload) {
         ServerClimbState state = SERVER_STATES.get(player.getUUID());
         if (state == null
@@ -1331,8 +1205,6 @@ public final class ClimbManager {
                 player.getInventory().setChanged();
             }
         } else if (!activeTool.isEmpty()) {
-            // The timer already started when the anchor was created. Releasing
-            // the pickaxe does not restart it; only the true remaining time is synced.
             remainingCooldownTicks = cooldownTicksRemaining(
                     activeTool,
                     player.level().getGameTime()
@@ -1350,8 +1222,6 @@ public final class ClimbManager {
         player.setDeltaMovement(detachVelocity);
 
         if (jump && state.anchorFace() != Direction.DOWN) {
-            // A wall jump is also an explicit ascent requested by the player and
-            // may chain into a boost with the other pickaxe.
             LAST_REAL_JUMP.put(player.getUUID(), player.level().getGameTime());
             CONSUMED_JUMP.remove(player.getUUID());
         }
@@ -1367,9 +1237,6 @@ public final class ClimbManager {
         );
         syncRemoteAnchorPoseDetached(player);
         if (jump && state.anchorFace() == Direction.DOWN) {
-            // Unlike wall jumps, ceiling releases cannot be predicted from client
-            // anchor state because swing velocity is server-authoritative. Send
-            // the exact result after detach so local physics cannot discard it.
             PacketDistributor.sendToPlayer(player, new BoostSyncPayload(
                     detachVelocity.x,
                     detachVelocity.y,
@@ -1388,8 +1255,6 @@ public final class ClimbManager {
 
         clearClientCracks(player, state);
 
-        // Only the user-requested jump is predicted locally. Gravity, flight, and
-        // passive detaches are synchronized by the server.
         if (jump && !state.ceilingAnchor()) {
             ItemStack activeTool = player.getItemInHand(state.activeHand());
             player.setDeltaMovement(calculateJumpVelocity(player, activeTool));
@@ -1428,15 +1293,10 @@ public final class ClimbManager {
                             player.level().getGameTime() + payload.cooldownTicks()
                     );
                 } else {
-                    // If cooldown ended while the pickaxe remained attached,
-                    // remove any residual client-side visual drift.
                     ToolIdentity.clearCooldown(releasedTool);
                 }
             }
 
-            // This anchor-state payload synchronizes visual state only. Passive
-            // movement still arrives through vanilla packets; a ceiling jump is
-            // followed by an explicit server-authoritative velocity payload.
             if (!payload.jumpDetach()) {
                 player.setDeltaMovement(Vec3.ZERO);
             }
@@ -1461,9 +1321,6 @@ public final class ClimbManager {
 
         ItemStack localTool = player.getItemInHand(hand);
         if (isClimbingTool(localTool) && payload.newAnchor()) {
-            // Only a genuinely new anchor may assign identity. During an F transfer,
-            // the vanilla inventory packet may arrive an instant later; assigning
-            // here would mark the wrong pickaxe.
             if (!ToolIdentity.matches(localTool, payload.toolId())) {
                 ToolIdentity.assign(localTool, payload.toolId());
             }
@@ -1496,17 +1353,12 @@ public final class ClimbManager {
 
         CLIENT_STATES.put(player.getUUID(), next);
         if (payload.ceilingAnchor()) {
-            // This is the exact collision-validated server target, not local
-            // prediction. setPos preserves normal render interpolation between
-            // ticks while periodic teleports remain the hard authority check.
             player.setDeltaMovement(Vec3.ZERO);
             player.setPos(target);
         }
     }
 
     public static void applyClientBoost(Player player, BoostSyncPayload payload) {
-        // A delayed boost packet must never remove an already confirmed anchor.
-        // Always prioritize the safe attached state.
         if (CLIENT_STATES.containsKey(player.getUUID())) {
             return;
         }
@@ -1532,7 +1384,6 @@ public final class ClimbManager {
         player.setOnGround(false);
     }
 
-    /** Applies observer-only pose state without touching local anchor physics. */
     public static void applyRemoteAnchorPose(Player receivingPlayer, RemoteAnchorPosePayload payload) {
         if (!payload.ceilingAnchor()) {
             REMOTE_ANCHOR_POSES.remove(payload.playerId());
@@ -1548,7 +1399,6 @@ public final class ClimbManager {
         );
     }
 
-    /** Clears visual state and the synthetic overlay before leaving the level. */
     public static void clearAllClientStates(Player localPlayer) {
         if (localPlayer != null) {
             ClientClimbState state = CLIENT_STATES.remove(localPlayer.getUUID());
@@ -1567,8 +1417,6 @@ public final class ClimbManager {
         Vec3 location = hit.getLocation();
         double wallOffset = player.getBbWidth() * 0.5D + 0.08D;
 
-        // Preserve the exact coordinate clicked on the face to allow horizontal
-        // and diagonal movement rather than vertical movement only.
         double targetX = location.x;
         double targetZ = location.z;
 
@@ -1599,7 +1447,6 @@ public final class ClimbManager {
                 );
             }
             default -> {
-                // Top and bottom faces were already rejected.
             }
         }
 
@@ -1607,17 +1454,6 @@ public final class ClimbManager {
         return new Vec3(targetX, targetY, targetZ);
     }
 
-    /**
-     * Adjusts only the height of a lateral target when the ideal position would
-     * insert the hitbox into a nearby floor or ceiling. The common case is moving
-     * from ceiling to wall: an eye-level hit places the feet half a block higher,
-     * even though preserving the current height is completely safe.
-     *
-     * The search always starts at the ideal target and moves toward the current
-     * height, preserving as much vertical displacement as collision allows. It
-     * never corrects ceiling faces or more than half the player's height; the
-     * 1.5-block reach is validated against the resulting position afterward.
-     */
     private static Vec3 resolveCollisionSafeTargetPosition(Player player, BlockHitResult hit) {
         Vec3 idealTarget = calculateTargetPosition(player, hit);
         if (isTargetPositionFree(player, idealTarget)) {
@@ -1683,9 +1519,7 @@ public final class ClimbManager {
                 state.swingReleaseMomentum().z
         );
         Vec3 release = releaseMomentum
-                // W/A/S/D apply exactly the horizontal impulse of a wall jump.
-                // Accumulated swing momentum is added as a vector, so build-up in
-                // any direction can reinforce or oppose the requested jump.
+
                 .add(requestedDirection.scale(WALL_JUMP_HORIZONTAL_IMPULSE));
         if (release.length() > CEILING_RELEASE_MAX_SPEED) {
             release = release.normalize().scale(CEILING_RELEASE_MAX_SPEED);
@@ -1693,11 +1527,6 @@ public final class ClimbManager {
         return release;
     }
 
-    /**
-     * Calculates an initial velocity that adds an approximate amount of height
-     * to Minecraft's remaining vertical trajectory. This avoids adding blocks as
-     * raw velocity, which would produce uncontrolled launches.
-     */
     private static double velocityForAdditionalRise(double currentVelocity, double additionalHeight) {
         double safeCurrent = Math.max(0.0D, currentVelocity);
         double desiredRise = predictedVerticalRise(safeCurrent) + Math.max(0.0D, additionalHeight);
@@ -1765,7 +1594,6 @@ public final class ClimbManager {
         player.getInventory().setChanged();
     }
 
-    /** A hard fall commits both equipped hands and prevents chaining another pickaxe. */
     private static void startEquippedEffortCooldown(ServerPlayer player, InteractionHand activeHand) {
         long until = player.level().getGameTime() + ANCHOR_COOLDOWN_TICKS;
         for (InteractionHand hand : InteractionHand.values()) {
@@ -1781,8 +1609,6 @@ public final class ClimbManager {
     }
 
     private static int createCrackId(ServerPlayer player) {
-        // Synthetic ID: prevents Minecraft from excluding the player from the
-        // crack packet by confusing it with the vanilla breakerId.
         return -1_000_000 - (player.getUUID().hashCode() & 0x3FFFFFFF);
     }
 
@@ -1794,11 +1620,6 @@ public final class ClimbManager {
         level.destroyBlockProgress(crackId, blockPos, -1);
     }
 
-    /**
-     * Always cleans up in the dimension where the anchor was created. This matters
-     * during dimension changes: by the time PlayerChangedDimensionEvent arrives,
-     * the ServerPlayer already belongs to the new level.
-     */
     private static void clearAnchorVisuals(ServerPlayer player, ServerClimbState state) {
         MinecraftServer server = player.getServer();
         if (server == null) {
@@ -1811,11 +1632,6 @@ public final class ClimbManager {
         }
     }
 
-    /**
-     * The client stores destruction overlays in a local table. On disconnect, the
-     * server packet may arrive too late, so the overlay is also removed directly
-     * before ClientLevel is destroyed.
-     */
     private static void clearClientCracks(Player player, ClientClimbState state) {
         player.level().destroyBlockProgress(
                 state.crackId(),
@@ -1862,9 +1678,6 @@ public final class ClimbManager {
     }
 
     private static void syncRemoteAnchorPoseDetached(ServerPlayer player) {
-        // A dimension change can move the entity between tracking sets before
-        // cleanup runs. Broadcasting this tiny removal packet prevents a stale
-        // raised arm in clients that tracked the previous dimension.
         PacketDistributor.sendToAllPlayers(RemoteAnchorPosePayload.detached(player.getUUID()));
     }
 

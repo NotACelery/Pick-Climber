@@ -7,7 +7,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
-/** Camera and movement input requested while attached to a sliding anchor. */
 public record SlideInputPayload(
         float forward,
         float strafe,

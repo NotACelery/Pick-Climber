@@ -7,10 +7,6 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
-/**
- * Single surface-classification entry point. Tags can be extended by datapacks
- * or modpacks without changing movement logic.
- */
 public final class AnchorSurfaceClassifier {
     public static final TagKey<Block> STABLE_ANCHOR_BLOCKS = tag("stable_anchor_blocks");
     public static final TagKey<Block> UNSTABLE_ANCHOR_BLOCKS = tag("unstable_anchor_blocks");
@@ -20,8 +16,6 @@ public final class AnchorSurfaceClassifier {
     }
 
     public static AnchorSurface classify(BlockState state) {
-        // Ordering is part of the contract: an exclusion always wins over a
-        // broader tag that accidentally contains the same block.
         if (state.is(UNCLIMBABLE_BLOCKS)) {
             return AnchorSurface.UNCLIMBABLE;
         }

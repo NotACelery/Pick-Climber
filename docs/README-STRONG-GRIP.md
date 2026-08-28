@@ -1,8 +1,10 @@
 # Strong Grip, Sturdy Latch y movimiento de techo
 
-> **Estado:** anclaje estático, balanceo base y poses elevadas locales implementados; la sincronización visual multijugador y maniobras avanzadas siguen pendientes.
+> **Estado actual (1.0.1):** anclaje estático, balanceo, poses elevadas locales y sincronización visual multijugador de la pose de techo están implementados. La validación de regresión con dos clientes y pulidos visuales adicionales siguen pendientes.
 >
 > Este documento conserva el comportamiento obligatorio y distingue lo implementado de las fases pendientes.
+>
+> **Referencia runtime:** para arquitectura, autoridad, payloads y constantes vigentes de 1.0.1, consultar `docs/DEVELOPMENT.md`.
 >
 > **Dependencias:** controles base estabilizados, clasificación de superficies, frenado progresivo, desgaste proporcional y `Sturdy Latch`.
 

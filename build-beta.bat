@@ -26,9 +26,6 @@ echo ============================================================
 echo Directory: %CD%
 echo.
 
-rem ------------------------------------------------------------
-rem 1. Find Java through PATH, JAVA_HOME, or Prism-managed runtimes.
-rem ------------------------------------------------------------
 where java.exe >nul 2>nul
 if not errorlevel 1 (
     for /f "delims=" %%J in ('where java.exe') do if not defined JAVA_EXE set "JAVA_EXE=%%J"
@@ -56,9 +53,6 @@ echo   %JAVA_EXE%
 echo.
 if errorlevel 1 goto :java_broken
 
-rem ------------------------------------------------------------
-rem 2. Download Gradle if it is not available locally yet.
-rem ------------------------------------------------------------
 if not exist "%DIST_DIR%\bin\gradle.bat" (
     echo Gradle %GRADLE_VERSION% has not been downloaded.
     if not exist "%DIST_ROOT%" mkdir "%DIST_ROOT%"
@@ -84,9 +78,6 @@ if not exist "%DIST_DIR%\bin\gradle.bat" (
 
 if not exist "%DIST_DIR%\bin\gradle.bat" goto :gradle_missing
 
-rem ------------------------------------------------------------
-rem 3. Build. --stacktrace leaves useful diagnostics on failure.
-rem ------------------------------------------------------------
 echo.
 echo Building Pick Climber...
 echo The first build may download NeoForge dependencies.

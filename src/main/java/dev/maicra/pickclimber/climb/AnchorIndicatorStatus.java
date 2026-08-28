@@ -1,6 +1,5 @@
 package dev.maicra.pickclimber.climb;
 
-/** Client-facing summary of why the targeted face can or cannot be anchored. */
 public enum AnchorIndicatorStatus {
     NONE("", 0xFFFFFF),
     READY("gui.pickclimber.anchor.ready", 0x55FF55),

@@ -37,14 +37,10 @@ public final class ClientEvents {
     private ClientEvents() {
     }
 
-
     @SubscribeEvent
     public static void onClientLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
         Player player = event.getPlayer();
         if (player != null) {
-            // This runs while ClientLevel still exists. The server cleanup packet
-            // may be lost while the connection closes, so also remove the
-            // synthetic overlay locally.
             ClimbManager.clearAllClientStates(player);
         } else {
             ClimbManager.clearAllClientStates(null);
@@ -63,13 +59,9 @@ public final class ClientEvents {
         }
 
         if (ClimbManager.activeHand(player) != InteractionHand.MAIN_HAND) {
-            // An off-hand anchor does not capture left click. The main hand may
-            // mine, attack, and play its vanilla swing.
             return;
         }
 
-        // Intentional rule: mining or attacking with the same pinned main-hand
-        // pickaxe removes it from the anchor. The free hand is not intercepted.
         event.setSwingHand(false);
         event.setCanceled(true);
         ClimbManager.detachClient(player, false);
@@ -96,10 +88,6 @@ public final class ClientEvents {
         boolean shiftDown = minecraft.options.keyShift.isDown();
 
         if (!attached) {
-            // Outside an anchor, only track the key's current physical state.
-            // Do not consume KeyMapping's internal queue: it may contain stale
-            // vanilla jump clicks and cause a phantom wall jump when attaching
-            // several ticks later.
             wasAttachedLastTick = false;
             jumpWasDown = jumpDown;
             jumpReleaseArmed = false;
@@ -116,9 +104,6 @@ public final class ClientEvents {
         ));
 
         if (!wasAttachedLastTick) {
-            // A newly received anchor requires a full key release. This prevents
-            // the same Space press used to jump or boost, or a queued click, from
-            // immediately detaching the player.
             wasAttachedLastTick = true;
             jumpWasDown = jumpDown;
             jumpReleaseArmed = !jumpDown;
@@ -171,7 +156,6 @@ public final class ClientEvents {
         );
     }
 
-
     private static void resetJumpLatch() {
         wasAttachedLastTick = false;
         jumpWasDown = false;
@@ -215,13 +199,9 @@ public final class ClientEvents {
         gui.flush();
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
-        // The frame guarantees readable state color even with resource packs
-        // whose item shader ignores the global tint.
         gui.fill(iconX - 1, iconY - 1, iconX + 17, iconY, argb);
         gui.fill(iconX - 1, iconY + 16, iconX + 17, iconY + 17, argb);
         gui.fill(iconX - 1, iconY, iconX, iconY + 16, argb);
         gui.fill(iconX + 16, iconY, iconX + 17, iconY + 16, argb);
-
     }
-
 }

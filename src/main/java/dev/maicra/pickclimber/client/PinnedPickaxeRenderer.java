@@ -17,13 +17,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderHandEvent;
 
-/**
- * Dedicated first-person renderer for the pickaxe maintaining the anchor.
- *
- * Instead of transforming the vanilla animation and letting it keep advancing,
- * only that hand is cancelled and its ItemStack is redrawn once in a stable pose
- * equivalent to the forward portion of the vanilla swing.
- */
 @EventBusSubscriber(modid = PickClimber.MOD_ID, value = Dist.CLIENT)
 public final class PinnedPickaxeRenderer {
     private PinnedPickaxeRenderer() {
@@ -64,11 +57,6 @@ public final class PinnedPickaxeRenderer {
         }
     }
 
-    /**
-     * Strong Grip pose: arm and tool rise together above the camera. The
-     * transformation mirrors through the actual arm, so it works equally for
-     * main hand, off hand, and left-handed players.
-     */
     private static void renderCeilingTool(
             Minecraft minecraft,
             LocalPlayer player,
@@ -92,8 +80,6 @@ public final class PinnedPickaxeRenderer {
             renderRaisedArm(minecraft, player, event, arm);
         }
 
-        // Base position of an equipped tool. The raised frame above rotates the
-        // handle and head toward the ceiling block without stacking vanilla swing.
         poseStack.translate(side * 0.56F, -0.52F, -0.72F);
 
         minecraft.gameRenderer.itemInHandRenderer.renderItem(
@@ -121,7 +107,6 @@ public final class PinnedPickaxeRenderer {
         poseStack.mulPose(Axis.XP.rotationDegrees(Mth.lerp(progress, 0.0F, -78.0F)));
     }
 
-    /** Reproduces vanilla equipped-arm geometry inside the raised frame. */
     private static void renderRaisedArm(
             Minecraft minecraft,
             LocalPlayer player,
@@ -178,15 +163,12 @@ public final class PinnedPickaxeRenderer {
         PoseStack poseStack = event.getPoseStack();
         poseStack.pushPose();
 
-        // Reproduces the vanilla path for normal tools, but with swingProgress
-        // controlled by anchor state and equipProgress fixed at zero.
         float rootSwing = Mth.sqrt(swingProgress);
         float translateX = -0.4F * Mth.sin(rootSwing * (float) Math.PI);
         float translateY = 0.2F * Mth.sin(rootSwing * (float) (Math.PI * 2.0D));
         float translateZ = -0.2F * Mth.sin(swingProgress * (float) Math.PI);
         poseStack.translate(side * translateX, translateY, translateZ);
 
-        // Base transform for a fully equipped hand.
         poseStack.translate(side * 0.56F, -0.52F, -0.72F);
 
         float attackCurve = Mth.sin(swingProgress * swingProgress * (float) Math.PI);

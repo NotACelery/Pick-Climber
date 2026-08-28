@@ -162,6 +162,16 @@ El indicador reutiliza las comprobaciones de cara, colisión, encantamientos y d
 
 Al cambiar de punto desde un techo, los requisitos se evalúan sobre la picota libre: una picota con Strong Grip que ya sostiene el ancla no puede ocultar que la segunda herramienta carece del encantamiento.
 
+## Documentación técnica
+
+La implementación, autoridad cliente/servidor, estados físicos, red, cooldown por herramienta, reglas de limpieza y límites seguros para futuros refactors están centralizados en:
+
+```text
+docs/DEVELOPMENT.md
+```
+
+`docs/README-STRONG-GRIP.md` se conserva como especificación histórica y de diseño de Strong Grip/Sturdy Latch. Para el comportamiento runtime vigente de 1.0.1, `docs/DEVELOPMENT.md` y el source actual son la referencia principal.
+
 ## Compilar en Windows
 
 1. Instala Java 21.

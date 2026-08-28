@@ -25,11 +25,6 @@ public final class CommonEvents {
 
     @SubscribeEvent
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
-        // Keep stale-state recovery at the start of the normal interaction
-        // pipeline, but never consume the click here. Blocks must get their own
-        // useItemOn/useWithoutItem handling before Pick Climber considers an
-        // anchor. This is important for modded machines that open menus without
-        // exposing BlockState#getMenuProvider.
         if (event.getEntity() instanceof ServerPlayer serverPlayer
                 && ClimbManager.isAttached(serverPlayer)
                 && !ClimbManager.isAttachmentCoherent(serverPlayer)) {
@@ -41,11 +36,6 @@ public final class CommonEvents {
             return;
         }
 
-        // Shift + RMB is the explicit force-anchor gesture. Resolve the preferred
-        // hand here, before the block can consume the interaction. This is the
-        // only path allowed to pre-empt a machine/chest/Farmer interaction.
-        // If the target is not a genuinely valid anchor, preferred() returns null
-        // and vanilla/modded Shift interaction proceeds untouched.
         InteractionHand preferredHand = ClimbingHandSelector.preferred(player, event.getHitVec());
         if (preferredHand == null) {
             return;
@@ -80,18 +70,12 @@ public final class CommonEvents {
 
         InteractionHand hand = event.getHand();
 
-        // Preserve the original off-hand priority. If both hands can anchor, the
-        // main-hand item gets its normal useOn opportunity and the interaction
-        // pipeline proceeds to the off hand, where Pick Climber consumes it.
         if (hand == InteractionHand.MAIN_HAND
                 && ClimbManager.canAttemptAnchor(player, InteractionHand.OFF_HAND, hit)) {
             return;
         }
 
         if (!ClimbManager.canAttemptAnchor(player, hand, hit)) {
-            // Feedback belongs here, after block interaction passed. A chest,
-            // Farmer, machine, etc. that consumed the click therefore opens
-            // normally without a misleading Pick Climber warning.
             if (player.level().isClientSide() && hand == InteractionHand.MAIN_HAND) {
                 Component feedback = ClimbManager.anchorAttemptFailureMessage(player, hit);
                 if (feedback != null) {
@@ -101,8 +85,6 @@ public final class CommonEvents {
             return;
         }
 
-        // ITEM_AFTER_BLOCK is only reached after the target block declined the
-        // interaction. Pick Climber can now safely take ownership of this click.
         event.cancelWithResult(ItemInteractionResult.SUCCESS);
 
         if (player instanceof ServerPlayer serverPlayer) {
@@ -128,14 +110,9 @@ public final class CommonEvents {
     public static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
         if (!ClimbManager.isAttached(event.getEntity())
                 || ClimbManager.activeHand(event.getEntity()) != InteractionHand.MAIN_HAND) {
-            // With the anchor in the off hand, left click belongs entirely to
-            // the main hand: mining and attacking do not detach the player.
             return;
         }
 
-        // Intentional behavior: mining with the same pickaxe supporting the
-        // player removes that tool from the anchor. The other hand can still
-        // mine and attack without causing this detach.
         event.setCanceled(true);
         if (event.getEntity() instanceof ServerPlayer serverPlayer) {
             ClimbManager.detachServer(serverPlayer, false);

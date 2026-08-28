@@ -8,7 +8,6 @@ import net.minecraft.world.item.component.CustomData;
 import java.util.Optional;
 import java.util.UUID;
 
-/** Persistent data owned by each pickaxe used by Pick Climber. */
 public final class ToolIdentity {
     private static final String ROOT_KEY = "pickclimber";
     private static final String TOOL_ID_KEY = "anchor_tool_id";
@@ -56,12 +55,6 @@ public final class ToolIdentity {
         return get(stack).map(expectedId::equals).orElse(false);
     }
 
-    /**
-     * Some inventory updates can temporarily rebuild the ItemStack and lose its
-     * custom data during the same tick transition. If the item is still a pickaxe
-     * in the correct hand and has no ID, restore the expected ID instead of
-     * immediately cancelling the anchor.
-     */
     public static boolean matchesOrRepair(ItemStack stack, UUID expectedId) {
         Optional<UUID> current = get(stack);
         if (current.isEmpty()) {
@@ -73,9 +66,7 @@ public final class ToolIdentity {
 
     public static long cooldownUntil(ItemStack stack) {
         CompoundTag root = root(stack);
-        // A missing key means the pickaxe never started a cooldown. Long.MIN_VALUE
-        // is avoided because subtracting gameTime can overflow and produce a huge
-        // positive value that visually appears as a full cooldown.
+
         return root.contains(COOLDOWN_UNTIL_KEY) ? root.getLong(COOLDOWN_UNTIL_KEY) : 0L;
     }
 
@@ -95,15 +86,11 @@ public final class ToolIdentity {
             return 0.0F;
         }
 
-        // Subtract only after checking until > gameTime to avoid underflow or
-        // overflow when the ItemStack has no cooldown.
         long remaining = until - gameTime;
         return Math.min(1.0F, remaining / (float) duration);
     }
 
     public static void startCooldown(ItemStack stack, long until) {
-        // A detach only knows the remaining ticks; preserve the original duration
-        // so an unstable anchor continues to display a 40-tick cooldown.
         startCooldown(stack, until, cooldownDuration(stack));
     }
 
