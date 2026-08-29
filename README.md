@@ -164,18 +164,21 @@ Al cambiar de punto desde un techo, los requisitos se evalúan sobre la picota l
 
 ## Documentación técnica
 
-La implementación, autoridad cliente/servidor, estados físicos, red, cooldown por herramienta, reglas de limpieza y límites seguros para futuros refactors están centralizados en:
+La implementación, autoridad cliente/servidor, estados físicos, red, cooldown por herramienta, reglas de limpieza y límites seguros para futuros refactors están centralizados en `docs/DEVELOPMENT.md`.
 
-```text
-docs/DEVELOPMENT.md
-```
+Documentos vigentes:
 
-`docs/README-STRONG-GRIP.md` se conserva como especificación histórica y de diseño de Strong Grip/Sturdy Latch. Para el comportamiento runtime vigente de 1.0.1, `docs/DEVELOPMENT.md` y el source actual son la referencia principal.
+- `docs/DEVELOPMENT.md` — arquitectura e invariantes runtime.
+- `TESTING-1.0.1.md` — regresión de la release actual.
+- `ROADMAP.md` — trabajo realmente pendiente después de 1.0.1.
+- `docs/STRONG-GRIP-DESIGN.md` — especificación histórica y de diseño de Strong Grip/Sturdy Latch.
 
-## Compilar en Windows
+Para el comportamiento runtime vigente de 1.0.1, `docs/DEVELOPMENT.md` y el source actual son la referencia principal.
+
+## Compilar desde source
 
 1. Instala Java 21.
-2. Ejecuta `build-beta.bat`; el script lee automáticamente la versión y Minecraft desde `gradle.properties`.
+2. En Windows ejecuta `build.bat`; en Linux/WSL usa `./build.sh`. Ambos leen automáticamente la versión y Minecraft desde `gradle.properties`.
 3. El JAR aparecerá en:
 
 ```text
@@ -184,12 +187,12 @@ build/libs/pickclimber-1.21.1-1.0.1.jar
 
 Retira versiones anteriores antes de instalar la release.
 
-## Diseño futuro obligatorio
+## Diseño e historial de Strong Grip
 
 La especificación de `Strong Grip`, `Sturdy Latch`, nieve, hielo, anclajes de techo, doble Shift y balanceo está documentada en:
 
 ```text
-docs/README-STRONG-GRIP.md
+docs/STRONG-GRIP-DESIGN.md
 ```
 
 El documento se conserva como especificación y registro de las fases implementadas.
@@ -198,4 +201,4 @@ El documento se conserva como especificación y registro de las fases implementa
 
 El icono oficial se encuentra en `src/main/resources/pickclimber_logo.png`.
 
-Autor: **NotACelery**.
+Autor: **celerbi**.

@@ -111,7 +111,7 @@ echo   1. In Prism: Settings ^> Java ^> open or copy the Java path.
 echo   2. Install Java 21, for example Eclipse Temurin 21.
 echo   3. Open CMD here and run:
 echo        set "JAVA_HOME=C:\path\to\java-21"
-echo        build-beta.bat
+echo        build.bat
 goto :failure
 
 :java_broken

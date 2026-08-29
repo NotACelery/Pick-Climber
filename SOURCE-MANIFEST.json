@@ -3,13 +3,13 @@
   "files": [
     {
       "path": ".editorconfig",
-      "size": 345,
-      "sha256": "672ee781988418c36fa171e3abebf8c2d278fdddfeebac45b8e7e3a5c5f7ab59"
+      "size": 535,
+      "sha256": "a1c49a324d2a64df2333ca6abf3e75dc7156b71e2420b9b8c60de8175a9accf6"
     },
     {
       "path": ".gitattributes",
-      "size": 17,
-      "sha256": "1d5d71dcc6ccd28ab46a335349ecc74742ca4b81f4fcad212f8d134f70f1f13e"
+      "size": 69,
+      "sha256": "fe3754597eb588e99d4272c25605a603b7ecd58210f4aa9a9609953c057ff89c"
     },
     {
       "path": ".gitignore",
@@ -17,39 +17,34 @@
       "sha256": "1acf974de839b1aedee654d4b55f56928b7372a4aaffa93248778b145d5d309f"
     },
     {
-      "path": "BETA-TEST-CHECKLIST.md",
+      "path": "BUILD-STATUS.md",
+      "size": 6198,
+      "sha256": "919725ef7736ebd42eb99cb6a42fee2a4229b3be51b6c9d740e0c7f62bf00e54"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "size": 21964,
+      "sha256": "ff21b28d71523b0fb3264caa344c7d4a75f425a77b729de68ec70cb98e014f22"
+    },
+    {
+      "path": "README.md",
+      "size": 14043,
+      "sha256": "31da195aeeb2514b6969b66badd5494480f5cb94cfc05eaa24cf1ee6bb83498b"
+    },
+    {
+      "path": "ROADMAP.md",
+      "size": 2141,
+      "sha256": "ed3ba128ebb9f9125abd2bb96ebfd7dabfb93806f32f3ceb70ecd113cf02f5dc"
+    },
+    {
+      "path": "TESTING-1.0.1.md",
       "size": 16383,
       "sha256": "ce5e2f59d6b65dd31929f16fdc977f93ba8204885e9817b6acf3b1d68e7ea770"
     },
     {
-      "path": "BUILD-STATUS.md",
-      "size": 6128,
-      "sha256": "6cae46d8aa381be40e0da5e3c82c6bb23520e2674940dc3e69ce6a1296929b5c"
-    },
-    {
-      "path": "CHANGELOG.md",
-      "size": 22000,
-      "sha256": "c51dc19eca97ff5f701f51e50d4dccf140c54e4d816b3add5b47cf7ddc9dd6a8"
-    },
-    {
-      "path": "README.md",
-      "size": 13813,
-      "sha256": "85515cd4e6451081ec5434c272eafdd05446a6933ebda3c0ef59b63f8ea43a59"
-    },
-    {
-      "path": "TODO.md",
-      "size": 15648,
-      "sha256": "423d0aa3f90e7f03b715556ccaf9050e8d2f984b9ad7fffe69d38b78956f977e"
-    },
-    {
-      "path": "build-beta.bat",
-      "size": 5824,
-      "sha256": "da2ce60fb96dd78ba36b7b57f7b75d4df898998b7a4b17f8cd057092f95c387d"
-    },
-    {
-      "path": "build-beta.sh",
-      "size": 1334,
-      "sha256": "bf6efb34053849af08baff5780e49ac293ed36170188778ccde22903c3f1ffab"
+      "path": "build.bat",
+      "size": 5985,
+      "sha256": "60d0e6054e3182db15d0515ee13e6bb66bd00966bc635f43640c276d6cfce553"
     },
     {
       "path": "build.gradle",
@@ -57,12 +52,17 @@
       "sha256": "4b83b937430618091af8951f243e6ab86f6299934c90b79be340ff977aaf7124"
     },
     {
-      "path": "docs/DEVELOPMENT.md",
-      "size": 25390,
-      "sha256": "dcd1cd4c5d8a598a8ad35271ac6989eebbad66cc55a528ac18275b3683bd3361"
+      "path": "build.sh",
+      "size": 1334,
+      "sha256": "bf6efb34053849af08baff5780e49ac293ed36170188778ccde22903c3f1ffab"
     },
     {
-      "path": "docs/README-STRONG-GRIP.md",
+      "path": "docs/DEVELOPMENT.md",
+      "size": 25377,
+      "sha256": "72b1a4d30ea34a581287057246c143e71c78071fff299fb6f385cd38d92e2cb8"
+    },
+    {
+      "path": "docs/STRONG-GRIP-DESIGN.md",
       "size": 31330,
       "sha256": "b24805428a84f2c2428853e7d2c3f74268a57e020cd0a9ff0543405a8602f878"
     },

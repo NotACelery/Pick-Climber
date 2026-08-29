@@ -606,7 +606,7 @@ Generated mod metadata comes from:
 
 `build.gradle` uses NeoForge ModDev and Java 21 toolchains.
 
-`build-beta.sh` and `build-beta.bat` read `mod_version` and `minecraft_version` from `gradle.properties` and expect:
+`build.sh` and `build.bat` read `mod_version` and `minecraft_version` from `gradle.properties` and expect:
 
 `build/libs/pickclimber-<minecraft_version>-<mod_version>.jar`
 
@@ -737,15 +737,15 @@ User-facing behavior, controls, compatibility and build entry point.
 
 Current implementation architecture, invariants, maintenance rules and regression reference.
 
-`docs/README-STRONG-GRIP.md`
+`docs/STRONG-GRIP-DESIGN.md`
 
 Historical/design specification for Strong Grip, Sturdy Latch and ceiling traversal. It remains useful for rationale and planned behavior, but current runtime truth should be checked against `DEVELOPMENT.md` and the 1.0.1 source.
 
-`BETA-TEST-CHECKLIST.md`
+`TESTING-1.0.1.md`
 
 Manual in-game beta/regression procedure.
 
-`TODO.md`
+`ROADMAP.md`
 
 Remaining validation and future ideas. Completed historical phases are retained as project history.
 

@@ -42,15 +42,15 @@ Baseline funcional vigente:
 
 Validación realizada en este entorno:
 
-- `cmd /c build-beta.bat` terminó con `BUILD SUCCESSFUL` usando Java 21.
+- Una compilación previa de la misma línea 1.0.x terminó con `BUILD SUCCESSFUL` usando Java 21; la limpieza actual debe recompilarse antes de publicar.
 - La última compilación documentada en este archivo corresponde a la línea 1.0.x; tras la limpieza de source 1.0.1 debe repetirse el build y QA in-game antes de publicación.
-- `bash -n build-beta.sh` validó el script Linux y `.gitattributes` fija sus finales de línea en LF.
+- `bash -n build.sh` valida el script Linux y `.gitattributes` fija sus finales de línea en LF.
 - La metadata de 1.0.1 debe declarar versión 1.0.1, autor `celerbi`, licencia All Rights Reserved, Minecraft 1.21.1, NeoForge 21.1.235 mínimo y ejecución en ambos lados; el JAR contiene la descripción localizada en `en_us`, `es_es` y `es_cl`.
 - La lógica de tags, frenado, descenso y render elevado compila contra NeoForge 21.1.235.
 - La regresión final específica del JAR 1.0.1 dentro de Minecraft sigue pendiente antes de publicarlo.
 
 ```text
-build-beta.bat
+build.bat
 ```
 
 Resultado esperado:
