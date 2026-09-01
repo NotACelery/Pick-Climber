@@ -20,6 +20,8 @@ public final class PickClimberOptionsScreen extends Screen {
     private static final int CONTENT_WIDTH = COLUMN_WIDTH * 2 + GAP;
     private static final int PREVIEW_TOP = 38;
     private static final int PREVIEW_HEIGHT = 40;
+    private static final int PREVIEW_PADDING = 4;
+    private static final int PREVIEW_MAX_ICON_SIZE = PREVIEW_HEIGHT - PREVIEW_PADDING * 2;
     private static final int CONTROLS_TOP = 84;
 
     private final Screen parent;
@@ -216,13 +218,20 @@ public final class PickClimberOptionsScreen extends Screen {
             return;
         }
 
+        int previewCenterY = PREVIEW_TOP + PREVIEW_HEIGHT / 2;
         int iconCenter = width / 2 - 46;
-        AnchorIndicatorRenderer.renderPreview(gui, iconCenter, PREVIEW_TOP + 10, AnchorIndicatorStatus.READY);
+        AnchorIndicatorRenderer.renderPreview(
+                gui,
+                iconCenter,
+                previewCenterY,
+                PREVIEW_MAX_ICON_SIZE,
+                AnchorIndicatorStatus.READY
+        );
         gui.drawString(
                 font,
                 Component.translatable("options.pickclimber.preview_status_ready"),
                 width / 2 - 20,
-                PREVIEW_TOP + 16,
+                PREVIEW_TOP + (PREVIEW_HEIGHT - font.lineHeight) / 2,
                 0xFFFFFF
         );
     }
@@ -232,7 +241,7 @@ public final class PickClimberOptionsScreen extends Screen {
                 font,
                 Component.translatable(translationKey),
                 width / 2,
-                PREVIEW_TOP + 16,
+                PREVIEW_TOP + (PREVIEW_HEIGHT - font.lineHeight) / 2,
                 color
         );
     }

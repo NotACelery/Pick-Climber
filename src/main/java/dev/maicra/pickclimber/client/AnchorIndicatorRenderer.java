@@ -26,8 +26,23 @@ final class AnchorIndicatorRenderer {
         renderStatus(gui, status, PickClimberClientOptionsStore.current());
     }
 
-    static void renderPreview(GuiGraphics gui, int centerX, int topY, AnchorIndicatorStatus status) {
-        renderStatusAt(gui, centerX, topY, status, PickClimberClientOptionsStore.current());
+    static void renderPreview(
+            GuiGraphics gui,
+            int centerX,
+            int centerY,
+            int maxDisplaySize,
+            AnchorIndicatorStatus status
+    ) {
+        PickClimberClientOptions options = PickClimberClientOptionsStore.current();
+        float configuredScale = (float) options.iconScale();
+        float maxPreviewScale = maxDisplaySize / (float) ClientClimbDefaults.ANCHOR_ICON_SIZE;
+        float previewScale = Math.min(configuredScale, maxPreviewScale);
+        int displaySize = Math.max(
+                1,
+                Math.round(ClientClimbDefaults.ANCHOR_ICON_SIZE * previewScale)
+        );
+        int topY = centerY - displaySize / 2;
+        renderStatusAt(gui, centerX, topY, status, options, displaySize, previewScale);
     }
 
     private static void renderStatus(
@@ -39,19 +54,7 @@ final class AnchorIndicatorRenderer {
         int displaySize = Math.max(1, Math.round(ClientClimbDefaults.ANCHOR_ICON_SIZE * scale));
         int centerX = gui.guiWidth() / 2;
         int topY = gui.guiHeight() / 2 + ClientClimbDefaults.ANCHOR_ICON_Y_OFFSET;
-        renderStatusAt(gui, centerX, topY, status, options, displaySize);
-    }
-
-    private static void renderStatusAt(
-            GuiGraphics gui,
-            int centerX,
-            int topY,
-            AnchorIndicatorStatus status,
-            PickClimberClientOptions options
-    ) {
-        float scale = (float) options.iconScale();
-        int displaySize = Math.max(1, Math.round(ClientClimbDefaults.ANCHOR_ICON_SIZE * scale));
-        renderStatusAt(gui, centerX, topY, status, options, displaySize);
+        renderStatusAt(gui, centerX, topY, status, options, displaySize, scale);
     }
 
     private static void renderStatusAt(
@@ -60,7 +63,8 @@ final class AnchorIndicatorRenderer {
             int topY,
             AnchorIndicatorStatus status,
             PickClimberClientOptions options,
-            int displaySize
+            int displaySize,
+            float iconScale
     ) {
         int iconX = centerX - displaySize / 2;
         float iconOpacity = opacityFromTransparency(options.iconTransparency());
@@ -72,7 +76,7 @@ final class AnchorIndicatorRenderer {
                     iconX,
                     topY,
                     iconColor,
-                    (float) options.iconScale(),
+                    iconScale,
                     iconOpacity
             );
         }
