@@ -1,4 +1,4 @@
-# Pick Climber — Release 1.0.1
+# Pick Climber — 1.0.3
 
 Mod para **Minecraft 1.21.1**, **NeoForge 21.1.235** y **Java 21**.
 
@@ -30,7 +30,7 @@ Desde 1.0.1, Pick Climber espera hasta que el bloque tenga su oportunidad normal
 - Si la cara no es un anchor válido, Pick Climber no roba el Shift-click y el bloque conserva su comportamiento normal.
 - Un intento inválido no consume durabilidad ni inicia cooldown.
 
-La prioridad se resuelve mediante el propio pipeline de interacción de NeoForge, sin listas hardcodeadas de bloques o mods. El indicador conserva además la detección preventiva de los bloques que exponen un `MenuProvider` directamente.
+La prioridad se resuelve sin ejecutar interacciones ni inspeccionar clases de otros mods. El indicador se oculta preventivamente sobre bloques que exponen un `MenuProvider`, tienen un `BlockEntity` cargado o pertenecen al tag extensible `pickclimber:interactive_blocks`, y vuelve a mostrarse al mantener Shift para solicitar el force-anchor. Esto cubre también máquinas modded con interacción directa que no abren una GUI.
 
 ## Prioridad de manos y mano principal libre
 
@@ -156,6 +156,8 @@ Al apuntar con una herramienta de escalada, una banda compacta bajo la mira info
 - gris: herramienta todavía en cooldown;
 - amarillo: destino fuera del alcance real.
 
+Desde 1.0.2, el tinte del String queda aislado al draw del propio icono: el mod vacía el batch pendiente antes de teñirlo, finaliza ese draw antes de restaurar el shader a blanco y mantiene el borde con color ARGB local. Esto evita que Jade, textos de eventos u otros overlays hereden el color del indicador.
+
 El String coloreado solo aparece sobre un bloque real situado a 3 bloques o menos. Entre 1.5 y 3 bloques usa el color de `OUT OF RANGE`; por encima de 3 se oculta para no interferir con minería o exploración. `ANCHOR OBSTRUCTED` queda reservado para caras situadas dentro del radio real de 1.5 bloques pero sin apoyo físico o sin espacio final.
 
 El indicador reutiliza las comprobaciones de cara, colisión, encantamientos y distancia del enganche. Los bloques con menú continúan ocultándolo durante el clic normal y lo muestran al mantener Shift. Si el clic derecho intenta una acción rechazada, la barra de acción explica el motivo: encantamiento ausente, cooldown, alcance, bloque sin apoyo, entidad o falta de espacio para la hitbox. Las superficies inestables sin Sturdy Latch no muestran rechazo porque el agarre controlado sigue siendo válido.
@@ -169,11 +171,11 @@ La implementación, autoridad cliente/servidor, estados físicos, red, cooldown 
 Documentos vigentes:
 
 - `docs/DEVELOPMENT.md` — arquitectura e invariantes runtime.
-- `TESTING-1.0.1.md` — regresión de la release actual.
-- `ROADMAP.md` — trabajo realmente pendiente después de 1.0.1.
+- `TESTING-1.0.3.md` — checklist de regresión de la release 1.0.3.
+- `ROADMAP.md` — trabajo realmente pendiente después de la estabilización 1.0.x.
 - `docs/STRONG-GRIP-DESIGN.md` — especificación histórica y de diseño de Strong Grip/Sturdy Latch.
 
-Para el comportamiento runtime vigente de 1.0.1, `docs/DEVELOPMENT.md` y el source actual son la referencia principal.
+Para el comportamiento runtime de la release 1.0.3, `docs/DEVELOPMENT.md` y el source actual son la referencia principal.
 
 ## Compilar desde source
 
@@ -182,7 +184,7 @@ Para el comportamiento runtime vigente de 1.0.1, `docs/DEVELOPMENT.md` y el sour
 3. El JAR aparecerá en:
 
 ```text
-build/libs/pickclimber-1.21.1-1.0.1.jar
+build/libs/pickclimber-1.21.1-1.0.3.jar
 ```
 
 Retira versiones anteriores antes de instalar la release.

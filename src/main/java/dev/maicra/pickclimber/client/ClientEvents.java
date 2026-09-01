@@ -26,13 +26,17 @@ import net.neoforged.neoforge.network.PacketDistributor;
 @EventBusSubscriber(modid = PickClimber.MOD_ID, value = Dist.CLIENT)
 public final class ClientEvents {
     private static final ItemStack RANGE_ICON = new ItemStack(Items.STRING);
+    private static final int RANGE_ICON_SIZE = 16;
+    private static final int RANGE_ICON_Y_OFFSET = 10;
+    private static final int OPAQUE_ALPHA = 0xFF000000;
+    private static final int DOUBLE_SHIFT_WINDOW_TICKS = 7;
+
     private static boolean hadPlayerLastTick;
     private static boolean wasAttachedLastTick;
     private static boolean jumpWasDown;
     private static boolean jumpReleaseArmed;
     private static boolean shiftWasDown;
     private static long lastShiftPressGameTime = Long.MIN_VALUE;
-    private static final int DOUBLE_SHIFT_WINDOW_TICKS = 7;
 
     private ClientEvents() {
     }
@@ -187,21 +191,43 @@ public final class ClientEvents {
             return;
         }
 
-        int iconX = gui.guiWidth() / 2 - 8;
-        int iconY = gui.guiHeight() / 2 + 10;
-        int argb = 0xFF000000 | status.color();
+        int iconX = gui.guiWidth() / 2 - RANGE_ICON_SIZE / 2;
+        int iconY = gui.guiHeight() / 2 + RANGE_ICON_Y_OFFSET;
+        int color = status.color();
 
-        float red = ((status.color() >> 16) & 0xFF) / 255.0F;
-        float green = ((status.color() >> 8) & 0xFF) / 255.0F;
-        float blue = (status.color() & 0xFF) / 255.0F;
-        RenderSystem.setShaderColor(red, green, blue, 1.0F);
-        gui.renderItem(RANGE_ICON, iconX, iconY);
+        renderTintedRangeIcon(gui, iconX, iconY, color);
+        renderRangeBorder(gui, iconX, iconY, OPAQUE_ALPHA | color);
+    }
+
+    private static void renderTintedRangeIcon(GuiGraphics gui, int x, int y, int color) {
         gui.flush();
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
-        gui.fill(iconX - 1, iconY - 1, iconX + 17, iconY, argb);
-        gui.fill(iconX - 1, iconY + 16, iconX + 17, iconY + 17, argb);
-        gui.fill(iconX - 1, iconY, iconX, iconY + 16, argb);
-        gui.fill(iconX + 16, iconY, iconX + 17, iconY + 16, argb);
+        RenderSystem.setShaderColor(
+                colorChannel(color, 16),
+                colorChannel(color, 8),
+                colorChannel(color, 0),
+                1.0F
+        );
+
+        try {
+            gui.renderItem(RANGE_ICON, x, y);
+            gui.flush();
+        } finally {
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        }
+    }
+
+    private static void renderRangeBorder(GuiGraphics gui, int x, int y, int color) {
+        int right = x + RANGE_ICON_SIZE;
+        int bottom = y + RANGE_ICON_SIZE;
+
+        gui.fill(x - 1, y - 1, right + 1, y, color);
+        gui.fill(x - 1, bottom, right + 1, bottom + 1, color);
+        gui.fill(x - 1, y, x, bottom, color);
+        gui.fill(right, y, right + 1, bottom, color);
+    }
+
+    private static float colorChannel(int color, int shift) {
+        return ((color >> shift) & 0xFF) / 255.0F;
     }
 }

@@ -1,6 +1,6 @@
 # Pick Climber — Development Reference
 
-This document is the technical reference for the current `1.0.1` source tree.
+This document is the technical reference for the current `1.0.3` source tree.
 It centralizes the implementation decisions that used to live in Java comments so the runtime code can stay compact and readable without losing design context.
 
 ## 1. Baseline
@@ -9,7 +9,7 @@ It centralizes the implementation decisions that used to live in Java comments s
 - NeoForge: `21.1.235`
 - Java: `21`
 - Mod id: `pickclimber`
-- Release line: `1.0.1`
+- Release: `1.0.3`
 - Network registrar protocol: `13`
 - Runtime target: client and dedicated server
 
@@ -52,6 +52,8 @@ Owns client-only input and HUD behavior:
 - jump-key latch used to avoid phantom wall jumps;
 - periodic slide input transmission;
 - reach/status indicator rendering.
+
+The reach indicator must not leak render state into the shared GUI batch. `ClientEvents` flushes pending GUI draws before applying the String tint, flushes the icon while that tint is active, and restores the shader color to white in a `finally` block. The border uses its own ARGB fill color and does not modify shader state.
 
 `client.ClientModEvents`
 
@@ -236,6 +238,8 @@ The regular path is:
 Shift + right click is the explicit force-anchor gesture. It may pre-empt the block only when a valid climbing tool and genuinely valid anchor target exist. Invalid anchors must not steal the Shift interaction.
 
 This policy is important for chests, machines, Easy Villagers Farmers, Easy Farmer's Delight Compat Farmers and other modded blocks that handle interaction directly rather than only exposing a vanilla menu provider.
+
+The HUD performs a side-effect-free preventive check before showing an anchor state. `BlockInteractionClassifier` treats a block as normally interactive when it exposes a `MenuProvider`, has a loaded `BlockEntity`, or belongs to the extensible `pickclimber:interactive_blocks` block tag. The BlockEntity branch is intentionally conservative: machine-style blocks with direct use handlers are hidden even when they expose no menu, without inspecting foreign classes or executing their interaction hooks from the render loop. Holding Shift disables that suppression so the force-anchor preview can appear. Modpacks can extend the tag through datapacks for additional non-menu, non-BlockEntity blocks that should preserve normal right-click use.
 
 ## 5. Hand priority
 
@@ -646,6 +650,7 @@ Before publishing a source-cleanup or refactor build, validate at least:
 - invalid face rejected without wear/cooldown;
 - reach boundary at `1.5` blocks;
 - HUD visible through `3` blocks with `OUT OF RANGE` beyond physical reach;
+- Jade/tooltips/other HUD overlays keep their own colors while the anchor indicator changes state;
 - move between nearby valid anchor points;
 - collision rejection near floors/ceilings.
 
@@ -739,9 +744,9 @@ Current implementation architecture, invariants, maintenance rules and regressio
 
 `docs/STRONG-GRIP-DESIGN.md`
 
-Historical/design specification for Strong Grip, Sturdy Latch and ceiling traversal. It remains useful for rationale and planned behavior, but current runtime truth should be checked against `DEVELOPMENT.md` and the 1.0.1 source.
+Historical/design specification for Strong Grip, Sturdy Latch and ceiling traversal. It remains useful for rationale and planned behavior, but current runtime truth should be checked against `DEVELOPMENT.md` and the 1.0.3 source.
 
-`TESTING-1.0.1.md`
+`TESTING-1.0.3.md`
 
 Manual in-game beta/regression procedure.
 

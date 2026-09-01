@@ -1,5 +1,30 @@
 # Changelog
 
+## 1.0.3 — 2026-09-01
+
+### HUD fixes
+
+- Fixed the String anchor indicator affecting the colors of Jade tooltips, event text and other HUD overlays.
+- The anchor indicator now keeps normal right-click interactions clear: it stays hidden while aiming at interactive blocks unless the player is sneaking.
+- Holding Shift reveals the indicator again when the targeted face can be used as a valid anchor.
+- Interactive-block detection covers menu-backed blocks, loaded BlockEntity-backed machines and the extensible `pickclimber:interactive_blocks` tag.
+- Direct-use machines such as noise switches are covered without third-party hardcodes, reflection or fake interaction calls.
+
+## 1.0.2 — 2026-08-30
+
+### HUD compatibility fix
+
+- Isolated the anchor-status tint to the String indicator drawn under the crosshair.
+- Pending GUI draws are flushed before the tint is applied, the icon is flushed while its tint is active, and the shader color is restored to white immediately afterward.
+- Jade tooltips, game-event text and other HUD overlays no longer inherit Pick Climber's green, cyan, red, violet, gray or yellow status colors.
+- The indicator border keeps using a local ARGB fill color and does not modify shared shader state.
+
+### Source cleanup
+
+- Extracted the tinted icon render and border render into focused helpers.
+- Replaced HUD layout/color magic numbers with named constants and centralized RGB channel conversion.
+- No climbing physics, networking, balance, interaction priority or anchor validation behavior changed in this cleanup.
+
 ## 1.0.1 — 2026-08-20
 
 ### Branding / icon integration

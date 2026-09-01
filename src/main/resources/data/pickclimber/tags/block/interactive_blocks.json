@@ -1,0 +1,20 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:doors",
+    "#minecraft:trapdoors",
+    "#minecraft:buttons",
+    "#minecraft:fence_gates",
+    "#minecraft:beds",
+    "minecraft:lever",
+    "minecraft:bell",
+    "minecraft:note_block",
+    "minecraft:jukebox",
+    "minecraft:respawn_anchor",
+    "minecraft:composter",
+    "minecraft:cake",
+    "minecraft:chiseled_bookshelf",
+    "minecraft:decorated_pot",
+    "#minecraft:flower_pots"
+  ]
+}

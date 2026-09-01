@@ -18,19 +18,23 @@ public final class ClimbingHandSelector {
             preferred = InteractionHand.MAIN_HAND;
         }
 
-        if (preferred == null || preservesVanillaMenuUse(player, hit)) {
+        if (preferred == null || preservesNormalBlockUse(player, hit)) {
             return null;
         }
 
         return preferred;
     }
 
-    public static boolean preservesVanillaMenuUse(Player player, BlockHitResult hit) {
+    public static boolean preservesNormalBlockUse(Player player, BlockHitResult hit) {
         if (player.isSecondaryUseActive()) {
             return false;
         }
 
         BlockState state = player.level().getBlockState(hit.getBlockPos());
-        return state.getMenuProvider(player.level(), hit.getBlockPos()) != null;
+        return BlockInteractionClassifier.handlesNormalBlockUse(
+                state,
+                player.level(),
+                hit.getBlockPos()
+        );
     }
 }

@@ -1,11 +1,11 @@
 # Pick Climber — Roadmap
 
-Current stable line: **1.0.1**. Completed beta-era implementation history belongs in `CHANGELOG.md`; this file contains only work that is still relevant after the 1.0.x stabilization pass.
+Current stable line: **1.0.2**. Completed beta-era implementation history belongs in `CHANGELOG.md`; this file contains only work that is still relevant after the 1.0.x stabilization pass.
 
 ## Release validation
 
-- Run the final Java 21 build and test the exact 1.0.1 JAR.
-- Complete `TESTING-1.0.1.md`.
+- Run the final Java 21 build and test the exact 1.0.2 JAR.
+- Complete `TESTING-1.0.2.md`.
 - Validate the already implemented remote ceiling-arm pose with two clients, including `F`, wall/ceiling transitions, detach, dimension change, disconnect, and late tracking.
 - Recheck Shift + right-click force-anchor behavior on vanilla menu blocks and representative modded machines.
 
@@ -28,7 +28,7 @@ Current stable line: **1.0.1**. Completed beta-era implementation history belong
 
 ## Structural maintenance
 
-`ClimbManager` remains intentionally intact for the 1.0.1 release line. A future structural pass may extract anchor validation, movement/physics, lifecycle/cleanup, and synchronization services using the boundaries documented in `docs/DEVELOPMENT.md`. Do not mix that refactor with physics or balance changes.
+`ClimbManager` remains intentionally intact for the 1.0.2 release line. A future structural pass may extract anchor validation, movement/physics, lifecycle/cleanup, and synchronization services using the boundaries documented in `docs/DEVELOPMENT.md`. Do not mix that refactor with physics or balance changes.
 
 ## Non-goals
 

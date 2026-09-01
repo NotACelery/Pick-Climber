@@ -293,7 +293,7 @@ public final class ClimbManager {
                 || player.isFallFlying()
                 || hit.getType() != net.minecraft.world.phys.HitResult.Type.BLOCK
                 || hit.getDirection() == Direction.UP
-                || ClimbingHandSelector.preservesVanillaMenuUse(player, hit)) {
+                || ClimbingHandSelector.preservesNormalBlockUse(player, hit)) {
             return AnchorIndicatorStatus.NONE;
         }
 

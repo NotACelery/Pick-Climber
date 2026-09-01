@@ -1,13 +1,13 @@
 # Estado de compilación
 
-Versión preparada: `1.0.1`
+Versión preparada: `1.0.3`
 
 Objetivo: Minecraft 1.21.1, NeoForge 21.1.235 y Java 21.
 
 Baseline funcional vigente:
 
-- 1.0.1 conserva la prioridad de interacción de bloques y usa Shift + clic derecho como override explícito de anclaje.
-- 1.0.1 incorpora la identidad visual actual y la pestaña creativa del mod.
+- 1.0.3 conserva la prioridad de interacción de bloques y usa Shift + clic derecho como override explícito de anclaje.
+- La línea 1.0.x incorpora la identidad visual actual y la pestaña creativa del mod.
 - Clasificación data-driven de superficies estables, inestables y no escalables.
 - Frenado progresivo servidor-autoritativo para caídas rápidas.
 - Descenso controlado en superficies inestables y comprobación de colisión antes de cada desplazamiento.
@@ -37,17 +37,20 @@ Baseline funcional vigente:
 - La evaluación del HUD reutiliza la validación real y no altera autoridad, payloads o física.
 - El HUD se limita a 3 bloques, muestra `OUT OF RANGE` entre 1.5 y 3 y solo evalúa obstrucción dentro del alcance físico.
 - El String teñido queda como único indicador permanente bajo la mira; los intentos rechazados explican en la barra de acción el encantamiento, cooldown, alcance, bloque, entidad o espacio que impide el anclaje.
+- 1.0.2 aísla el tinte del String al render del propio icono y restaura el shader inmediatamente, evitando contaminar Jade, tooltips, textos de eventos u otros overlays.
+- El HUD de 1.0.3 oculta el indicador sobre bloques que deben conservar el clic derecho normal y sólo lo habilita con Shift; la detección usa `MenuProvider`, presencia de `BlockEntity` cargado y el tag extensible `pickclimber:interactive_blocks`, sin reflection ni ejecución de interacciones durante el render.
 - Un Strong Grip ya ocupado en el techo no cuenta como herramienta candidata para el siguiente punto; la picota libre determina el requisito mostrado.
 - La metadata declara `celerbi` como autor y traduce la descripción de la lista de mods mediante los recursos `en_us`, `es_es` y `es_cl`.
 
 Validación realizada en este entorno:
 
+- QA in-game confirmado por el usuario: el indicador conserva sus colores y ya no tiñe Jade ni el resto del HUD.
 - Una compilación previa de la misma línea 1.0.x terminó con `BUILD SUCCESSFUL` usando Java 21; la limpieza actual debe recompilarse antes de publicar.
-- La última compilación documentada en este archivo corresponde a la línea 1.0.x; tras la limpieza de source 1.0.1 debe repetirse el build y QA in-game antes de publicación.
+- La última compilación documentada en este archivo corresponde a la línea 1.0.x; el source 1.0.3 final debe recompilarse en el entorno de release antes de publicar el JAR.
 - `bash -n build.sh` valida el script Linux y `.gitattributes` fija sus finales de línea en LF.
-- La metadata de 1.0.1 debe declarar versión 1.0.1, autor `celerbi`, licencia All Rights Reserved, Minecraft 1.21.1, NeoForge 21.1.235 mínimo y ejecución en ambos lados; el JAR contiene la descripción localizada en `en_us`, `es_es` y `es_cl`.
+- La metadata de la release declara versión 1.0.3, autor `celerbi`, licencia All Rights Reserved, Minecraft 1.21.1, NeoForge 21.1.235 mínimo y ejecución en ambos lados; el JAR contiene la descripción localizada en `en_us`, `es_es` y `es_cl`.
 - La lógica de tags, frenado, descenso y render elevado compila contra NeoForge 21.1.235.
-- La regresión final específica del JAR 1.0.1 dentro de Minecraft sigue pendiente antes de publicarlo.
+- QA in-game validado por el usuario para 1.0.3: el indicador queda oculto sobre VNS/Cutter y otros bloques interactivos sin Shift, reaparece con Shift cuando corresponde y el fix de aislamiento de color del HUD se mantiene.
 
 ```text
 build.bat
@@ -56,13 +59,15 @@ build.bat
 Resultado esperado:
 
 ```text
-build/libs/pickclimber-1.21.1-1.0.1.jar
+build/libs/pickclimber-1.21.1-1.0.3.jar
 ```
 
-## Estado del source 1.0.1
+## Estado del source 1.0.3
 
 - El árbol Java fue normalizado manteniendo la misma lógica ejecutable.
 - La documentación técnica se centraliza en `docs/DEVELOPMENT.md`.
 - Los comentarios explicativos fueron retirados del runtime Java y trasladados a documentación.
-- `SOURCE-MANIFEST.json` debe corresponder a esta base 1.0.1.
-- El build y la regresión in-game siguen siendo obligatorios antes de publicar cualquier artefacto generado desde esta limpieza.
+- `SOURCE-MANIFEST.json` debe corresponder a esta base 1.0.3.
+- El comportamiento objetivo de 1.0.3 fue validado in-game; sólo queda repetir el build final del JAR en el entorno de release antes de publicar.
+
+- 1.0.3 amplía la supresión preventiva del HUD a máquinas respaldadas por BlockEntity, sin reflection ni hardcodes de terceros.
