@@ -1,5 +1,7 @@
 # Pick Climber — 1.0.3
 
+> Development workstream: `1.1.0-dev.3` (Phase 0 final integration). Public gameplay baseline: `1.0.3`.
+
 Mod para **Minecraft 1.21.1**, **NeoForge 21.1.235** y **Java 21**.
 
 Convierte las herramientas incluidas en `#pickclimber:climbing_tools` en herramientas de escalada, impulso y rescate. `#pickclimber:excluded_climbing_tools` tiene prioridad y permite vetar herramientas concretas.
@@ -171,7 +173,8 @@ La implementación, autoridad cliente/servidor, estados físicos, red, cooldown 
 Documentos vigentes:
 
 - `docs/DEVELOPMENT.md` — arquitectura e invariantes runtime.
-- `TESTING-1.0.3.md` — checklist de regresión de la release 1.0.3.
+- `TESTING-1.1.0-dev.3.md` — regresión final de Phase 0 contra la baseline 1.0.3.
+- `TESTING-1.0.3.md` — checklist histórico de la release estable 1.0.3.
 - `ROADMAP.md` — trabajo realmente pendiente después de la estabilización 1.0.x.
 - `docs/STRONG-GRIP-DESIGN.md` — especificación histórica y de diseño de Strong Grip/Sturdy Latch.
 
@@ -184,7 +187,7 @@ Para el comportamiento runtime de la release 1.0.3, `docs/DEVELOPMENT.md` y el s
 3. El JAR aparecerá en:
 
 ```text
-build/libs/pickclimber-1.21.1-1.0.3.jar
+build/libs/pickclimber-1.21.1-1.1.0-dev.3.jar
 ```
 
 Retira versiones anteriores antes de instalar la release.

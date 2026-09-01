@@ -1,0 +1,17 @@
+package dev.maicra.pickclimber.climb;
+
+enum AnchorFailureReason {
+    NONE,
+    PLAYER_UNAVAILABLE,
+    INVALID_FACE,
+    NOT_CLIMBING_TOOL,
+    REQUIRES_STRONG_GRIP,
+    TOOL_OCCUPIED,
+    COOLDOWN,
+    TOO_FAR_FROM_EYES,
+    UNCLIMBABLE,
+    INVALID_ANCHOR_FACE,
+    REQUIRES_STURDY_LATCH,
+    NO_SPACE,
+    OUT_OF_RANGE
+}

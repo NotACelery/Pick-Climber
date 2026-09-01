@@ -70,3 +70,135 @@ neoForge.ideSyncTask generateModMetadata
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
+
+tasks.register('verifySourceQuality') {
+    group = 'verification'
+    description = 'Checks source formatting invariants and validates JSON resources.'
+
+    def javaSources = fileTree('src/main/java') {
+        include '**/*.java'
+    }
+    def jsonResources = fileTree('src/main/resources') {
+        include '**/*.json'
+        include '**/*.mcmeta'
+    }
+
+    inputs.files(javaSources, jsonResources)
+
+    doLast {
+        def violations = []
+
+        javaSources.each { file ->
+            file.readLines('UTF-8').eachWithIndex { line, index ->
+                def lineNumber = index + 1
+                if (line.contains('\t')) {
+                    violations << "${file}:$lineNumber contains a tab"
+                }
+                if (line != line.stripTrailing()) {
+                    violations << "${file}:$lineNumber has trailing whitespace"
+                }
+                if (line.length() > 120) {
+                    violations << "${file}:$lineNumber exceeds 120 characters (${line.length()})"
+                }
+                if (line.contains('System.out.') || line.contains('printStackTrace(')) {
+                    violations << "${file}:$lineNumber contains direct debug output"
+                }
+                if (line.contains('TODO') || line.contains('FIXME') || line.contains('HACK')) {
+                    violations << "${file}:$lineNumber contains a temporary code marker"
+                }
+            }
+        }
+
+        def parser = new groovy.json.JsonSlurper()
+        jsonResources.each { file ->
+            try {
+                parser.parseText(file.getText('UTF-8'))
+            } catch (Exception exception) {
+                violations << "${file} is not valid JSON: ${exception.message}"
+            }
+        }
+
+        if (!violations.isEmpty()) {
+            throw new GradleException("Source quality verification failed:\n - " + violations.join('\n - '))
+        }
+    }
+}
+
+
+def climbSourceDir = layout.projectDirectory.dir('src/main/java/dev/maicra/pickclimber/climb').asFile
+def clientSourceDir = layout.projectDirectory.dir('src/main/java/dev/maicra/pickclimber/client').asFile
+def architectureSources = fileTree(climbSourceDir) {
+    include '**/*.java'
+}
+
+tasks.register('verifyArchitectureBoundaries') {
+    group = 'verification'
+    description = 'Protects anchor evaluation, surface, wear, lifecycle, sync and adapter boundaries.'
+
+    inputs.files(architectureSources)
+    inputs.files(fileTree(clientSourceDir) {
+        include '**/*.java'
+    })
+
+    doLast {
+        def violations = []
+        def evaluatorFiles = [
+            new File(climbSourceDir, 'AnchorEvaluator.java'),
+            new File(climbSourceDir, 'AnchorFeedbackResolver.java')
+        ]
+        def forbiddenEvaluationCalls = [
+            'ToolIdentity.assign(',
+            'ToolIdentity.clearCooldown(',
+            '.hurtAndBreak(',
+            '.setDeltaMovement(',
+            '.teleport(',
+            'PacketDistributor.'
+        ]
+
+        evaluatorFiles.each { sourceFile ->
+            def source = sourceFile.getText('UTF-8')
+            forbiddenEvaluationCalls.each { call ->
+                if (source.contains(call)) {
+                    violations << "${sourceFile} contains side-effecting call ${call}"
+                }
+            }
+        }
+
+        architectureSources.each { sourceFile ->
+            def source = sourceFile.getText('UTF-8')
+            if (sourceFile.name != 'AnchorSurfaceResolver.java'
+                    && source.contains('AnchorSurfaceClassifier.classify(')) {
+                violations << "${sourceFile} bypasses AnchorSurfaceResolver"
+            }
+            if (sourceFile.name != 'ToolWearService.java' && source.contains('.hurtAndBreak(')) {
+                violations << "${sourceFile} bypasses ToolWearService"
+            }
+            if (source.contains('dev.maicra.pickclimber.network') || source.contains('PacketDistributor')) {
+                violations << "${sourceFile} introduces climb -> network coupling"
+            }
+        }
+
+        def climbManager = new File(climbSourceDir, 'ClimbManager.java')
+        if (climbManager.readLines('UTF-8').size() > 250) {
+            violations << "${climbManager} exceeded the 250-line compatibility-facade budget"
+        }
+
+        def clientEvents = new File(clientSourceDir, 'ClientEvents.java')
+        def clientEventsSource = clientEvents.getText('UTF-8')
+        if (clientEvents.readLines('UTF-8').size() > 90) {
+            violations << "${clientEvents} is no longer a thin event adapter"
+        }
+        if (clientEventsSource.contains('RenderSystem') || clientEventsSource.contains('PacketDistributor')) {
+            violations << "${clientEvents} owns rendering or transport details"
+        }
+
+        if (!violations.isEmpty()) {
+            throw new GradleException("Architecture verification failed:\n - " + violations.join('\n - '))
+        }
+    }
+}
+
+tasks.named('check').configure {
+    dependsOn tasks.named('verifySourceQuality')
+    dependsOn tasks.named('verifyArchitectureBoundaries')
+}

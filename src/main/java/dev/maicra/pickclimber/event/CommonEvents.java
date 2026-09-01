@@ -1,17 +1,19 @@
 package dev.maicra.pickclimber.event;
 
 import dev.maicra.pickclimber.PickClimber;
+import dev.maicra.pickclimber.climb.AnchorInteractionService;
+import dev.maicra.pickclimber.climb.AnchorUseDecision;
 import dev.maicra.pickclimber.climb.ClimbManager;
-import dev.maicra.pickclimber.climb.ClimbingHandSelector;
-import net.minecraft.network.chat.Component;
+import dev.maicra.pickclimber.climb.ClimbPresentationGate;
+import dev.maicra.pickclimber.climb.ClimbRuntimeGate;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.event.entity.living.LivingEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
@@ -25,28 +27,23 @@ public final class CommonEvents {
 
     @SubscribeEvent
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
-        if (event.getEntity() instanceof ServerPlayer serverPlayer
-                && ClimbManager.isAttached(serverPlayer)
-                && !ClimbManager.isAttachmentCoherent(serverPlayer)) {
-            ClimbManager.recoverStaleAttachment(serverPlayer);
-        }
-
         Player player = event.getEntity();
+        if (!ClimbRuntimeGate.interactionsEnabled(player)) {
+            return;
+        }
+        recoverStaleAttachment(player);
         if (!player.isSecondaryUseActive()) {
             return;
         }
 
-        InteractionHand preferredHand = ClimbingHandSelector.preferred(player, event.getHitVec());
-        if (preferredHand == null) {
+        AnchorUseDecision decision = AnchorInteractionService.forcedAnchor(player, event.getHitVec());
+        if (!decision.consume()) {
             return;
         }
 
         event.setCancellationResult(InteractionResult.SUCCESS);
         event.setCanceled(true);
-
-        if (player instanceof ServerPlayer serverPlayer) {
-            ClimbManager.useClimbingTool(serverPlayer, preferredHand, event.getHitVec());
-        }
+        performServerAnchor(player, decision.hand(), event.getHitVec());
     }
 
     @SubscribeEvent
@@ -56,7 +53,7 @@ public final class CommonEvents {
         }
 
         Player player = event.getPlayer();
-        if (player == null) {
+        if (player == null || !ClimbRuntimeGate.interactionsEnabled(player)) {
             return;
         }
 
@@ -67,48 +64,41 @@ public final class CommonEvents {
                 context.getClickedPos(),
                 context.isInside()
         );
-
-        InteractionHand hand = event.getHand();
-
-        if (hand == InteractionHand.MAIN_HAND
-                && ClimbManager.canAttemptAnchor(player, InteractionHand.OFF_HAND, hit)) {
-            return;
+        AnchorUseDecision decision = AnchorInteractionService.afterBlockUse(
+                player,
+                event.getHand(),
+                hit
+        );
+        if (decision.feedback() != null && ClimbPresentationGate.showFailureText(player)) {
+            player.displayClientMessage(decision.feedback(), true);
         }
-
-        if (!ClimbManager.canAttemptAnchor(player, hand, hit)) {
-            if (player.level().isClientSide() && hand == InteractionHand.MAIN_HAND) {
-                Component feedback = ClimbManager.anchorAttemptFailureMessage(player, hit);
-                if (feedback != null) {
-                    player.displayClientMessage(feedback, true);
-                }
-            }
+        if (!decision.consume()) {
             return;
         }
 
         event.cancelWithResult(ItemInteractionResult.SUCCESS);
-
-        if (player instanceof ServerPlayer serverPlayer) {
-            ClimbManager.useClimbingTool(serverPlayer, hand, hit);
-        }
+        performServerAnchor(player, decision.hand(), hit);
     }
 
     @SubscribeEvent
     public static void onRightClickEntity(PlayerInteractEvent.EntityInteractSpecific event) {
-        if (!event.getEntity().level().isClientSide()
+        if (!ClimbRuntimeGate.interactionsEnabled(event.getEntity())
+                || !event.getEntity().level().isClientSide()
                 || !ClimbManager.isClimbingTool(event.getItemStack())
                 || event.getHand() == InteractionHand.OFF_HAND
                 && ClimbManager.isClimbingTool(event.getEntity().getMainHandItem())) {
             return;
         }
         event.getEntity().displayClientMessage(
-                Component.translatable("message.pickclimber.anchor.entity"),
+                net.minecraft.network.chat.Component.translatable("message.pickclimber.anchor.entity"),
                 true
         );
     }
 
     @SubscribeEvent
     public static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
-        if (!ClimbManager.isAttached(event.getEntity())
+        if (!ClimbRuntimeGate.interactionsEnabled(event.getEntity())
+                || !ClimbManager.isAttached(event.getEntity())
                 || ClimbManager.activeHand(event.getEntity()) != InteractionHand.MAIN_HAND) {
             return;
         }
@@ -121,7 +111,8 @@ public final class CommonEvents {
 
     @SubscribeEvent
     public static void onLivingJump(LivingEvent.LivingJumpEvent event) {
-        if (event.getEntity() instanceof ServerPlayer serverPlayer) {
+        if (event.getEntity() instanceof ServerPlayer serverPlayer
+                && ClimbRuntimeGate.interactionsEnabled(serverPlayer)) {
             ClimbManager.recordRealJump(serverPlayer);
         }
     }
@@ -142,6 +133,24 @@ public final class CommonEvents {
     public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         if (event.getEntity() instanceof ServerPlayer serverPlayer) {
             ClimbManager.cleanupServer(serverPlayer);
+        }
+    }
+
+    private static void recoverStaleAttachment(Player player) {
+        if (player instanceof ServerPlayer serverPlayer
+                && ClimbManager.isAttached(serverPlayer)
+                && !ClimbManager.isAttachmentCoherent(serverPlayer)) {
+            ClimbManager.recoverStaleAttachment(serverPlayer);
+        }
+    }
+
+    private static void performServerAnchor(
+            Player player,
+            InteractionHand hand,
+            BlockHitResult hit
+    ) {
+        if (player instanceof ServerPlayer serverPlayer) {
+            ClimbManager.useClimbingTool(serverPlayer, hand, hit);
         }
     }
 }

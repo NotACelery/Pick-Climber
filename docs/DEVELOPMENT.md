@@ -1,6 +1,7 @@
 # Pick Climber — Development Reference
 
-This document is the technical reference for the current `1.0.3` source tree.
+This document is the technical reference for the current `1.1.0-dev.3` structural source tree.
+The gameplay and networking comparison baseline remains the validated `1.0.3` release.
 It centralizes the implementation decisions that used to live in Java comments so the runtime code can stay compact and readable without losing design context.
 
 ## 1. Baseline
@@ -9,7 +10,8 @@ It centralizes the implementation decisions that used to live in Java comments s
 - NeoForge: `21.1.235`
 - Java: `21`
 - Mod id: `pickclimber`
-- Release: `1.0.3`
+- Development version: `1.1.0-dev.3`
+- Stable behavior baseline: `1.0.3`
 - Network registrar protocol: `13`
 - Runtime target: client and dedicated server
 
@@ -28,201 +30,224 @@ The implementation follows these priorities:
 5. The client may predict or render presentation state, but it must not invent physical state.
 6. Data packs and mod packs extend compatible tools and surfaces through tags instead of hardcoded compatibility lists.
 7. Cleanup must be safe across disconnects, dimension changes, broken tools and lost packets.
+8. Anchor evaluation is query-only: validation may read state but must not mutate ItemStacks, movement, cooldowns, visuals or networking.
+9. Surface policy consumers go through `AnchorSurfaceResolver`; direct classification outside that boundary is an architecture violation.
 
 ## 3. Source layout
+
+Phase 0 intentionally organizes code by responsibility rather than by feature version. `ClimbManager` remains as a compatibility façade for existing callers, but new implementation logic belongs in the focused services below.
 
 ### Root package
 
 `dev.maicra.pickclimber.PickClimber`
 
-Defines the mod id and initialization entry point.
+Defines the mod id and registers the root mod components.
 
 `dev.maicra.pickclimber.ModItems`
 
-Registers the Pick Climber creative tab and the icon item used by the tab.
+Owns item registration and the creative-tab icon item only.
+
+`dev.maicra.pickclimber.ModCreativeTabs`
+
+Owns the Pick Climber creative tab and the enchanted-book entries. Keeping this separate prevents `ModItems` from becoming the future home of unrelated 1.2.0 block/menu registration.
 
 ### Client package
 
 `client.ClientEvents`
 
-Owns client-only input and HUD behavior:
+Thin NeoForge client adapter. It delegates disconnect, attack, client-tick and HUD-render events and must not own packet transport or shader operations.
 
-- disconnect cleanup;
-- left-click interception for the active anchor hand;
-- jump-key latch used to avoid phantom wall jumps;
-- periodic slide input transmission;
-- reach/status indicator rendering.
+`client.ClientClimbInputController`
 
-The reach indicator must not leak render state into the shared GUI batch. `ClientEvents` flushes pending GUI draws before applying the String tint, flushes the icon while that tint is active, and restores the shader color to white in a `finally` block. The border uses its own ARGB fill color and does not modify shader state.
+Owns local input policy/edge detection used by climbing runtime: active-tool left click, slide input, double-Shift detach, jump latch and logout-local input reset. Network transport remains outside the climbing domain.
 
-`client.ClientModEvents`
+`client.AnchorIndicatorRenderer`
 
-Registers the item decorator for all items. Eligibility is filtered at render time through the climbing-tool classifier so modded tools can participate without a fixed registration list.
+Owns the current String indicator draw. It preserves the 1.0.2 batching invariant: flush pending GUI draws, apply tint, render+flush while tinted, and restore shader white immediately. Its box uses local ARGB color.
 
-`client.PickClimberItemDecorator`
+`client.AnchorIndicatorPolicy`
 
-Draws the per-tool cooldown overlay stored on the ItemStack.
+Chooses the indicator status to present and passes it through `ClimbPresentationGate`. During Phase 0 the default policy is behavior-equivalent to 1.0.3.
 
-`client.PinnedPickaxeRenderer`
+`client.ClientClimbDefaults`
 
-Replaces only the active hand's first-person rendering while anchored. It supports:
+Contains current presentation defaults such as indicator size/offset and double-Shift window. These are defaults, not yet persisted 1.1.0 user options.
 
-- the pinned wall pose;
-- the elevated Strong Grip ceiling pose;
-- main hand, off hand and left-handed players;
-- stable transfer when the same tool moves through vanilla `F` hand swap.
+`client.ClientModEvents`, `client.PickClimberItemDecorator`, `client.PinnedPickaxeRenderer`, `client.CeilingPlayerPoseRenderer`
 
-`client.CeilingPlayerPoseRenderer`
+Retain item-decoration, first-person pinned-tool and local/remote ceiling-pose presentation responsibilities.
 
-Applies the elevated arm pose in third person for local and remotely synchronized ceiling anchors.
-
-### Climb package
+### Climb package — evaluation and policy
 
 `climb.ClimbManager`
 
-The current orchestration hub. It owns anchor validation, boost selection, attach/detach transitions, server physics, client synchronization, cracks, cooldown coordination, wall jump calculations and ceiling swing behavior.
+A 154-line compatibility façade/coordinator in `1.1.0-dev.3`. It exposes established entry points while delegating evaluation, action commit, lifecycle, input, ticking and synchronization to focused services. New physics or configuration logic must not be added back into this class.
 
-This class is intentionally not split during formatting-only cleanup because it is the most regression-sensitive part of the mod. See section 20 for safe future extraction boundaries.
+`climb.AnchorEvaluator`
+
+Side-effect-free mechanical evaluation entry point. It evaluates both hands from one target/session snapshot. It must never spend durability, mutate tool identity/cooldown, move players, create visuals or send packets.
+
+`climb.AnchorEvaluation`, `climb.AnchorHandEvaluation`, `climb.AnchorFailureReason`
+
+Immutable evaluation/result types consumed by gameplay, hand selection, HUD and failure feedback.
+
+`climb.AnchorFeedbackResolver`
+
+Derives indicator/failure feedback from `AnchorEvaluation` instead of maintaining a second mechanical ruleset.
+
+`climb.AnchorGeometry`
+
+Side-effect-free face support, target, collision-safe correction and movement-range geometry.
+
+`climb.AnchorSurfaceResolver`
+
+The only world-aware runtime entry point for surface classification. During Phase 0 it delegates to `AnchorSurfaceClassifier`. Future 1.2.0 world profiles extend this seam instead of adding card checks to HUD/physics/actions.
+
+`climb.ClimbSessionView`
+
+Read-only view of the current active anchor used by evaluation without depending on orchestration internals.
+
+`climb.ClimbRuntimePolicy` / `climb.ClimbRuntimeGate`
+
+Policy seam for whether Pick Climber runtime interaction is enabled for a player. Phase 0 installs an always-enabled default. 1.1.0 may back this with a synchronized per-player hot-disable preference.
+
+`climb.ClimbPresentationPolicy` / `climb.ClimbPresentationGate`
+
+Presentation seam for indicator filtering and action-bar feedback. Phase 0 is pass-through; 1.1.0 will supply user customization without changing server authority.
+
+### Climb package — state and lifecycle
+
+`climb.ClimbStateStore`
+
+Owns transient server sessions, local client states and remote pose snapshots.
 
 `climb.ServerClimbState`
 
-Immutable server-side record describing one authoritative anchor.
+Immutable authoritative anchor state. Large coherent groups are stored through `AttachmentRestoreState`, `AnchorControlInput`, `BrakingRuntimeState` and `CeilingRuntimeState`, with compatibility accessors retained for call sites during the refactor.
 
-Important fields include:
+`climb.ClientClimbState`, `climb.RemoteAnchorPoseState`
 
-- anchor dimension, block and face;
-- collision-validated target position;
-- active hand and tool UUID;
-- synthetic crack id;
-- ability restoration flags;
-- attach time;
-- classified surface and wall motion state;
-- slide velocity and input;
-- exact contact offset;
-- committed braking direction;
-- Sturdy Latch state;
-- optional second braking tool;
-- braking distance and charged blocks;
-- ceiling center, swing velocity and release momentum.
+Local synchronized presentation state and remote observer pose state.
 
-`climb.ClientClimbState`
+`climb.AnchorLifecycle`
 
-Client presentation state for the local player. It stores the synchronized target, anchor block, crack id, hand, tool id, restoration flags, sync age, pose start time and whether the anchor is a ceiling anchor.
+Single authoritative attach/detach/cleanup boundary. It owns ability restoration, state removal, crack cleanup, cooldown outcome and remote-pose detach publication.
 
-`climb.AnchorMotion`
+`climb.AnchorStateValidator`
 
-Wall anchor physical modes:
+Checks active-hand/tool coherence and attachment validity before the runtime continues.
 
-- `FIXED`
-- `BRAKING`
-- `UNSTABLE_SLIDING`
+`climb.JumpTracker`
 
-`climb.AnchorSurface`
+Tracks real-jump authorization timestamps for boosts.
 
-Surface classifications:
-
-- `UNCLIMBABLE`
-- `UNSTABLE`
-- `STABLE`
-- `FALLBACK`
-
-`FALLBACK` preserves compatibility for blocks not covered by any Pick Climber surface tag.
-
-`climb.AnchorSurfaceClassifier`
-
-Single surface-classification entry point. Priority is part of the contract:
-
-1. `unclimbable_blocks`
-2. `unstable_anchor_blocks`
-3. `stable_anchor_blocks`
-4. fallback
-
-An exclusion therefore wins if the same block is accidentally included by a broader tag.
+### Climb package — tools, wear and cooldown
 
 `climb.ClimbingToolClassifier`
 
-Single item eligibility entry point. `excluded_climbing_tools` has priority over `climbing_tools`.
-
-`climb.ClimbingHandSelector`
-
-Centralizes hand priority without bypassing Minecraft's interaction sequence. Off hand wins among available climbing tools, but a successful main-hand block/item interaction is allowed to finish first.
+Data-driven tool eligibility; exclusion tags win over inclusion tags.
 
 `climb.ToolIdentity`
 
-Persists per-tool runtime identity and cooldown in `DataComponents.CUSTOM_DATA` under the `pickclimber` root.
+Persists physical ItemStack UUID and cooldown metadata in custom data.
 
-Stored keys:
+`climb.ToolLocator`
 
-- `anchor_tool_id`
-- `cooldown_until`
-- `cooldown_duration`
+Locates a physical climbing tool by its persistent UUID.
 
-The UUID belongs to the ItemStack, not to the hand or slot.
+`climb.ToolWearReason` / `climb.ToolWearService`
 
-`climb.ModEnchantments`
+Typed server-authoritative durability boundary. All Pick Climber `hurtAndBreak` calls must live here so future world durability rules can be centralized while preserving vanilla Unbreaking semantics.
 
-Central resource keys and lookup helpers for:
+`climb.AnchorCooldownService`
 
-- `pick_climber`
-- `sturdy_latch`
-- `strong_grip`
+Owns cooldown start/clear/query/propagation for server and synchronized local presentation. Remaining ticks are not capped at the 20-tick base, preserving real longer cooldowns such as the 40-tick unstable case.
 
-`climb.AnchorIndicatorStatus`
+### Climb package — action, physics and presentation state
 
-Client-facing result used by the HUD. Current states include ready, unstable, unclimbable, Strong Grip requirement, Sturdy Latch requirement, cooldown, range and obstruction.
+`climb.ClimbActionService`
+
+Consumes one `AnchorEvaluation`, chooses boost versus attach and commits the action without re-running a separate permission ruleset.
+
+`climb.AnchorInteractionService` / `climb.AnchorUseDecision`
+
+Centralizes interaction-pipeline decisions for forced Shift-anchor and the post-normal-block-use path.
+
+`climb.AnchorInputStateService`
+
+Validates/clamps synchronized movement/camera input before updating server anchor state.
+
+`climb.AnchorMotionService`
+
+Small dispatcher that routes the current anchor state to wall or ceiling motion logic.
+
+`climb.WallAnchorMotion`
+
+Owns fixed wall maintenance, dangerous-fall braking, unstable sliding, lateral movement, surface transitions and associated wear decisions.
+
+`climb.CeilingAnchorMotion`
+
+Owns Strong Grip ceiling movement, swing acceleration/damping/radius limits and collision-aware ceiling motion.
+
+`climb.AnchorImpulseCalculator`
+
+Contains boost, wall-jump, ceiling-release and prediction/vector calculations. Keep pure calculations here whenever practical.
+
+`climb.AnchorPositioning`
+
+Owns hold/correct positioning operations shared by runtime paths.
+
+`climb.ClimbRuntimeTicker`
+
+Coordinates per-tick state validation, lifecycle detach, sustained wear, motion advancement, crack/sync refresh and remote pose refresh.
+
+`climb.AnchorVisualService`
+
+Owns anchor cracks and sounds. Physics services request visual actions rather than implementing crack-id/sound details.
+
+`climb.ClimbTuning`
+
+Central source of truth for 1.0.3 physical/timing/durability/sound constants. Phase 0 changes location, not values.
+
+### Climb package — synchronization boundary
+
+`climb.AnchorSyncSink`
+
+Domain interface for publishing attach/detach/boost/remote-pose synchronization without importing NeoForge transport classes.
+
+`climb.ClimbSynchronization`
+
+Domain-side sink holder/forwarder. The installed implementation is supplied by the network package.
+
+`climb.ClientAnchorSync` / `climb.ClientClimbSynchronizer`
+
+Transport-independent synchronized client DTO/application logic, including timeout cleanup.
 
 ### Event package
 
 `event.CommonEvents`
 
-Connects NeoForge events to climbing logic.
-
-Key responsibilities:
-
-- preserve normal block interaction priority;
-- implement the explicit Shift + right-click force-anchor path;
-- allow Pick Climber to own the click only after the target block declines normal interaction;
-- allow the free main hand to mine/attack while the off hand anchors;
-- detach if the player attacks/mines with the same tool supporting the anchor;
-- capture real `LivingJumpEvent` jumps for boost authorization;
-- tick server state and cleanup on dimension/logout events.
+NeoForge common event adapter. It remains responsible for event cancellation/result mechanics while delegating climbing decisions/actions to `AnchorInteractionService`, `ClimbActionService`, lifecycle and policy gates.
 
 ### Network package
 
 `network.ModNetworking`
 
-Registers protocol `13` payloads.
+Registers protocol `13`, payload codecs/handlers and installs the NeoForge sync sink. Payload handlers translate transport data to domain arguments rather than exposing payload types to the `climb` package.
 
-Server to client:
+`network.NeoForgeAnchorSyncSink`
+
+Only transport adapter used by domain synchronization. It owns `PacketDistributor` and construction of attach/detach/boost/remote-pose payloads.
+
+Payload records:
 
 - `AnchorSyncPayload`
 - `BoostSyncPayload`
-- `RemoteAnchorPosePayload`
-
-Client to server:
-
 - `DetachRequestPayload`
+- `RemoteAnchorPosePayload`
 - `SlideInputPayload`
 
-`AnchorSyncPayload`
-
-Synchronizes local anchor presentation and lifecycle flags. Flags include restoration state, jump detach, new anchor, cooldown refund and ceiling-anchor state. Cooldown ticks are packed into the flags integer.
-
-`BoostSyncPayload`
-
-Synchronizes a server-authorized velocity after a boost or ceiling release.
-
-`RemoteAnchorPosePayload`
-
-Observer-only state for remote third-person ceiling poses. It intentionally carries no durability, position authority or movement physics.
-
-`DetachRequestPayload`
-
-Carries the detach request plus movement/camera input from the same Space action so the server calculates the wall or ceiling release from the triggering input rather than an older periodic packet.
-
-`SlideInputPayload`
-
-Carries clamped movement intent and camera angles while an anchor requires server-authoritative movement integration.
+Dependency direction is intentional: **network may depend on climb; climb must not depend on network**.
 
 ## 4. Interaction ownership
 
@@ -504,66 +529,39 @@ Properties:
 
 The remaining work is multiplayer regression validation, not initial implementation.
 
-## 20. Clean-code boundaries and future refactor
+## 20. Clean-code boundaries after Phase 0
 
-`ClimbManager` currently contains more than half of the Java source lines. It works, but it is the clearest architectural debt in the project.
+The original 1,723-line `ClimbManager` has been reduced to a 154-line compatibility façade. The previous plan to someday create generic `AnchorValidator`, `AnchorPhysics` or `AnchorSyncService` god classes is superseded by the focused boundaries already implemented in `1.1.0-dev.3`.
 
-Do not split it casually. A safe future refactor should preserve behavior and tests while extracting cohesive responsibilities in small passes.
+The architecture rules are now:
 
-Suggested boundaries:
+1. **Mechanical permission is evaluated once.** `AnchorEvaluator` is query-only and gameplay/HUD/messages consume its results.
+2. **World surface policy has one insertion point.** Runtime consumers use `AnchorSurfaceResolver`.
+3. **Commit-time side effects stay outside evaluation.** Attach/detach live in `AnchorLifecycle`; action selection/commit lives in `ClimbActionService`.
+4. **Durability and cooldown are infrastructure.** `ToolWearService` and `AnchorCooldownService` are the only persistence boundaries for those concerns.
+5. **Physics is decomposed by behavior.** Wall, ceiling, impulse math, positioning and ticking are separate; do not recreate a monolithic `AnchorPhysics` class.
+6. **Transport is outside the climb domain.** `climb` publishes through `AnchorSyncSink`; NeoForge payload construction lives in `network`.
+7. **Events are adapters.** `CommonEvents` and `ClientEvents` should remain small and delegate decisions rather than accumulate mechanics.
+8. **Client presentation is not authority.** `ClimbPresentationGate` may hide/change visuals, but it cannot make an invalid anchor valid or alter world rules.
+9. **Runtime enablement has one seam.** 1.1.0 hot-disable must use `ClimbRuntimeGate` and a safe lifecycle detach, not scattered booleans.
+10. **World rules belong to 1.2.0.** Persistent Rules Cards/Jukebox state must enter through dedicated world policy/services and `AnchorSurfaceResolver`, not through hardcoded checks in physics.
 
-### `AnchorValidator`
+### Architecture gates
 
-Candidate methods and rules:
+`verifyArchitectureBoundaries` protects key invariants under Gradle `check`:
 
-- `canAttemptAnchor`
-- indicator validation
-- obstruction/range messages
-- surface/enchantment requirements
-- collision-safe target resolution
+- evaluator/feedback source may not perform known side effects;
+- direct surface classification outside `AnchorSurfaceResolver` is rejected;
+- direct `hurtAndBreak` outside `ToolWearService` is rejected;
+- the `climb` package may not import the `network` package or own `PacketDistributor`;
+- `ClimbManager` has a 250-line compatibility-façade budget;
+- `ClientEvents` has a 90-line thin-adapter budget and may not own renderer/transport details.
 
-### `AnchorPhysics`
-
-Candidate responsibilities:
-
-- wall braking;
-- unstable descent;
-- lateral slide integration;
-- ceiling swing integration;
-- collision-limited target movement.
-
-### `AnchorLifecycle`
-
-Candidate responsibilities:
-
-- attach;
-- detach;
-- cleanup;
-- state replacement;
-- ability restoration;
-- crack lifecycle.
-
-### `ClimbMovementCalculator`
-
-Candidate pure calculations:
-
-- wall jump velocity;
-- additional-rise velocity;
-- ceiling release vector;
-- predicted vertical rise.
-
-### `AnchorSyncService`
-
-Candidate responsibilities:
-
-- local anchor sync;
-- remote pose sync;
-- periodic refresh;
-- detach payloads.
+These gates are intentionally architectural, not a substitute for compilation or in-game regression.
 
 ### Refactor rule
 
-Never combine a structural extraction with a gameplay balance or physics change in the same pass. First prove token/behavior equivalence or run the full regression matrix, then change mechanics separately.
+Do not combine structural movement with balance changes. The only intentional functional correction currently carried by Phase 0 is the audited remaining-cooldown reporting fix for cooldowns longer than 20 ticks; it must be regression-tested separately in 0.9.
 
 ## 21. Comment policy
 

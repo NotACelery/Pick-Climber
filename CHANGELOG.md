@@ -1,5 +1,54 @@
 # Changelog
 
+## 1.1.0-dev.3 — 2026-09-01
+
+### Phase 0.3–0.8 — runtime decomposition
+
+- Extracted authoritative attach/detach/cleanup orchestration into `AnchorLifecycle` and attachment coherence into `AnchorStateValidator`.
+- Reworked the large positional `ServerClimbState` construction around coherent restore/input/braking/ceiling substates while preserving compatibility accessors.
+- Completed `ToolWearService` and `AnchorCooldownService`; all Pick Climber durability and cooldown persistence now goes through focused boundaries.
+- Added typed wear reasons so future world rules can scale durability without coupling map profiles to physics internals.
+- Fixed the audited remaining-cooldown reporting mismatch that could visually truncate a 40-tick unstable cooldown to 20 ticks.
+- Broke the old `climb <-> network` package cycle with a domain `AnchorSyncSink` and NeoForge transport adapter; protocol 13 is unchanged.
+- Extracted wall motion, ceiling motion, impulses, positioning, visuals, runtime ticking, action commit and validated input state from `ClimbManager`.
+- Reduced `ClimbManager` from the original 1,723 lines to a 154-line compatibility façade.
+- Extracted HUD drawing and client input from `ClientEvents`; it is now a 49-line NeoForge event adapter.
+- Added default pass-through runtime and presentation policy gates as explicit seams for the future 1.1.0 options/hot-disable implementation. No customization behavior is enabled yet.
+- Centralized forced-anchor and post-block-use interaction decisions in `AnchorInteractionService`.
+- Split creative-tab registration into `ModCreativeTabs` while preserving existing resources and behavior.
+- Preserved 1.0.3 physics/tuning as the intended regression baseline; no new 1.1.0 player-facing feature is part of this structural snapshot.
+
+### Phase 0.9 preparation
+
+- Added Java 21 GitHub Actions CI for `main`, `preparacionUpdate` and pull requests.
+- Expanded architecture verification to protect evaluation, surface, wear, networking and thin-adapter boundaries.
+- Reworked `verifyArchitectureBoundaries` so its source directories/file trees are resolved during Gradle configuration, addressing the configuration-cache failure exposed by the `1.1.0-dev.2` build attempt.
+- Full NeoForge compilation and gameplay regression are intentionally deferred to the final Phase 0.9 integration pass.
+
+## 1.1.0-dev.2 — 2026-09-01
+
+### Phase 0.2 — unified anchor evaluation
+
+- Extracted side-effect-free anchor evaluation from `ClimbManager` for both hands.
+- Hand selection, real anchor permission, HUD state and failure messages now consume the same evaluated facts.
+- Moved anchor face/target/collision calculations into `AnchorGeometry` and made attach/boost reuse the resolved target instead of deciding again.
+- Added `AnchorSurfaceResolver` as the world-aware policy seam that future map rules will extend while preserving current tags as the default.
+- Added `ClimbSessionView` so the evaluator reads active-session state without depending on the orchestration manager.
+- Added an architecture verification gate that rejects side effects inside evaluation and direct bypasses of the surface resolver.
+- `canAttemptAnchor` no longer mutates duplicated tool UUIDs or clears cooldown data during a validation query; identity separation remains in the attach commit path.
+- No physics, balance, controls, HUD presentation defaults, interaction priority, tags or network protocol were intentionally changed.
+
+## 1.1.0-dev.1 — Phase 0 structural preparation
+
+### Internal architecture
+
+- Started the 1.1.0 modularization pass on top of the validated 1.0.3 gameplay baseline.
+- Centralized climbing tuning values in `ClimbTuning` without changing any values.
+- Extracted runtime state storage, jump authorization, tool lookup/wear and anchor cooldown coordination from `ClimbManager`.
+- Moved the remote anchor pose record out of the manager into its own immutable type.
+- Added a Gradle source-quality gate for Java formatting invariants and JSON/MCMeta syntax.
+- No climbing physics, balance, interaction priority, enchantment behavior, tags or network protocol behavior changed in this pass.
+
 ## 1.0.3 — 2026-09-01
 
 ### HUD fixes

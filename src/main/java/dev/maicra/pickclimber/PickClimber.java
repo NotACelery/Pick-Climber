@@ -12,7 +12,7 @@ public final class PickClimber {
 
     public PickClimber(IEventBus modEventBus, ModContainer modContainer) {
         ModItems.ITEMS.register(modEventBus);
-        ModItems.CREATIVE_MODE_TABS.register(modEventBus);
+        ModCreativeTabs.TABS.register(modEventBus);
         modEventBus.addListener(ModNetworking::registerPayloads);
     }
 

@@ -21,3 +21,6 @@ Thumbs.db
 # Local Codex context (intentionally not versioned)
 /AGENTS.md
 /PROJECT-HANDOFF.md
+
+# Local compiler diagnostics
+javac.*.args

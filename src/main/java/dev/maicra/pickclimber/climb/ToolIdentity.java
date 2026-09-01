@@ -13,7 +13,7 @@ public final class ToolIdentity {
     private static final String TOOL_ID_KEY = "anchor_tool_id";
     private static final String COOLDOWN_UNTIL_KEY = "cooldown_until";
     private static final String COOLDOWN_DURATION_KEY = "cooldown_duration";
-    private static final int DEFAULT_COOLDOWN_TICKS = 20;
+    private static final int DEFAULT_COOLDOWN_TICKS = ClimbTuning.ANCHOR_COOLDOWN_TICKS;
 
     private ToolIdentity() {
     }

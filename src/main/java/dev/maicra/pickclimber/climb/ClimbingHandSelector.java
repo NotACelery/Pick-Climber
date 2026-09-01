@@ -10,19 +10,9 @@ public final class ClimbingHandSelector {
     }
 
     public static InteractionHand preferred(Player player, BlockHitResult hit) {
-        InteractionHand preferred = null;
-
-        if (ClimbManager.canAttemptAnchor(player, InteractionHand.OFF_HAND, hit)) {
-            preferred = InteractionHand.OFF_HAND;
-        } else if (ClimbManager.canAttemptAnchor(player, InteractionHand.MAIN_HAND, hit)) {
-            preferred = InteractionHand.MAIN_HAND;
-        }
-
-        if (preferred == null || preservesNormalBlockUse(player, hit)) {
-            return null;
-        }
-
-        return preferred;
+        AnchorEvaluation evaluation = AnchorEvaluator.evaluate(player, hit);
+        InteractionHand preferred = evaluation.preferredHand();
+        return preferred == null || preservesNormalBlockUse(player, hit) ? null : preferred;
     }
 
     public static boolean preservesNormalBlockUse(Player player, BlockHitResult hit) {

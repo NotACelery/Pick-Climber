@@ -1,4 +1,4 @@
-# Checklist de release 1.0.1 — indicadores y regresiones
+# Checklist de release 1.0.3 — indicadores y regresiones
 
 ## Indicadores de anclaje
 
@@ -18,6 +18,7 @@
 - [ ] Un bloque con menú no muestra la banda durante clic normal y sí la evalúa al mantener Shift.
 - [ ] Mano secundaria, principal y dos herramientas muestran el estado correspondiente a la herramienta que finalmente selecciona el servidor.
 - [ ] Ocultar la interfaz con F1 oculta también el indicador.
+- [x] Jade, tooltips y otros overlays del HUD conservan sus colores mientras el indicador alterna entre sus distintos estados.
 - [ ] Apuntar al vacío, una entidad o un impacto situado a más de 3 bloques no muestra icono ni texto.
 - [ ] Un bloque real entre 1.5 y 3 bloques muestra `OUT OF RANGE`, no `ANCHOR OBSTRUCTED`.
 - [ ] Cuerda, vegetación seleccionable y caras sin soporte muestran `ANCHOR OBSTRUCTED` únicamente dentro de 1.5 bloques.
@@ -154,7 +155,9 @@
 - [ ] Un anclaje de pared no activa la pose elevada de tercera persona.
 - [ ] Confirmar la pose desde un segundo cliente multijugador mediante el estado remoto de protocolo 13.
 
-## Regresión 0.1.14 — bloques con menú vanilla
+## Regresión 1.0.3 — bloques interactivos y Shift
+
+Validación manual 2026-09-01: VNS y Cutter confirmados in-game; el aislamiento de color del HUD también permanece correcto.
 
 - [ ] Clic derecho normal con una picota sobre una mesa de crafteo abre su interfaz y no engancha.
 - [ ] Clic derecho normal sobre horno, ahumador y alto horno abre su interfaz y no engancha.
@@ -162,7 +165,15 @@
 - [ ] `Shift + clic derecho` sobre una cara vertical válida de esos bloques crea el anclaje sin abrir el menú.
 - [ ] `Shift + clic derecho` sobre una cara inválida no gasta durabilidad ni inicia cooldown.
 - [ ] Sin Shift, el indicador de alcance no aparece sobre un bloque con menú.
+- [ ] Sin Shift, el indicador tampoco aparece sobre puertas, trampillas, palancas, botones y otros bloques incluidos en `pickclimber:interactive_blocks`.
+- [ ] Bloque normal sin interacción: el indicador sigue apareciendo sin Shift.
+- [x] Villager Noise Switch: sin Shift no aparece el indicador; con Shift reaparece si el anclaje es válido.
+- [ ] Iron Farm Noise Switch / otras máquinas con BlockEntity: misma regla sin Shift/Shift.
+- [x] Cutter: sin Shift no aparece el indicador; con Shift reaparece cuando el anclaje es válido.
+- [ ] Cofre/horno: sin Shift no aparece el indicador.
+- [ ] Repetir la prueba con al menos otro bloque modded que consuma clic derecho mediante su propia interacción.
 - [ ] Con Shift, el indicador aparece cuando la cara, distancia, cooldown y colisión permiten el anclaje.
+- [ ] Soltar Shift vuelve a ocultar el indicador inmediatamente mientras se siga mirando el bloque interactivo.
 - [ ] Probar con el pico únicamente en la mano principal.
 - [ ] Probar con el pico únicamente en la mano secundaria.
 - [ ] Probar con dos picos disponibles: la secundaria conserva prioridad para el anclaje.
@@ -196,3 +207,6 @@
 - [ ] No reaparece el wall jump automático.
 - [ ] Las grietas se limpian al cambiar de punto, dimensión o desconectarse.
 - [ ] La pose clavada sigue correcta en ambas manos.
+
+- [ ] Puerta/trampilla/palanca/botón: sin Shift no aparece el indicador.
+- [ ] Bloque normal sin interacción: el indicador sigue apareciendo sin Shift.
