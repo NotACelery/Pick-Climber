@@ -2,7 +2,7 @@
 
 Current stable line: **1.0.3**.
 
-Current development line: **1.1.0-dev.3** on the `preparacionUpdate` workstream.
+Current development line: **1.1.0-dev.8** on the `preparacionUpdate` workstream.
 
 The 1.0.x line is the behavioral regression baseline. Development is intentionally split into:
 
@@ -199,6 +199,13 @@ Completed:
 
 ### Phase 0.9 — Build integration, automated verification, documentation and final acceptance
 
+Current integration status:
+
+- `dev.3` confirmed that the Gradle architecture verifier now runs under configuration cache and reaches `compileJava`.
+- The first Java failure was isolated to four client-input references typed as `Player` instead of `LocalPlayer`; corrected in `dev.4`.
+- `dev.4` also moves all root documentation except `README.md` into `docs/` and provides `MIGRATE-DOCS-DEV4.bat` for stale-root cleanup after ZIP extraction.
+- Additional compiler/API errors, if exposed by the next build, remain normal Phase 0.9 integration work until the full tree compiles and passes regression.
+
 Status: **IN PROGRESS — FINAL PHASE 0 GATE**.
 
 Already implemented/prepared:
@@ -221,7 +228,7 @@ Already implemented/prepared:
 
 Still required before Phase 0 can be declared complete:
 
-- [ ] Run the first complete Java 21 / NeoForge 21.1.235 build of the fully decomposed `1.1.0-dev.3` tree.
+- [ ] Continue Java 21 / NeoForge 21.1.235 compile repair from the fully decomposed `1.1.0-dev.4` tree.
 - [ ] Repair all compile/API/import/type errors produced by the full integration build; do not paper over them by weakening architecture boundaries.
 - [ ] Confirm `verifySourceQuality` and the revised `verifyArchitectureBoundaries` pass under the real Gradle configuration cache.
 - [ ] Add focused unit tests for extracted pure logic where they provide real value without mocking the entire Minecraft world.
@@ -230,11 +237,11 @@ Still required before Phase 0 can be declared complete:
 - [ ] Run two-client multiplayer regression for remote pose, detach, hand transfer, timeout and cleanup.
 - [ ] Run representative compatibility regression: vanilla interactive blocks, VNS/Cutter-style BlockEntity machines, external climbing tools and tag overrides.
 - [ ] Update final build status after the real build and QA results.
-- [ ] Regenerate and validate `SOURCE-MANIFEST.json` after the final compile-repair/doc pass.
+- [ ] Regenerate and validate `docs/SOURCE-MANIFEST.json` after the final compile-repair/doc pass.
 
 ### Phase 0 exit criteria
 
-**Do not begin the user-facing 1.1.0 options implementation until all unchecked integration/QA gates below are green.**
+The original gate required build/QA before beginning user-facing 1.1.0 work. During the workstream this was intentionally relaxed: source-side 1.1.0 implementation proceeded on the completed structural boundaries, while compile repair and gameplay acceptance remain mandatory before release. This does not waive any unchecked gate below.
 
 Structural architecture:
 
@@ -265,29 +272,34 @@ Final integration/behavior:
 
 ## 1.1.0 — Player Customization & Runtime Control
 
-Status: **PLANNED AFTER PHASE 0**.
+Status: **SOURCE-COMPLETE CANDIDATE in `1.1.0-dev.8`**. No additional 1.1.0 feature is planned before the integration/QA pass unless testing exposes a concrete UX gap.
 
 ### In-world options entry
 
 Add **Pick Climber Options** to the vanilla Options screen only while a world/server is loaded.
 
-- Do not show the button from the title screen.
-- Keep the screen responsive at small window sizes and different GUI scales.
-- Apply visual changes immediately while the screen is open when technically safe.
+- [x] Do not show the button from the title screen.
+- [x] Add the entry only to `OptionsScreen` while a world/player is loaded.
+- [x] Use adaptive columns so the first options screen remains usable across narrow/small GUI layouts.
+- [x] Apply visual changes immediately while the screen is open when technically safe.
 
 ### HUD controls
 
 Provide:
 
-- Indicator mode: `Contextual`, `Always`, `Off`.
-- Show unclimbable indicator: On/Off, default Off.
-- Icon style: `String`, `Pickaxe Outline`.
-- Icon size.
-- Icon opacity.
-- Border/box visibility.
-- Border/box opacity.
-- Anchor status/failure messages: On/Off.
-- Reset HUD to Defaults.
+- [x] Indicator mode: `Contextual`, `Always`, `Off`.
+- [x] Show unclimbable indicator: On/Off, default Off.
+- [x] Icon style: `String`, `Pickaxe Outline` using separate renderers and no vanilla-pickaxe fallback.
+- [x] Icon size (50%–200%).
+- [x] Icon opacity.
+- [x] Border/box visibility.
+- [x] Border/box opacity.
+- [x] Anchor failure messages: On/Off, mirrored transiently to the server so server-originated feedback respects the client choice.
+- [x] Reset HUD to Defaults without changing the runtime enable/disable preference.
+- [x] Reset All to restore HUD, failure feedback and runtime interactions to defaults.
+- [x] Disable visual child controls when their parent state makes them irrelevant.
+- [x] Version the client-options JSON (`configVersion: 1`) while retaining defensive loading of legacy/malformed known fields.
+- [x] Avoid redundant writes when an option value did not actually change.
 
 Possible later polish after the core controls are stable:
 
@@ -321,24 +333,26 @@ Preserve the 1.0.2 shader/batch isolation invariant so Jade and other overlays n
 
 ### Hot-disable
 
+Status: **source-side implementation complete in `dev.8`; build/QA pending**.
+
 Add a personal **Enable Pick Climber interactions** toggle.
 
 When disabled while attached:
 
-- perform a safe authoritative detach;
-- clear cracks and pose;
-- restore gravity/abilities;
-- stop climbing input/network actions;
-- hide Pick Climber feedback;
-- leave all non-Pick-Climber Minecraft interactions untouched.
+- [x] perform a safe authoritative detach via the existing lifecycle path;
+- [x] clear client attachment immediately and detach authoritatively on the server;
+- [x] stop climbing input/network actions through the runtime gate;
+- [x] hide Pick Climber feedback through the same gate;
+- [x] leave all non-Pick-Climber Minecraft interactions untouched;
+- [ ] verify gravity/abilities/cracks/remote pose cleanup in multiplayer QA.
 
 In multiplayer this preference is per-player. Visual preferences remain client-only; the enabled/disabled interaction state must be known by the server so server event handlers respect the opt-out.
 
 ### 1.1.0 network
 
-Expected protocol bump: **13 -> 14**.
+Protocol bump implemented source-side: **13 -> 14**.
 
-Add only the payload/state required for the per-player runtime enable/disable feature. HUD size/style/opacity preferences remain client-local.
+`RuntimePreferencePayload` mirrors only interaction enable/disable and failure-text visibility. Size, opacity, box and indicator-mode preferences remain client-local. Server runtime preferences are transient and cleared on logout.
 
 ### 1.1.0 QA
 
@@ -355,6 +369,9 @@ Validate:
 - hot-disable while attached/unattached;
 - hot-enable without restart;
 - two multiplayer clients with different visual/enable preferences;
+- Reset HUD vs Reset All behavior and immediate runtime resync;
+- disabled/enabled dependent controls at each indicator mode;
+- legacy client config without `configVersion` and future-version known-field loading;
 - complete 1.0.3 physics/interaction regression;
 - Jade/overlay color isolation.
 
@@ -542,7 +559,7 @@ These remain valid candidates for later 1.3.x+ work once the world-rule model is
 
 ## Current handoff / exact next step
 
-Current source target: **`1.1.0-dev.3`**.
+Current source target: **`1.1.0-dev.8`**.
 
 Current stable comparison target: **`1.0.3`**.
 
@@ -552,10 +569,10 @@ Structural passes **0.0 through 0.8 are implemented source-side**. The remaining
 2. Run the full Java 21 / NeoForge `clean build --stacktrace`.
 3. Repair compile/API/import/type errors without collapsing the new module boundaries.
 4. Confirm both Gradle verification tasks under configuration cache.
-5. Run `TESTING-1.1.0-dev.3.md` against the exact 1.0.3 baseline.
+5. Run `docs/testing/TESTING-1.1.0-dev.8.md` against the exact 1.0.3 baseline.
 6. Run multiplayer and representative mod/tag compatibility regression.
 7. Regenerate the manifest after any final repair.
 8. Mark Phase 0 complete only when the exact compiled JAR passes regression.
-9. Begin **1.1.0 — Player Customization & Runtime Control** only after that gate.
+9. Treat 1.1.0 as releasable only after the compiled dev.8-equivalent tree passes the full 1.0.3 + options/runtime regression.
 
 This handoff is intentionally explicit so Phase 0 can continue safely in a new conversation without reconstructing the architecture from chat history.

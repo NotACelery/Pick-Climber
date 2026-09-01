@@ -19,6 +19,9 @@ public final class ClientEvents {
     @SubscribeEvent
     public static void onClientLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
         ClientClimbInputController.onLogout(event.getPlayer());
+        if (event.getPlayer() instanceof net.minecraft.client.player.LocalPlayer localPlayer) {
+            ClientRuntimePreferenceController.onLogout(localPlayer);
+        }
     }
 
     @SubscribeEvent
@@ -34,7 +37,10 @@ public final class ClientEvents {
 
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
-        ClientClimbInputController.tick(Minecraft.getInstance());
+        Minecraft minecraft = Minecraft.getInstance();
+        ClientPickClimberBootstrap.ensureInstalled();
+        ClientRuntimePreferenceController.tick(minecraft);
+        ClientClimbInputController.tick(minecraft);
     }
 
     @SubscribeEvent

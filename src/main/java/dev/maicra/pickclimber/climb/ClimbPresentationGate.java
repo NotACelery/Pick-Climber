@@ -11,7 +11,7 @@ public final class ClimbPresentationGate {
 
         @Override
         public boolean showFailureText(Player player) {
-            return true;
+            return PlayerClimbPresentationPreferences.failureTextEnabled(player);
         }
     };
 

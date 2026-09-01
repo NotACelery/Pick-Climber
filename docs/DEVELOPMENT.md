@@ -1,6 +1,6 @@
 # Pick Climber — Development Reference
 
-This document is the technical reference for the current `1.1.0-dev.3` structural source tree.
+This document is the technical reference for the current `1.1.0-dev.4` structural source tree.
 The gameplay and networking comparison baseline remains the validated `1.0.3` release.
 It centralizes the implementation decisions that used to live in Java comments so the runtime code can stay compact and readable without losing design context.
 
@@ -10,7 +10,7 @@ It centralizes the implementation decisions that used to live in Java comments s
 - NeoForge: `21.1.235`
 - Java: `21`
 - Mod id: `pickclimber`
-- Development version: `1.1.0-dev.3`
+- Development version: `1.1.0-dev.4`
 - Stable behavior baseline: `1.0.3`
 - Network registrar protocol: `13`
 - Runtime target: client and dedicated server
@@ -81,7 +81,7 @@ Retain item-decoration, first-person pinned-tool and local/remote ceiling-pose p
 
 `climb.ClimbManager`
 
-A 154-line compatibility façade/coordinator in `1.1.0-dev.3`. It exposes established entry points while delegating evaluation, action commit, lifecycle, input, ticking and synchronization to focused services. New physics or configuration logic must not be added back into this class.
+A 154-line compatibility façade/coordinator in `1.1.0-dev.4`. It exposes established entry points while delegating evaluation, action commit, lifecycle, input, ticking and synchronization to focused services. New physics or configuration logic must not be added back into this class.
 
 `climb.AnchorEvaluator`
 
@@ -531,7 +531,7 @@ The remaining work is multiplayer regression validation, not initial implementat
 
 ## 20. Clean-code boundaries after Phase 0
 
-The original 1,723-line `ClimbManager` has been reduced to a 154-line compatibility façade. The previous plan to someday create generic `AnchorValidator`, `AnchorPhysics` or `AnchorSyncService` god classes is superseded by the focused boundaries already implemented in `1.1.0-dev.3`.
+The original 1,723-line `ClimbManager` has been reduced to a 154-line compatibility façade. The previous plan to someday create generic `AnchorValidator`, `AnchorPhysics` or `AnchorSyncService` god classes is superseded by the focused boundaries already implemented in `1.1.0-dev.4`.
 
 The architecture rules are now:
 
@@ -625,7 +625,7 @@ That search logic is operational behavior and should be preserved even though ex
 
 ## 24. Source manifest
 
-`SOURCE-MANIFEST.json` is a integrity snapshot of the release-relevant working tree.
+`docs/SOURCE-MANIFEST.json` is an integrity snapshot of the release-relevant working tree.
 
 It should contain:
 
@@ -744,14 +744,26 @@ Current implementation architecture, invariants, maintenance rules and regressio
 
 Historical/design specification for Strong Grip, Sturdy Latch and ceiling traversal. It remains useful for rationale and planned behavior, but current runtime truth should be checked against `DEVELOPMENT.md` and the 1.0.3 source.
 
-`TESTING-1.0.3.md`
+`docs/testing/TESTING-1.0.3.md`
 
 Manual in-game beta/regression procedure.
 
-`ROADMAP.md`
+`docs/ROADMAP.md`
 
 Remaining validation and future ideas. Completed historical phases are retained as project history.
 
-`CHANGELOG.md`
+`docs/CHANGELOG.md`
 
 User-visible release history. Formatting-only cleanup should not create a fake gameplay changelog entry.
+
+## 1.1.0 client options and runtime preference boundary
+
+`1.1.0-dev.8` completes the planned source-side options pass consuming the Phase 0 seams. Client HUD preferences are owned by `PickClimberClientOptionsStore` and persisted in `config/pickclimber-client.json`; rendering reads them through `ClientOptionsPresentationPolicy` and `AnchorIndicatorRenderer` rather than through event adapters. `IndicatorStyle` selects between independent `StringIndicatorIconRenderer` and `PickaxeOutlineIndicatorIconRenderer` implementations through `AnchorIndicatorIconRenderer`, so adding future styles does not add branches to NeoForge event adapters or anchor evaluation.
+
+The in-world entry point is `PickClimberOptionsEntry`. It only adds the Pick Climber button to `OptionsScreen` while a level and local player are present, keeping the title-screen Options UI unchanged. `PickClimberOptionsScreen` uses an adaptive layout and writes changes immediately. Child controls become inactive when their parent state makes them irrelevant, and the footer exposes separate HUD-only and full resets.
+
+Runtime opt-out is intentionally separate from HUD rendering. `PlayerClimbRuntimePreferences` is a common, transient per-player store whose default is enabled. The client mirrors its local preference through protocol 14 using `RuntimePreferencePayload`; the server applies the preference and detaches an active climb through the normal lifecycle. No persistent server/world rule is created by 1.1.0.
+
+Failure-text visibility remains a client preference but is mirrored transiently to the server because some authoritative interaction failures originate server-side. Other HUD properties (mode, style, scale, opacity, box and unclimbable visibility) never leave the client. The JSON format writes `configVersion: 1`; legacy files without that key remain readable and known fields from newer versions are loaded defensively.
+
+The Pickaxe Outline indicator is implemented as a dedicated monochrome line-art renderer behind the same icon-rendering boundary as String. Do not collapse the two implementations into a fake vanilla-pickaxe item renderer; the separation is intentional so future styles remain presentation-only.

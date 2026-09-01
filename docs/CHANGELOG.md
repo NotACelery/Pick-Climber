@@ -1,5 +1,68 @@
 # Changelog
 
+## 1.1.0-dev.8 — 2026-09-01
+
+### Integration repair — options screen and deprecation cleanup
+
+- Fixed the 1.21.1 Mojmap package for the vanilla Options screen used by the in-world Pick Climber options entry (`net.minecraft.client.gui.screens.options.OptionsScreen`).
+- Removed the deprecated explicit event-bus selector from the client mod-event subscriber; NeoForge routes `IModBusEvent` handlers to the mod bus automatically.
+- Switched anchor sound lookup to the contextual `BlockState#getSoundType(level, pos, player)` path, preserving vanilla behavior while allowing modded blocks to provide context-sensitive sound types.
+- No climbing physics, balance, anchor classification, runtime preferences or HUD defaults are intentionally changed.
+- `dev.7` reached `compileJava` and exposed only the OptionsScreen mapping error plus deprecation warnings; this patch addresses that reported layer.
+
+## 1.1.0-dev.7 — 2026-09-01
+
+### 1.1.0 — options UX finalization
+
+- Finished the planned 1.1.0 options surface source-side; the next gate is compile/API repair and gameplay QA rather than additional feature expansion.
+- Added dependency-aware controls: visual widgets are disabled while Indicator Mode is Off, box opacity is disabled while the box is hidden, and Show Unclimbable is only editable in Contextual mode.
+- Added `Reset All` alongside `Reset HUD`; the former restores interaction/runtime defaults and immediately requests a preference resync, while the latter preserves the interaction-enable choice.
+- Added `configVersion: 1` to `pickclimber-client.json` while keeping old files without a version readable and tolerating newer files by loading known fields defensively.
+- Avoided redundant option-file writes when the effective record does not change and clean up temporary files after atomic-move fallback.
+- Improved footer responsiveness for narrow GUI layouts.
+- Build/API repair remains intentionally deferred to the consolidated integration pass; this entry does not claim a successful JAR build.
+
+## 1.1.0-dev.6 — 2026-09-01
+
+### 1.1.0 — indicator-style completion
+
+- Added the `String / Pickaxe Outline` HUD style selector requested for the 1.1.0 customization menu.
+- Implemented Pickaxe Outline as a dedicated line-art renderer; it does not reuse a vanilla pickaxe item or copy a Minecraft texture.
+- Split indicator icon drawing behind `IndicatorIconRenderer` and a style dispatcher so future styles remain presentation-only.
+- Kept String rendering in its own renderer with the 1.0.2 flush/tint/reset isolation invariant intact.
+- Pickaxe Outline uses local ARGB GUI draws and therefore never changes global shader color.
+- Persisted `indicatorStyle` in `config/pickclimber-client.json` with a defensive fallback to String for old or malformed configs.
+- Added localized style labels for English, Spanish and Chilean Spanish.
+- Build/API repair remains intentionally deferred to the final integration pass; this snapshot is source-side implementation, not a claimed successful JAR build.
+
+## 1.1.0-dev.5 — 2026-09-01
+
+### 1.1.0 — options core and runtime control
+
+- Added an in-world-only `Pick Climber Options` entry to the vanilla Options screen; it is not injected when no world/player is loaded.
+- Added persistent client HUD preferences in `config/pickclimber-client.json` with defensive default merging for missing/invalid fields.
+- Added `Contextual / Always / Off` indicator modes. Contextual hides `UNCLIMBABLE` by default while preserving actionable states.
+- Added HUD controls for unclimbable visibility, icon scale, icon opacity, indicator-box visibility, box opacity and failure-message visibility.
+- Preserved the 1.0.2 shader-isolation invariant while adding icon opacity and scaling.
+- Added HUD reset that restores visual defaults without silently re-enabling disabled Pick Climber interactions.
+- Added the first real hot-disable path: a per-player runtime preference is mirrored to the server, client input/feedback stops immediately, and an active attachment is detached through the existing lifecycle path.
+- Bumped the development networking protocol from 13 to 14 and added `RuntimePreferencePayload` for transient per-player interaction/failure-text preferences.
+- Added server-side transient runtime/presentation preference stores and cleanup on logout.
+- Kept icon style on the String renderer for this pass; the planned Pickaxe Outline renderer remains pending.
+- Build/API repair is intentionally deferred until the feature implementation pass is complete, per the current development strategy.
+- Removed legacy documentation copies from the snapshot root; only `README.md` remains as root documentation. `MIGRATE-DOCS-DEV5.bat` removes stale copies when applying the patch over earlier dev trees.
+
+## 1.1.0-dev.4 — 2026-09-01
+
+### Phase 0.9 — compile repair and repository cleanup
+
+- Fixed the first real Java compile failure exposed by `dev.3`: client movement input is now read from `LocalPlayer` instead of a base `Player` reference.
+- Preserved the exact 1.0.3 input values (`forwardImpulse`, `leftImpulse`, yaw and pitch) and existing protocol-13 payloads.
+- Moved release/development documentation out of the repository root: build status, changelog, roadmap and manifest now live in `docs/`, while regression checklists live in `docs/testing/`.
+- Added `MIGRATE-DOCS-DEV4.bat` to safely remove only the stale root copies left behind when the ZIP is extracted over a `dev.3` tree.
+- Updated all active documentation references and Phase 0.9 targets to the new paths and `dev.4`.
+- No gameplay, physics, balance, anchor classification, interaction priority or network protocol behavior is intentionally changed in this patch.
+
 ## 1.1.0-dev.3 — 2026-09-01
 
 ### Phase 0.3–0.8 — runtime decomposition

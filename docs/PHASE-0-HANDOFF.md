@@ -3,7 +3,7 @@
 ## Current state
 
 - Stable gameplay baseline: `1.0.3`.
-- Current structural source: `1.1.0-dev.3`.
+- Current development source: `1.1.0-dev.8`.
 - Intended development branch/workstream: `preparacionUpdate`.
 - Minecraft: `1.21.1`.
 - NeoForge: `21.1.235`.
@@ -93,11 +93,15 @@
 - tool/surface/interactive tags preserved
 - no reflection/foreign-class inspection/fake interaction calls introduced
 
-## Build failure already observed
+## Build failures already observed
 
 The user's `1.1.0-dev.2` build used Temurin Java 21.0.12 / Gradle 9.2.1 and failed **before Java compilation** inside the first `verifyArchitectureBoundaries` implementation. Gradle configuration cache rejected a `file(...)` call captured from the build-script closure at task execution time.
 
-`1.1.0-dev.3` rewrites that verifier so source directories/file trees are resolved at Gradle configuration time. This correction still requires a real 0.9 build to prove it.
+`1.1.0-dev.3` repaired that verifier. The user's next build confirmed the architecture task and Minecraft artifact preparation both completed and Gradle reached `compileJava`. The remaining failure was four occurrences of the same client typing mistake: `ClientClimbInputController` referenced `player.input` through a base `Player` variable.
+
+`1.1.0-dev.4` corrects those client input references by keeping `minecraft.player` as `LocalPlayer`, matching the direct `minecraft.player.input` access already used in 1.0.3. The next real build may expose additional integration errors; those belong to Phase 0.9 until the full tree compiles.
+
+Documentation remains consolidated under `docs/` with only `README.md` kept as root documentation. The current overlay helper is `MIGRATE-DOCS-DEV8.bat`, which removes stale root copies and older migration helpers.
 
 ## Critical invariants
 
@@ -110,7 +114,7 @@ Do not intentionally change during Phase 0 unless isolated/documented as a bugfi
 - server authority;
 - Strong Grip / Sturdy Latch semantics;
 - public tool/surface/interactive tags and precedence;
-- protocol 13;
+- server authority and the intentional 1.1.0 protocol-14 runtime-preference extension;
 - 1.0.2 shader-color isolation;
 - 1.0.3 interactive-block HUD suppression.
 
@@ -118,9 +122,9 @@ Evaluation must remain side-effect-free. Surface consumers must use `AnchorSurfa
 
 ## Current static status
 
-- Java files: 73.
+- Java files: 90.
 - `ClimbManager`: 154 lines.
-- `ClientEvents`: 49 lines.
+- `ClientEvents`: 55 lines.
 - Source-format/static quality violations: 0 in the current workspace scan.
 - Invalid JSON/MCMeta: 0.
 - Direct `hurtAndBreak` outside `ToolWearService`: 0.
@@ -129,16 +133,14 @@ Evaluation must remain side-effect-free. Surface consumers must use `AnchorSurfa
 
 This is not a substitute for the final NeoForge build.
 
-## Exact next step — Phase 0.9
+## Exact next step
 
-1. Finish/update Phase 0 documentation and `TESTING-1.1.0-dev.3.md`.
-2. Regenerate the source manifest after the documentation pass.
-3. Run the first full Java 21 `clean build --stacktrace` of the completely decomposed tree.
-4. Repair every compile/API/import/type error without collapsing the new boundaries.
-5. Confirm both Gradle quality/architecture gates under configuration cache.
-6. Run the complete 1.0.3 regression, including multiplayer and representative mod compatibility.
-7. Regenerate manifest after any source repair.
-8. Mark Phase 0 complete only after the exact compiled JAR passes regression.
-9. Then begin **1.1.0 — Player Customization & Runtime Control**.
+The structural decomposition (Phase 0.0-0.8) and the planned 1.1.0 options/runtime feature surface are now implemented source-side in `1.1.0-dev.8`. Intermediate build failures are intentionally accumulated until the integration pass.
 
-Full detailed status and future 1.1.0/1.2.0 scope lives in `ROADMAP.md`.
+1. Apply `dev.8` and run `MIGRATE-DOCS-DEV8.bat` once when overlaying an older development tree.
+2. Do not add new 1.1.0 scope unless QA exposes a concrete gap.
+3. Run the consolidated Java 21 / NeoForge build repair pass.
+4. Fix Gradle/API/import/type/deprecation issues without weakening the new architecture boundaries.
+5. Run `docs/testing/TESTING-1.1.0-dev.8.md` plus the exact 1.0.3 regression and multiplayer/compatibility checks.
+6. Regenerate the manifest after the accepted compile-repair tree.
+7. Only after those gates are green, promote the development line toward the final 1.1.0 release.

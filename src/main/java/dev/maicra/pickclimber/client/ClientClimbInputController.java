@@ -5,6 +5,7 @@ import dev.maicra.pickclimber.climb.ClimbRuntimeGate;
 import dev.maicra.pickclimber.network.DetachRequestPayload;
 import dev.maicra.pickclimber.network.SlideInputPayload;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -27,7 +28,7 @@ final class ClientClimbInputController {
     }
 
     static boolean handleAttack(Minecraft minecraft) {
-        Player player = minecraft.player;
+        LocalPlayer player = minecraft.player;
         if (player == null
                 || !ClimbRuntimeGate.interactionsEnabled(player)
                 || !ClimbManager.isAttached(player)
@@ -41,7 +42,7 @@ final class ClientClimbInputController {
     }
 
     static void tick(Minecraft minecraft) {
-        Player player = minecraft.player;
+        LocalPlayer player = minecraft.player;
         if (player == null) {
             if (hadPlayerLastTick) {
                 ClimbManager.clearAllClientStates(null);
@@ -131,7 +132,7 @@ final class ClientClimbInputController {
     }
 
     private static DetachRequestPayload detachRequest(Minecraft minecraft, boolean jump) {
-        Player player = minecraft.player;
+        LocalPlayer player = minecraft.player;
         if (player == null) {
             return new DetachRequestPayload(jump, 0.0F, 0.0F, 0.0F, 0.0F);
         }

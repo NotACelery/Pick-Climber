@@ -1,0 +1,31 @@
+package dev.maicra.pickclimber.client;
+
+import dev.maicra.pickclimber.climb.AnchorIndicatorStatus;
+import dev.maicra.pickclimber.climb.ClimbPresentationPolicy;
+import net.minecraft.world.entity.player.Player;
+
+final class ClientOptionsPresentationPolicy implements ClimbPresentationPolicy {
+    static final ClientOptionsPresentationPolicy INSTANCE = new ClientOptionsPresentationPolicy();
+
+    private ClientOptionsPresentationPolicy() {
+    }
+
+    @Override
+    public AnchorIndicatorStatus filterIndicator(Player player, AnchorIndicatorStatus status) {
+        PickClimberClientOptions options = PickClimberClientOptionsStore.current();
+        if (options.indicatorMode() == IndicatorMode.OFF) {
+            return AnchorIndicatorStatus.NONE;
+        }
+        if (options.indicatorMode() == IndicatorMode.CONTEXTUAL
+                && status == AnchorIndicatorStatus.UNCLIMBABLE
+                && !options.showUnclimbableIndicator()) {
+            return AnchorIndicatorStatus.NONE;
+        }
+        return status;
+    }
+
+    @Override
+    public boolean showFailureText(Player player) {
+        return PickClimberClientOptionsStore.current().showFailureText();
+    }
+}

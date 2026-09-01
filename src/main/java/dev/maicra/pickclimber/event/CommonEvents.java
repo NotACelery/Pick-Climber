@@ -6,6 +6,8 @@ import dev.maicra.pickclimber.climb.AnchorUseDecision;
 import dev.maicra.pickclimber.climb.ClimbManager;
 import dev.maicra.pickclimber.climb.ClimbPresentationGate;
 import dev.maicra.pickclimber.climb.ClimbRuntimeGate;
+import dev.maicra.pickclimber.climb.PlayerClimbPresentationPreferences;
+import dev.maicra.pickclimber.climb.PlayerClimbRuntimePreferences;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -89,10 +91,12 @@ public final class CommonEvents {
                 && ClimbManager.isClimbingTool(event.getEntity().getMainHandItem())) {
             return;
         }
-        event.getEntity().displayClientMessage(
-                net.minecraft.network.chat.Component.translatable("message.pickclimber.anchor.entity"),
-                true
-        );
+        if (ClimbPresentationGate.showFailureText(event.getEntity())) {
+            event.getEntity().displayClientMessage(
+                    net.minecraft.network.chat.Component.translatable("message.pickclimber.anchor.entity"),
+                    true
+            );
+        }
     }
 
     @SubscribeEvent
@@ -119,7 +123,14 @@ public final class CommonEvents {
 
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
-        ClimbManager.tick(event.getEntity());
+        Player player = event.getEntity();
+        if (!ClimbRuntimeGate.interactionsEnabled(player)) {
+            if (player instanceof ServerPlayer serverPlayer && ClimbManager.isAttached(serverPlayer)) {
+                ClimbManager.detachServer(serverPlayer, false);
+            }
+            return;
+        }
+        ClimbManager.tick(player);
     }
 
     @SubscribeEvent
@@ -133,6 +144,8 @@ public final class CommonEvents {
     public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         if (event.getEntity() instanceof ServerPlayer serverPlayer) {
             ClimbManager.cleanupServer(serverPlayer);
+            PlayerClimbRuntimePreferences.clear(serverPlayer);
+            PlayerClimbPresentationPreferences.clear(serverPlayer);
         }
     }
 

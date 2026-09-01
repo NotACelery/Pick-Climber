@@ -1,6 +1,6 @@
 # Pick Climber — 1.0.3
 
-> Development workstream: `1.1.0-dev.3` (Phase 0 final integration). Public gameplay baseline: `1.0.3`.
+> Development workstream: `1.1.0-dev.8` (1.1.0 source-complete candidate; integration/QA pending). Public gameplay baseline: `1.0.3`.
 
 Mod para **Minecraft 1.21.1**, **NeoForge 21.1.235** y **Java 21**.
 
@@ -166,6 +166,12 @@ El indicador reutiliza las comprobaciones de cara, colisión, encantamientos y d
 
 Al cambiar de punto desde un techo, los requisitos se evalúan sobre la picota libre: una picota con Strong Grip que ya sostiene el ancla no puede ocultar que la segunda herramienta carece del encantamiento.
 
+## Desarrollo 1.1.0
+
+La rama de preparación ya incluye la infraestructura completa de opciones prevista para 1.1.0: el botón `Pick Climber Options` sólo aparece dentro de una partida cargada y permite configurar el modo del indicador (`Contextual / Always / Off`), visibilidad de superficies no escalables, estilo del indicador (`String / Pickaxe Outline`), tamaño/opacidad, caja/opacidad y mensajes de fallo. Los controles visuales se deshabilitan cuando su opción padre los vuelve irrelevantes, existe reset independiente del HUD y reset total, y el archivo cliente usa un formato versionado. También existe un hot-disable por jugador preparado para sincronizarse con el servidor mediante protocolo 14.
+
+La variante visual `Pickaxe Outline` ya usa un renderer line-art dedicado y teñible; no reutiliza una picota vanilla ni altera el shader global.
+
 ## Documentación técnica
 
 La implementación, autoridad cliente/servidor, estados físicos, red, cooldown por herramienta, reglas de limpieza y límites seguros para futuros refactors están centralizados en `docs/DEVELOPMENT.md`.
@@ -173,9 +179,12 @@ La implementación, autoridad cliente/servidor, estados físicos, red, cooldown 
 Documentos vigentes:
 
 - `docs/DEVELOPMENT.md` — arquitectura e invariantes runtime.
-- `TESTING-1.1.0-dev.3.md` — regresión final de Phase 0 contra la baseline 1.0.3.
-- `TESTING-1.0.3.md` — checklist histórico de la release estable 1.0.3.
-- `ROADMAP.md` — trabajo realmente pendiente después de la estabilización 1.0.x.
+- `docs/BUILD-STATUS.md` — estado de integración y compilación de la línea de desarrollo.
+- `docs/CHANGELOG.md` — historial de releases y snapshots internos.
+- `docs/testing/TESTING-1.1.0-dev.8.md` — QA de opciones/runtime y regresión completa contra la baseline 1.0.3.
+- `docs/testing/TESTING-1.0.3.md` — checklist histórico de la release estable 1.0.3.
+- `docs/ROADMAP.md` — trabajo realmente pendiente después de la estabilización 1.0.x.
+- `docs/SOURCE-MANIFEST.json` — snapshot de integridad del árbol source aceptado.
 - `docs/STRONG-GRIP-DESIGN.md` — especificación histórica y de diseño de Strong Grip/Sturdy Latch.
 
 Para el comportamiento runtime de la release 1.0.3, `docs/DEVELOPMENT.md` y el source actual son la referencia principal.
@@ -187,7 +196,7 @@ Para el comportamiento runtime de la release 1.0.3, `docs/DEVELOPMENT.md` y el s
 3. El JAR aparecerá en:
 
 ```text
-build/libs/pickclimber-1.21.1-1.1.0-dev.3.jar
+build/libs/pickclimber-1.21.1-1.1.0-dev.8.jar
 ```
 
 Retira versiones anteriores antes de instalar la release.

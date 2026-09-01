@@ -48,7 +48,7 @@ final class AnchorVisualService {
             BlockState blockState,
             BlockPos blockPos
     ) {
-        SoundType soundType = blockState.getSoundType();
+        SoundType soundType = blockState.getSoundType(level, blockPos, player);
         float volume = Mth.clamp((float) ((soundType.getVolume() + ClimbTuning.ANCHOR_SOUND_VOLUME_OFFSET)
                         * ClimbTuning.ANCHOR_SOUND_VOLUME_SCALE),
                 ClimbTuning.ANCHOR_SOUND_MIN_VOLUME,
