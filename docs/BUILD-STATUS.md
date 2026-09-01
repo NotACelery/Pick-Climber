@@ -1,6 +1,6 @@
 # Estado de compilación
 
-Versión preparada: `1.1.0-dev.8`
+Versión preparada: `1.1.0-dev.11`
 
 Objetivo: Minecraft 1.21.1, NeoForge 21.1.235 y Java 21.
 
@@ -15,7 +15,7 @@ La descomposición estructural de Phase 0 sigue siendo la base, pero por decisi�
 ### Resultado estructural actual
 
 - `ClimbManager`: **1.723 -> 154 líneas**. Ahora es una fachada de compatibilidad/delegación, no el dueño de toda la física.
-- `ClientEvents`: **49 líneas**. Es un adapter de eventos, no el renderer/controlador de inputs.
+- `ClientEvents`: **64 líneas**. Es un adapter de eventos/keybind, no el renderer ni el controlador de inputs.
 - Evaluación unificada y side-effect-free: `AnchorEvaluator` + `AnchorEvaluation` + `AnchorFeedbackResolver`.
 - Política de superficies: `AnchorSurfaceResolver` es el único seam que la futura Rules Card debe extender.
 - Lifecycle: `AnchorLifecycle` + `AnchorStateValidator` centralizan attach/detach/cleanup y coherencia de estado.
@@ -59,16 +59,16 @@ La raíz del repositorio conserva únicamente `README.md` como documentación vi
 
 - `IndicatorStyle` is persisted independently from indicator visibility mode.
 - `String` remains the compatibility/default renderer and preserves the 1.0.2 shader isolation rule.
-- `Pickaxe Outline` is a dedicated monochrome line-art GUI renderer using local ARGB draws; it does not render a vanilla item or alter global shader state.
+- `Pickaxe` uses a dedicated monochrome 16x16 texture mask with a recognizable horizontal head and diagonal handle; it is tinted through the same isolated shader path as String and does not render a vanilla item.
 - Style selection is isolated behind `IndicatorIconRenderer`/`AnchorIndicatorIconRenderer`, so future styles do not couple to anchor evaluation or NeoForge event adapters.
 - Old client configs without `indicatorStyle` defensively fall back to `String`.
 
 
-## UX/config finalization in `1.1.0-dev.8`
+## UX/config finalization in `1.1.0-dev.9`
 
 - The 1.1.0 options surface is treated as source-complete pending integration/QA.
 - Visual controls now become inactive when their parent mode makes them irrelevant: indicator controls while Off, box opacity while the box is disabled, and Show Unclimbable outside Contextual mode.
-- Added independent `Reset HUD` and `Reset All`; Reset All also restores interactions to enabled and immediately requests runtime preference resync.
+- The options footer now exposes one `Reset to Defaults` action, which restores the full client-options record and immediately requests runtime preference resync.
 - Client config now writes `configVersion: 1`, continues to load legacy files without the field, and tolerates newer versions by reading known fields only.
 - Redundant option writes are skipped and temporary files are cleaned after non-atomic save fallback.
 - Footer layout now adapts between one and two rows on narrow windows.
@@ -77,20 +77,20 @@ La raíz del repositorio conserva únicamente `README.md` como documentación vi
 
 El build de `dev.7` superó los verificadores y llegó a `compileJava`. Falló con **2 errores del mismo origen**: `PickClimberOptionsEntry` importaba `OptionsScreen` desde `net.minecraft.client.gui.screens`, mientras que en Minecraft 1.21.1 Mojmap la clase vive en `net.minecraft.client.gui.screens.options`. El mismo build reportó además las deprecaciones ya conocidas del selector explícito de bus en `ClientModEvents` y del lookup no contextual de `SoundType` en `AnchorVisualService`.
 
-`dev.8` corrige esa capa: usa el package correcto de `OptionsScreen`, deja que `@EventBusSubscriber` enrute automáticamente los eventos de mod bus y consulta el `SoundType` contextual con nivel/posición/jugador. Este documento **no afirma todavía un build verde de dev.8**; debe validarse en el entorno Windows de release.
+`dev.8` corrige esa capa: usa el package correcto de `OptionsScreen`, deja que `@EventBusSubscriber` enrute automáticamente los eventos de mod bus y consulta el `SoundType` contextual con nivel/posición/jugador. El usuario confirmó posteriormente un build verde de dev.8 en el entorno Windows de release con Java 21.
 
 ## Verificación estática actual
 
-- Source Java inspeccionado: 90 archivos.
+- Source Java inspeccionado: 92 archivos.
 - Violaciones de formato/calidad detectadas por el escaneo estático: **0**.
 - JSON/MCMeta inválidos: **0**.
-- `docs/SOURCE-MANIFEST.json`: pendiente de regeneración para `dev.8`, validadas por tamaño y SHA-256.
+- `docs/SOURCE-MANIFEST.json`: debe corresponder al snapshot dev.11 y validarse por tamaño y SHA-256.
 - Markdown en la raíz del repositorio: únicamente `README.md`.
 - `hurtAndBreak` directos fuera de `ToolWearService`: **0**.
 - Imports `climb -> network` / `PacketDistributor` dentro de `climb`: **0**.
 - Bypass directo de `AnchorSurfaceClassifier.classify` fuera de `AnchorSurfaceResolver`: **0**.
 - `ClimbManager`: 154 líneas, bajo el budget de 250.
-- `ClientEvents`: 49 líneas, bajo el budget de 90.
+- `ClientEvents`: 64 líneas, bajo el budget de 90.
 - Raw `javac -proc:none` sin classpath Minecraft sólo produce dependencias faltantes; no se detectaron patrones evidentes de error sintáctico estructural.
 - `bash -n build.sh`: debe mantenerse verde en la aceptación final.
 
@@ -103,7 +103,7 @@ La integración/compilación se realizará en una pasada concentrada al finaliza
 1. Ejecutar `build.bat` / `gradle clean build --stacktrace` con Java 21.
 2. Corregir todos los errores reales de compilación/API/imports/tipos sin debilitar los boundaries.
 3. Confirmar `verifySourceQuality` y `verifyArchitectureBoundaries` bajo configuration cache.
-4. Ejecutar `docs/testing/TESTING-1.1.0-dev.8.md` y la regresión 1.0.3.
+4. Ejecutar `docs/testing/TESTING-1.1.0-dev.11.md` y la regresión 1.0.3.
 5. Ejecutar regresión multiplayer/compatibilidad.
 6. Regenerar el manifest después de cualquier reparación final.
 7. Corregir además cualquier incompatibilidad introducida por la primera pasada visible de 1.1.0 antes de QA final.
@@ -111,7 +111,7 @@ La integración/compilación se realizará en una pasada concentrada al finaliza
 Resultado esperado cuando compile:
 
 ```text
-build/libs/pickclimber-1.21.1-1.1.0-dev.8.jar
+build/libs/pickclimber-1.21.1-1.1.0-dev.11.jar
 ```
 
 ## Invariantes que siguen vigentes
@@ -126,3 +126,28 @@ build/libs/pickclimber-1.21.1-1.1.0-dev.8.jar
 - Supresión preventiva del HUD sobre bloques interactivos como en 1.0.3.
 - Servidor autoritativo.
 - Protocolo 14 desde el inicio de las funciones runtime de 1.1.0; el gameplay base sigue siendo servidor-autoritativo.
+
+## Resultado dev.8, fallo dev.9 y objetivo dev.10
+
+El usuario confirmó que `1.1.0-dev.8` compiló correctamente en el entorno Windows de release con Java 21. La primera prueba in-game detectó problemas de UX: entrada descentrada en Options, preview mezclado con el HUD detrás del backdrop, transparencia del String inefectiva, outline de picota poco reconocible y orden/dependencias de controles mejorables.
+
+`1.1.0-dev.9` implementó la corrección UX y alcanzó nuevamente `compileJava`, donde quedó un único error: la fábrica compartida de sliders recibía `Consumer<Double>` y `DoubleOptionSlider` exige `DoubleConsumer`.
+
+`1.1.0-dev.10` corrige exclusivamente esa frontera de tipos. No se incluye ningún migrador ni BAT de limpieza nuevo.
+
+## dev.10 integration-repair status
+
+- Keybind-based options entry and revised GUI remain unchanged from dev.9.
+- Default key: `K`, rebindable through Minecraft Controls.
+- `pickclimber-client.json` remains on config format version 2.
+- The transparency-slider callback now uses `DoubleConsumer` end-to-end.
+- Static scan found no remaining `Consumer<Double>` use in the client options package.
+- Exact build and in-game QA are pending for this snapshot.
+
+## dev.11 pickaxe/reset refinement status
+
+- The user confirmed dev.10 options behavior works in-game, but the procedural Pickaxe Outline remained visually ambiguous and resembled a hook/scythe.
+- dev.11 replaces those plotted pixels with `textures/gui/pickaxe_indicator.png`, a dedicated monochrome 16x16 tool-slot pickaxe mask.
+- The user-facing style is now simply `Pickaxe`; config v3 maps the legacy serialized value `pickaxe_outline` to `PICKAXE`.
+- The redundant `Reset HUD` and `Reset All` pair is replaced by a single `Reset to Defaults` action with immediate runtime-preference resync.
+- Exact build and in-game visual QA are pending for dev.11.

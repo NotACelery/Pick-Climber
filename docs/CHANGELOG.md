@@ -1,5 +1,39 @@
 # Changelog
 
+## 1.1.0-dev.11 — 2026-09-01
+
+### Pickaxe indicator + reset simplification
+
+- Replaced the hand-plotted Pickaxe Outline pixels with a dedicated 16x16 monochrome pickaxe texture mask based on a classic tool-slot silhouette: broad horizontal head, tapered ends and diagonal handle.
+- Renamed the user-facing indicator style from `Pickaxe Outline` to simply `Pickaxe`.
+- Config format v3 migrates the old `pickaxe_outline` value to `pickaxe` without resetting the rest of the player's options.
+- Replaced the redundant `Reset HUD` / `Reset All` pair with one `Reset to Defaults` action.
+- The single reset restores the complete Pick Climber client-options record and immediately resynchronizes runtime preferences with the server.
+- No anchor physics, surface rules, enchantment requirements, interaction priority or networking protocol semantics changed.
+
+## 1.1.0-dev.10 — 2026-09-01
+
+### Integration repair — slider callback typing
+
+- Fixed the remaining `compileJava` type error in `PickClimberOptionsScreen`: the shared transparency-slider factory now accepts `DoubleConsumer`, matching `DoubleOptionSlider` without boxed `Double` adaptation.
+- Audited the client options screen for other `Consumer<Double>` / `DoubleConsumer` mismatches; no additional occurrences remain.
+- No gameplay, HUD semantics, option defaults, networking behavior or world interaction logic is intentionally changed.
+- `dev.9` reached `compileJava` with exactly one reported error at this callback boundary; `dev.10` addresses that layer only.
+
+## 1.1.0-dev.9 — 2026-09-01
+
+### Options GUI / HUD correction pass
+
+- Replaced the injected vanilla Options button with a configurable in-game key mapping (default `K`).
+- Rebuilt the Pick Climber options screen as a self-contained GUI with a dedicated preview panel and no normal HUD indicator rendered behind it.
+- Reordered controls so runtime interactions are first, failure messages sit below Indicator Mode, and Indicator Style sits above Indicator Box.
+- Disabling Pick Climber interactions now disables every dependent option until interactions are enabled again.
+- Renamed the user-facing opacity controls to transparency controls and made their values intuitive: 0% means fully visible, 100% means fully transparent.
+- String transparency now renders through the String texture directly instead of the item renderer, so alpha is applied consistently.
+- Added independent Muted / Normal / Neon color-intensity presets for the icon and its surrounding box.
+- Reworked the Pickaxe Outline as a one-pixel slot-style pickaxe silhouette instead of the previous blocky shape.
+- Client config version 2 preserves compatibility with earlier opacity/transparency and color-intensity fields.
+
 ## 1.1.0-dev.8 — 2026-09-01
 
 ### Integration repair — options screen and deprecation cleanup

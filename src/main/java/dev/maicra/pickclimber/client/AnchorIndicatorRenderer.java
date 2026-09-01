@@ -12,7 +12,8 @@ final class AnchorIndicatorRenderer {
     }
 
     static void render(Minecraft minecraft, Player player, GuiGraphics gui) {
-        if (!(minecraft.hitResult instanceof BlockHitResult hit)
+        if (minecraft.screen != null
+                || !(minecraft.hitResult instanceof BlockHitResult hit)
                 || hit.getType() != HitResult.Type.BLOCK) {
             return;
         }
@@ -22,7 +23,6 @@ final class AnchorIndicatorRenderer {
         if (status == AnchorIndicatorStatus.NONE) {
             return;
         }
-
         renderStatus(gui, status, PickClimberClientOptionsStore.current());
     }
 
@@ -63,37 +63,41 @@ final class AnchorIndicatorRenderer {
             int displaySize
     ) {
         int iconX = centerX - displaySize / 2;
-        int color = status.color();
-
-        if (options.iconOpacity() > 0.0D) {
+        float iconOpacity = opacityFromTransparency(options.iconTransparency());
+        if (iconOpacity > 0.0F) {
+            int iconColor = IndicatorColorPalette.resolve(status.color(), options.iconColorIntensity());
             AnchorIndicatorIconRenderer.render(
                     gui,
                     options.indicatorStyle(),
                     iconX,
                     topY,
-                    color,
+                    iconColor,
                     (float) options.iconScale(),
-                    (float) options.iconOpacity()
+                    iconOpacity
             );
         }
-        if (options.showIndicatorBox() && options.boxOpacity() > 0.0D) {
-            int boxColor = alpha(options.boxOpacity()) | color;
-            renderRangeBorder(gui, iconX, topY, displaySize, boxColor);
+
+        float boxOpacity = opacityFromTransparency(options.boxTransparency());
+        if (options.showIndicatorBox() && boxOpacity > 0.0F) {
+            int boxColor = IndicatorColorPalette.resolve(status.color(), options.boxColorIntensity());
+            renderRangeBorder(gui, iconX, topY, displaySize, alpha(boxOpacity) | boxColor);
         }
     }
 
     private static void renderRangeBorder(GuiGraphics gui, int x, int y, int size, int color) {
         int right = x + size;
         int bottom = y + size;
-
         gui.fill(x - 1, y - 1, right + 1, y, color);
         gui.fill(x - 1, bottom, right + 1, bottom + 1, color);
         gui.fill(x - 1, y, x, bottom, color);
         gui.fill(right, y, right + 1, bottom, color);
     }
 
-    private static int alpha(double opacity) {
-        int alpha = (int) Math.round(Math.max(0.0D, Math.min(1.0D, opacity)) * 255.0D);
-        return alpha << 24;
+    private static float opacityFromTransparency(double transparency) {
+        return (float) (1.0D - Math.max(0.0D, Math.min(1.0D, transparency)));
+    }
+
+    private static int alpha(float opacity) {
+        return Math.round(Math.max(0.0F, Math.min(1.0F, opacity)) * 255.0F) << 24;
     }
 }

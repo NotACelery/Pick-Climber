@@ -5,9 +5,11 @@ public record PickClimberClientOptions(
         IndicatorStyle indicatorStyle,
         boolean showUnclimbableIndicator,
         double iconScale,
-        double iconOpacity,
+        double iconTransparency,
+        IndicatorColorIntensity iconColorIntensity,
         boolean showIndicatorBox,
-        double boxOpacity,
+        double boxTransparency,
+        IndicatorColorIntensity boxColorIntensity,
         boolean showFailureText,
         boolean interactionsEnabled
 ) {
@@ -17,9 +19,11 @@ public record PickClimberClientOptions(
     public PickClimberClientOptions {
         indicatorMode = indicatorMode == null ? IndicatorMode.CONTEXTUAL : indicatorMode;
         indicatorStyle = indicatorStyle == null ? IndicatorStyle.STRING : indicatorStyle;
+        iconColorIntensity = iconColorIntensity == null ? IndicatorColorIntensity.NORMAL : iconColorIntensity;
+        boxColorIntensity = boxColorIntensity == null ? IndicatorColorIntensity.NORMAL : boxColorIntensity;
         iconScale = clamp(iconScale, MIN_ICON_SCALE, MAX_ICON_SCALE);
-        iconOpacity = clamp(iconOpacity, 0.0D, 1.0D);
-        boxOpacity = clamp(boxOpacity, 0.0D, 1.0D);
+        iconTransparency = clamp(iconTransparency, 0.0D, 1.0D);
+        boxTransparency = clamp(boxTransparency, 0.0D, 1.0D);
     }
 
     public static PickClimberClientOptions defaults() {
@@ -28,76 +32,84 @@ public record PickClimberClientOptions(
                 IndicatorStyle.STRING,
                 false,
                 1.0D,
-                1.0D,
+                0.0D,
+                IndicatorColorIntensity.NORMAL,
                 true,
-                1.0D,
+                0.0D,
+                IndicatorColorIntensity.NORMAL,
                 true,
                 true
         );
     }
 
-    public PickClimberClientOptions resetHud() {
-        PickClimberClientOptions defaults = defaults();
-        return new PickClimberClientOptions(
-                defaults.indicatorMode,
-                defaults.indicatorStyle,
-                defaults.showUnclimbableIndicator,
-                defaults.iconScale,
-                defaults.iconOpacity,
-                defaults.showIndicatorBox,
-                defaults.boxOpacity,
-                defaults.showFailureText,
-                interactionsEnabled
-        );
-    }
-
-    public PickClimberClientOptions resetAll() {
+    public PickClimberClientOptions resetToDefaults() {
         return defaults();
     }
 
     public PickClimberClientOptions withIndicatorMode(IndicatorMode value) {
-        return copy(value, indicatorStyle, showUnclimbableIndicator, iconScale, iconOpacity,
-                showIndicatorBox, boxOpacity, showFailureText, interactionsEnabled);
+        return copy(value, indicatorStyle, showUnclimbableIndicator, iconScale, iconTransparency,
+                iconColorIntensity, showIndicatorBox, boxTransparency, boxColorIntensity,
+                showFailureText, interactionsEnabled);
     }
 
     public PickClimberClientOptions withIndicatorStyle(IndicatorStyle value) {
-        return copy(indicatorMode, value, showUnclimbableIndicator, iconScale, iconOpacity,
-                showIndicatorBox, boxOpacity, showFailureText, interactionsEnabled);
+        return copy(indicatorMode, value, showUnclimbableIndicator, iconScale, iconTransparency,
+                iconColorIntensity, showIndicatorBox, boxTransparency, boxColorIntensity,
+                showFailureText, interactionsEnabled);
     }
 
     public PickClimberClientOptions withShowUnclimbableIndicator(boolean value) {
-        return copy(indicatorMode, indicatorStyle, value, iconScale, iconOpacity,
-                showIndicatorBox, boxOpacity, showFailureText, interactionsEnabled);
+        return copy(indicatorMode, indicatorStyle, value, iconScale, iconTransparency,
+                iconColorIntensity, showIndicatorBox, boxTransparency, boxColorIntensity,
+                showFailureText, interactionsEnabled);
     }
 
     public PickClimberClientOptions withIconScale(double value) {
-        return copy(indicatorMode, indicatorStyle, showUnclimbableIndicator, value, iconOpacity,
-                showIndicatorBox, boxOpacity, showFailureText, interactionsEnabled);
+        return copy(indicatorMode, indicatorStyle, showUnclimbableIndicator, value, iconTransparency,
+                iconColorIntensity, showIndicatorBox, boxTransparency, boxColorIntensity,
+                showFailureText, interactionsEnabled);
     }
 
-    public PickClimberClientOptions withIconOpacity(double value) {
+    public PickClimberClientOptions withIconTransparency(double value) {
         return copy(indicatorMode, indicatorStyle, showUnclimbableIndicator, iconScale, value,
-                showIndicatorBox, boxOpacity, showFailureText, interactionsEnabled);
+                iconColorIntensity, showIndicatorBox, boxTransparency, boxColorIntensity,
+                showFailureText, interactionsEnabled);
+    }
+
+    public PickClimberClientOptions withIconColorIntensity(IndicatorColorIntensity value) {
+        return copy(indicatorMode, indicatorStyle, showUnclimbableIndicator, iconScale, iconTransparency,
+                value, showIndicatorBox, boxTransparency, boxColorIntensity,
+                showFailureText, interactionsEnabled);
     }
 
     public PickClimberClientOptions withShowIndicatorBox(boolean value) {
-        return copy(indicatorMode, indicatorStyle, showUnclimbableIndicator, iconScale, iconOpacity,
-                value, boxOpacity, showFailureText, interactionsEnabled);
+        return copy(indicatorMode, indicatorStyle, showUnclimbableIndicator, iconScale, iconTransparency,
+                iconColorIntensity, value, boxTransparency, boxColorIntensity,
+                showFailureText, interactionsEnabled);
     }
 
-    public PickClimberClientOptions withBoxOpacity(double value) {
-        return copy(indicatorMode, indicatorStyle, showUnclimbableIndicator, iconScale, iconOpacity,
-                showIndicatorBox, value, showFailureText, interactionsEnabled);
+    public PickClimberClientOptions withBoxTransparency(double value) {
+        return copy(indicatorMode, indicatorStyle, showUnclimbableIndicator, iconScale, iconTransparency,
+                iconColorIntensity, showIndicatorBox, value, boxColorIntensity,
+                showFailureText, interactionsEnabled);
+    }
+
+    public PickClimberClientOptions withBoxColorIntensity(IndicatorColorIntensity value) {
+        return copy(indicatorMode, indicatorStyle, showUnclimbableIndicator, iconScale, iconTransparency,
+                iconColorIntensity, showIndicatorBox, boxTransparency, value,
+                showFailureText, interactionsEnabled);
     }
 
     public PickClimberClientOptions withShowFailureText(boolean value) {
-        return copy(indicatorMode, indicatorStyle, showUnclimbableIndicator, iconScale, iconOpacity,
-                showIndicatorBox, boxOpacity, value, interactionsEnabled);
+        return copy(indicatorMode, indicatorStyle, showUnclimbableIndicator, iconScale, iconTransparency,
+                iconColorIntensity, showIndicatorBox, boxTransparency, boxColorIntensity,
+                value, interactionsEnabled);
     }
 
     public PickClimberClientOptions withInteractionsEnabled(boolean value) {
-        return copy(indicatorMode, indicatorStyle, showUnclimbableIndicator, iconScale, iconOpacity,
-                showIndicatorBox, boxOpacity, showFailureText, value);
+        return copy(indicatorMode, indicatorStyle, showUnclimbableIndicator, iconScale, iconTransparency,
+                iconColorIntensity, showIndicatorBox, boxTransparency, boxColorIntensity,
+                showFailureText, value);
     }
 
     private static PickClimberClientOptions copy(
@@ -105,9 +117,11 @@ public record PickClimberClientOptions(
             IndicatorStyle indicatorStyle,
             boolean showUnclimbableIndicator,
             double iconScale,
-            double iconOpacity,
+            double iconTransparency,
+            IndicatorColorIntensity iconColorIntensity,
             boolean showIndicatorBox,
-            double boxOpacity,
+            double boxTransparency,
+            IndicatorColorIntensity boxColorIntensity,
             boolean showFailureText,
             boolean interactionsEnabled
     ) {
@@ -116,9 +130,11 @@ public record PickClimberClientOptions(
                 indicatorStyle,
                 showUnclimbableIndicator,
                 iconScale,
-                iconOpacity,
+                iconTransparency,
+                iconColorIntensity,
                 showIndicatorBox,
-                boxOpacity,
+                boxTransparency,
+                boxColorIntensity,
                 showFailureText,
                 interactionsEnabled
         );

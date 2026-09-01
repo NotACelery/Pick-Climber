@@ -2,12 +2,14 @@ package dev.maicra.pickclimber.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.resources.ResourceLocation;
 
 final class StringIndicatorIconRenderer implements IndicatorIconRenderer {
     static final StringIndicatorIconRenderer INSTANCE = new StringIndicatorIconRenderer();
-    private static final ItemStack RANGE_ICON = new ItemStack(Items.STRING);
+    private static final ResourceLocation STRING_TEXTURE = ResourceLocation.fromNamespaceAndPath(
+            "minecraft",
+            "textures/item/string.png"
+    );
 
     private StringIndicatorIconRenderer() {
     }
@@ -15,6 +17,8 @@ final class StringIndicatorIconRenderer implements IndicatorIconRenderer {
     @Override
     public void render(GuiGraphics gui, int x, int y, int color, float scale, float opacity) {
         gui.flush();
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
         RenderSystem.setShaderColor(
                 colorChannel(color, 16),
                 colorChannel(color, 8),
@@ -26,7 +30,7 @@ final class StringIndicatorIconRenderer implements IndicatorIconRenderer {
         gui.pose().translate(x, y, 0.0F);
         gui.pose().scale(scale, scale, 1.0F);
         try {
-            gui.renderItem(RANGE_ICON, 0, 0);
+            gui.blit(STRING_TEXTURE, 0, 0, 0.0F, 0.0F, 16, 16, 16, 16);
             gui.flush();
         } finally {
             gui.pose().popPose();

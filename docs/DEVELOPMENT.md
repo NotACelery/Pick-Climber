@@ -758,12 +758,35 @@ User-visible release history. Formatting-only cleanup should not create a fake g
 
 ## 1.1.0 client options and runtime preference boundary
 
-`1.1.0-dev.8` completes the planned source-side options pass consuming the Phase 0 seams. Client HUD preferences are owned by `PickClimberClientOptionsStore` and persisted in `config/pickclimber-client.json`; rendering reads them through `ClientOptionsPresentationPolicy` and `AnchorIndicatorRenderer` rather than through event adapters. `IndicatorStyle` selects between independent `StringIndicatorIconRenderer` and `PickaxeOutlineIndicatorIconRenderer` implementations through `AnchorIndicatorIconRenderer`, so adding future styles does not add branches to NeoForge event adapters or anchor evaluation.
+`1.1.0-dev.11` contains the current options implementation consuming the Phase 0 seams. Client HUD preferences are owned by `PickClimberClientOptionsStore` and persisted in `config/pickclimber-client.json`; rendering reads them through `ClientOptionsPresentationPolicy` and `AnchorIndicatorRenderer` rather than through event adapters. `IndicatorStyle` selects between independent String and Pickaxe render paths through `AnchorIndicatorIconRenderer`, so adding future styles does not add branches to NeoForge event adapters or anchor evaluation.
 
-The in-world entry point is `PickClimberOptionsEntry`. It only adds the Pick Climber button to `OptionsScreen` while a level and local player are present, keeping the title-screen Options UI unchanged. `PickClimberOptionsScreen` uses an adaptive layout and writes changes immediately. Child controls become inactive when their parent state makes them irrelevant, and the footer exposes separate HUD-only and full resets.
+The in-world entry point is the configurable `PickClimberKeyMappings` binding (default `K`). It opens `PickClimberOptionsScreen` only while a local world/player is active and no other screen is open. The screen uses an adaptive layout and writes changes immediately. Child controls become inactive when their parent state makes them irrelevant, and the footer exposes one complete Reset to Defaults action.
 
 Runtime opt-out is intentionally separate from HUD rendering. `PlayerClimbRuntimePreferences` is a common, transient per-player store whose default is enabled. The client mirrors its local preference through protocol 14 using `RuntimePreferencePayload`; the server applies the preference and detaches an active climb through the normal lifecycle. No persistent server/world rule is created by 1.1.0.
 
-Failure-text visibility remains a client preference but is mirrored transiently to the server because some authoritative interaction failures originate server-side. Other HUD properties (mode, style, scale, opacity, box and unclimbable visibility) never leave the client. The JSON format writes `configVersion: 1`; legacy files without that key remain readable and known fields from newer versions are loaded defensively.
+Failure-text visibility remains a client preference but is mirrored transiently to the server because some authoritative interaction failures originate server-side. Other HUD properties (mode, style, scale, opacity, box and unclimbable visibility) never leave the client. The JSON format currently writes `configVersion: 3`; legacy files without a version, v1 opacity fields, v2 transparency fields and the former `pickaxe_outline` style value remain readable. Known fields from newer versions are loaded defensively.
 
-The Pickaxe Outline indicator is implemented as a dedicated monochrome line-art renderer behind the same icon-rendering boundary as String. Do not collapse the two implementations into a fake vanilla-pickaxe item renderer; the separation is intentional so future styles remain presentation-only.
+The Pickaxe indicator is implemented as a dedicated monochrome 16x16 texture mask behind the same icon-rendering boundary as String. The mask deliberately resembles a tool-slot pickaxe silhouette instead of a procedural hook/curve, and it must not be replaced by a vanilla-item renderer; the separation keeps future styles presentation-only.
+
+## 1.1.0-dev.9 — options entry and presentation boundaries
+
+The options GUI is no longer injected into vanilla `OptionsScreen`. `PickClimberKeyMappings` owns a configurable in-game key mapping, registered through `RegisterKeyMappingsEvent`, while `ClientEvents` only opens `PickClimberOptionsScreen` when a local world/player exists and no other screen is active.
+
+`PickClimberOptionsScreen` owns its preview surface and draws it after an opaque-enough GUI backdrop. `AnchorIndicatorRenderer` suppresses the normal HUD indicator while this screen is open, preventing the live-world indicator from being blurred behind the configuration UI.
+
+User-facing alpha is expressed as transparency. The persisted v2 format stores `iconTransparency` and `boxTransparency`; runtime renderers still receive opacity derived as `1 - transparency`. Legacy `iconOpacity`/`boxOpacity` files remain readable. String rendering uses the vanilla String texture directly so shader alpha affects the actual sprite instead of being reset by item rendering.
+
+`IndicatorColorIntensity` and `IndicatorColorPalette` form a single shared color policy for both icon and border. The modes are `MUTED`, `NORMAL`, and `NEON`; they transform the existing status color rather than replacing status semantics or letting client config choose arbitrary RGB values.
+
+
+## 1.1.0-dev.10 — slider callback integration repair
+
+`DoubleOptionSlider` deliberately uses primitive-specialized `DoubleConsumer` / `DoubleFunction<Component>` callbacks. The shared transparency-slider factory in `PickClimberOptionsScreen` must therefore also accept `DoubleConsumer`; do not reintroduce `Consumer<Double>` at that boundary, as doing so creates an incompatible functional-interface conversion during `compileJava`.
+
+This repair is presentation/integration-only and does not change persisted transparency semantics, runtime preferences, HUD policy, anchor evaluation or networking.
+
+## 1.1.0-dev.11 — pickaxe asset and reset semantics
+
+The user-facing style name is now `Pickaxe`. `IndicatorStyle.PICKAXE` renders `textures/gui/pickaxe_indicator.png`, a white-alpha mask tinted by the existing status palette. Config v3 maps the legacy serialized value `pickaxe_outline` to `PICKAXE` before normal enum parsing.
+
+The client-options API exposes one `resetToDefaults()` operation. It restores the entire client preference record, including runtime interactions, then `PickClimberOptionsScreen` requests an immediate runtime-preference sync. Do not reintroduce separate HUD/full reset semantics unless a future settings domain genuinely requires different persistence ownership.

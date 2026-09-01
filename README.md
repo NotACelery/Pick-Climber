@@ -1,6 +1,6 @@
 # Pick Climber — 1.0.3
 
-> Development workstream: `1.1.0-dev.8` (1.1.0 source-complete candidate; integration/QA pending). Public gameplay baseline: `1.0.3`.
+> Development workstream: `1.1.0-dev.11` (1.1.0 UX refinement candidate; QA pending). Public gameplay baseline: `1.0.3`.
 
 Mod para **Minecraft 1.21.1**, **NeoForge 21.1.235** y **Java 21**.
 
@@ -168,9 +168,9 @@ Al cambiar de punto desde un techo, los requisitos se evalúan sobre la picota l
 
 ## Desarrollo 1.1.0
 
-La rama de preparación ya incluye la infraestructura completa de opciones prevista para 1.1.0: el botón `Pick Climber Options` sólo aparece dentro de una partida cargada y permite configurar el modo del indicador (`Contextual / Always / Off`), visibilidad de superficies no escalables, estilo del indicador (`String / Pickaxe Outline`), tamaño/opacidad, caja/opacidad y mensajes de fallo. Los controles visuales se deshabilitan cuando su opción padre los vuelve irrelevantes, existe reset independiente del HUD y reset total, y el archivo cliente usa un formato versionado. También existe un hot-disable por jugador preparado para sincronizarse con el servidor mediante protocolo 14.
+La rama de preparación ya incluye la infraestructura completa de opciones prevista para 1.1.0. El menú se abre mediante un keybind configurable desde Controles (por defecto `K`) y sólo responde con una partida cargada; ya no inserta un botón dentro de la pantalla vanilla de Options. Permite configurar el modo del indicador (`Contextual / Always / Off`), visibilidad de superficies no escalables, estilo (`String / Pickaxe`), tamaño, transparencia real del icono y de su caja, intensidad de color independiente para icono y caja (`Muted / Normal / Neon`) y mensajes de fallo. Si las interacciones de Pick Climber se apagan, el resto de los controles queda deshabilitado hasta reactivarlas. También existe un hot-disable por jugador preparado para sincronizarse con el servidor mediante protocolo 14.
 
-La variante visual `Pickaxe Outline` ya usa un renderer line-art dedicado y teñible; no reutiliza una picota vanilla ni altera el shader global.
+La variante visual `Pickaxe` usa una máscara de textura monocromática propia, inspirada en un outline de slot de herramienta: cabeza horizontal y mango diagonal claramente reconocibles. Se tiñe con el estado del anchor y no reutiliza el item renderer de una picota vanilla.
 
 ## Documentación técnica
 
@@ -181,7 +181,7 @@ Documentos vigentes:
 - `docs/DEVELOPMENT.md` — arquitectura e invariantes runtime.
 - `docs/BUILD-STATUS.md` — estado de integración y compilación de la línea de desarrollo.
 - `docs/CHANGELOG.md` — historial de releases y snapshots internos.
-- `docs/testing/TESTING-1.1.0-dev.8.md` — QA de opciones/runtime y regresión completa contra la baseline 1.0.3.
+- `docs/testing/TESTING-1.1.0-dev.11.md` — QA de opciones/runtime y regresión completa contra la baseline 1.0.3.
 - `docs/testing/TESTING-1.0.3.md` — checklist histórico de la release estable 1.0.3.
 - `docs/ROADMAP.md` — trabajo realmente pendiente después de la estabilización 1.0.x.
 - `docs/SOURCE-MANIFEST.json` — snapshot de integridad del árbol source aceptado.
@@ -196,7 +196,7 @@ Para el comportamiento runtime de la release 1.0.3, `docs/DEVELOPMENT.md` y el s
 3. El JAR aparecerá en:
 
 ```text
-build/libs/pickclimber-1.21.1-1.1.0-dev.8.jar
+build/libs/pickclimber-1.21.1-1.1.0-dev.11.jar
 ```
 
 Retira versiones anteriores antes de instalar la release.

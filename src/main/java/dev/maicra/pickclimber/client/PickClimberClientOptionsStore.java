@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 public final class PickClimberClientOptionsStore {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final int CONFIG_VERSION = 1;
+    private static final int CONFIG_VERSION = 3;
     private static final Path CONFIG_PATH = FMLPaths.CONFIGDIR.get().resolve("pickclimber-client.json");
     private static PickClimberClientOptions current = PickClimberClientOptions.defaults();
     private static boolean loaded;
@@ -43,18 +43,9 @@ public final class PickClimberClientOptionsStore {
         save();
     }
 
-    public static synchronized void resetHud() {
+    public static synchronized void resetToDefaults() {
         ensureLoaded();
-        PickClimberClientOptions next = current.resetHud();
-        if (!next.equals(current)) {
-            current = next;
-            save();
-        }
-    }
-
-    public static synchronized void resetAll() {
-        ensureLoaded();
-        PickClimberClientOptions next = current.resetAll();
+        PickClimberClientOptions next = current.resetToDefaults();
         if (!next.equals(current)) {
             current = next;
             save();
@@ -85,44 +76,102 @@ public final class PickClimberClientOptionsStore {
                         configVersion
                 );
             }
-            current = fromJson(json, current);
+            current = fromJson(json, current, configVersion);
         } catch (IOException | RuntimeException exception) {
             LOGGER.warn("Unable to read Pick Climber client options; defaults will be used", exception);
             current = PickClimberClientOptions.defaults();
         }
     }
 
-    private static PickClimberClientOptions fromJson(JsonObject json, PickClimberClientOptions defaults) {
+    private static PickClimberClientOptions fromJson(
+            JsonObject json,
+            PickClimberClientOptions defaults,
+            int configVersion
+    ) {
         return new PickClimberClientOptions(
-                indicatorMode(json, defaults.indicatorMode()),
+                enumValue(json, "indicatorMode", IndicatorMode.class, defaults.indicatorMode()),
                 indicatorStyle(json, defaults.indicatorStyle()),
                 booleanValue(json, "showUnclimbableIndicator", defaults.showUnclimbableIndicator()),
                 doubleValue(json, "iconScale", defaults.iconScale()),
-                doubleValue(json, "iconOpacity", defaults.iconOpacity()),
+                transparencyValue(
+                        json,
+                        "iconTransparency",
+                        "iconOpacity",
+                        defaults.iconTransparency(),
+                        configVersion
+                ),
+                colorIntensity(json, "iconColorIntensity", defaults.iconColorIntensity()),
                 booleanValue(json, "showIndicatorBox", defaults.showIndicatorBox()),
-                doubleValue(json, "boxOpacity", defaults.boxOpacity()),
+                transparencyValue(
+                        json,
+                        "boxTransparency",
+                        "boxOpacity",
+                        defaults.boxTransparency(),
+                        configVersion
+                ),
+                colorIntensity(json, "boxColorIntensity", defaults.boxColorIntensity()),
                 booleanValue(json, "showFailureText", defaults.showFailureText()),
                 booleanValue(json, "interactionsEnabled", defaults.interactionsEnabled())
         );
     }
 
-    private static IndicatorMode indicatorMode(JsonObject json, IndicatorMode fallback) {
-        if (!json.has("indicatorMode")) {
-            return fallback;
+    private static double transparencyValue(
+            JsonObject json,
+            String transparencyKey,
+            String legacyOpacityKey,
+            double fallback,
+            int configVersion
+    ) {
+        if (json.has(transparencyKey)) {
+            return doubleValue(json, transparencyKey, fallback);
         }
-        try {
-            return IndicatorMode.valueOf(json.get("indicatorMode").getAsString().toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException | UnsupportedOperationException exception) {
-            return fallback;
+        if (configVersion <= 1 && json.has(legacyOpacityKey)) {
+            return 1.0D - doubleValue(json, legacyOpacityKey, 1.0D - fallback);
         }
+        return fallback;
     }
+
 
     private static IndicatorStyle indicatorStyle(JsonObject json, IndicatorStyle fallback) {
         if (!json.has("indicatorStyle")) {
             return fallback;
         }
         try {
-            return IndicatorStyle.valueOf(json.get("indicatorStyle").getAsString().toUpperCase(Locale.ROOT));
+            String value = json.get("indicatorStyle").getAsString();
+            if ("pickaxe_outline".equalsIgnoreCase(value)) {
+                return IndicatorStyle.PICKAXE;
+            }
+            return IndicatorStyle.valueOf(value.toUpperCase(Locale.ROOT));
+        } catch (RuntimeException exception) {
+            return fallback;
+        }
+    }
+
+    private static IndicatorColorIntensity colorIntensity(
+            JsonObject json,
+            String key,
+            IndicatorColorIntensity fallback
+    ) {
+        if (json.has(key)) {
+            return enumValue(json, key, IndicatorColorIntensity.class, fallback);
+        }
+        if (json.has("colorIntensity")) {
+            return enumValue(json, "colorIntensity", IndicatorColorIntensity.class, fallback);
+        }
+        return fallback;
+    }
+
+    private static <T extends Enum<T>> T enumValue(
+            JsonObject json,
+            String key,
+            Class<T> type,
+            T fallback
+    ) {
+        if (!json.has(key)) {
+            return fallback;
+        }
+        try {
+            return Enum.valueOf(type, json.get(key).getAsString().toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException | UnsupportedOperationException exception) {
             return fallback;
         }
@@ -179,9 +228,11 @@ public final class PickClimberClientOptionsStore {
         json.addProperty("indicatorStyle", options.indicatorStyle().name().toLowerCase(Locale.ROOT));
         json.addProperty("showUnclimbableIndicator", options.showUnclimbableIndicator());
         json.addProperty("iconScale", options.iconScale());
-        json.addProperty("iconOpacity", options.iconOpacity());
+        json.addProperty("iconTransparency", options.iconTransparency());
+        json.addProperty("iconColorIntensity", options.iconColorIntensity().name().toLowerCase(Locale.ROOT));
         json.addProperty("showIndicatorBox", options.showIndicatorBox());
-        json.addProperty("boxOpacity", options.boxOpacity());
+        json.addProperty("boxTransparency", options.boxTransparency());
+        json.addProperty("boxColorIntensity", options.boxColorIntensity().name().toLowerCase(Locale.ROOT));
         json.addProperty("showFailureText", options.showFailureText());
         json.addProperty("interactionsEnabled", options.interactionsEnabled());
         return json;

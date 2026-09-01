@@ -3,7 +3,7 @@
 ## Current state
 
 - Stable gameplay baseline: `1.0.3`.
-- Current development source: `1.1.0-dev.8`.
+- Current development source: `1.1.0-dev.11`.
 - Intended development branch/workstream: `preparacionUpdate`.
 - Minecraft: `1.21.1`.
 - NeoForge: `21.1.235`.
@@ -135,12 +135,12 @@ This is not a substitute for the final NeoForge build.
 
 ## Exact next step
 
-The structural decomposition (Phase 0.0-0.8) and the planned 1.1.0 options/runtime feature surface are now implemented source-side in `1.1.0-dev.8`. Intermediate build failures are intentionally accumulated until the integration pass.
+The structural decomposition (Phase 0.0-0.8) and the planned 1.1.0 options/runtime feature surface are now implemented source-side through `1.1.0-dev.11`. Intermediate build failures are intentionally accumulated until the integration pass.
 
-1. Apply `dev.8` and run `MIGRATE-DOCS-DEV8.bat` once when overlaying an older development tree.
+1. Apply the current dev.11 patch/snapshot. Documentation migration is already complete; no new docs migrator is required.
 2. Do not add new 1.1.0 scope unless QA exposes a concrete gap.
 3. Run the consolidated Java 21 / NeoForge build repair pass.
 4. Fix Gradle/API/import/type/deprecation issues without weakening the new architecture boundaries.
-5. Run `docs/testing/TESTING-1.1.0-dev.8.md` plus the exact 1.0.3 regression and multiplayer/compatibility checks.
+5. Run `docs/testing/TESTING-1.1.0-dev.11.md` plus the exact 1.0.3 regression and multiplayer/compatibility checks.
 6. Regenerate the manifest after the accepted compile-repair tree.
 7. Only after those gates are green, promote the development line toward the final 1.1.0 release.

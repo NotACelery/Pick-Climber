@@ -1,5 +1,5 @@
 {
-  "version": "1.1.0-dev.8",
+  "version": "1.1.0-dev.11",
   "files": [
     {
       "path": ".editorconfig",
@@ -22,14 +22,9 @@
       "sha256": "06e620a567d295d8d372977dbc3a10dbf40eb6078a647ba8bfa8b777c6087c74"
     },
     {
-      "path": "MIGRATE-DOCS-DEV8.bat",
-      "size": 703,
-      "sha256": "8a84e9a04321f9aabe068e0448377021f157153c4c6d816dadd3c41d3a18ee7f"
-    },
-    {
       "path": "README.md",
-      "size": 15956,
-      "sha256": "72f5171a33e5f27b2f3772c4018dee9f036988af65745bd196631da4939e2d30"
+      "size": 16193,
+      "sha256": "ec0adb29e77a19f81d19652eae167d6af818e333d74e3c5f2b6cdcd540f013ad"
     },
     {
       "path": "build.bat",
@@ -53,28 +48,28 @@
     },
     {
       "path": "docs/BUILD-STATUS.md",
-      "size": 9960,
-      "sha256": "c8049136603a02ce211c94d62f0e5fdab5ed08ce6c2c23fbfaaaecb1e9921901"
+      "size": 11905,
+      "sha256": "84de3e5adf299484bf85a19719d05ca0ebf6ed0e7056b0d2ac181d127482d27f"
     },
     {
       "path": "docs/CHANGELOG.md",
-      "size": 33376,
-      "sha256": "2baa625edad7cd8958f833cb760464da574e54e4eb58f65837eeff062d365943"
+      "size": 36099,
+      "sha256": "1515bcf0186b705a5029c19a9d4f5a220ab03d124953feabcc3a8c73fd1e22ee"
     },
     {
       "path": "docs/DEVELOPMENT.md",
-      "size": 33224,
-      "sha256": "70c4da277d4262d1a9a859ac86849693513517c8f6ebb187fec6b6ca381fd1d6"
+      "size": 35922,
+      "sha256": "9bb1705da0811355e0b5c412c1e5800d6fb15dd2e84506513e363a9991864ee6"
     },
     {
       "path": "docs/PHASE-0-HANDOFF.md",
-      "size": 5728,
-      "sha256": "b84d0764c23a0be67ca8fbeaaa753b8464ae1063963ea6f9690291c0d1b22ebb"
+      "size": 5762,
+      "sha256": "694f13dcb3f22b1633478c63848a20ec0bee622f6ecdf45af4081620be95dc95"
     },
     {
       "path": "docs/ROADMAP.md",
-      "size": 28344,
-      "sha256": "1fb25fcbd7192676ce50ffb13c19e3f543de5d571fb1aea1f5f4394896ff0b72"
+      "size": 30400,
+      "sha256": "9d613155e1b1bd0e3ea97ac8d4b93ecdb020351987e56b7af11d0edf3fefce07"
     },
     {
       "path": "docs/STRONG-GRIP-DESIGN.md",
@@ -90,6 +85,16 @@
       "path": "docs/testing/TESTING-1.1.0-dev.1.md",
       "size": 3152,
       "sha256": "b739335bdb024b56d36480581e23231009f2bc5d39a8d34be696e9cc939c1956"
+    },
+    {
+      "path": "docs/testing/TESTING-1.1.0-dev.10.md",
+      "size": 3021,
+      "sha256": "00a73a3dd3fc705f01ee79819279d6c5fb22d8d3a549b5242504f27a979f0ba5"
+    },
+    {
+      "path": "docs/testing/TESTING-1.1.0-dev.11.md",
+      "size": 3355,
+      "sha256": "811b0f961ebab8120568a4763d10a4c2be9de941f65eb662a16f2cdbd6aaca99"
     },
     {
       "path": "docs/testing/TESTING-1.1.0-dev.2.md",
@@ -127,9 +132,14 @@
       "sha256": "020a8a0640478de579189a0ceb225be005a9e2375b4ff0b00b4627a126ad6bac"
     },
     {
+      "path": "docs/testing/TESTING-1.1.0-dev.9.md",
+      "size": 2891,
+      "sha256": "0cb222c15c6d80a8460a6fd239b2a8ee4b2eac0078c2845cac384464e62f9b59"
+    },
+    {
       "path": "gradle.properties",
-      "size": 623,
-      "sha256": "75df097140bf41354b040f3bb74a46f26ae8f03f6b12cf2bd19e3a408fcddbb2"
+      "size": 624,
+      "sha256": "772f0f88ed80257b058ea29989bf5f3d5489cad398024950b5916d7c76d9d2a1"
     },
     {
       "path": "settings.gradle",
@@ -153,8 +163,8 @@
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/client/AnchorIndicatorIconRenderer.java",
-      "size": 737,
-      "sha256": "5cb415de30a45ce1087a105a5ec93dfdde3bea944a5943ab192928f6669c2272"
+      "size": 729,
+      "sha256": "7896394aa697a7b80dd1665a23fa689fcd0af20d956093ad426863258bd57c57"
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/client/AnchorIndicatorPolicy.java",
@@ -163,8 +173,8 @@
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/client/AnchorIndicatorRenderer.java",
-      "size": 3575,
-      "sha256": "3f30154ad1eaf72d4bcfb299b241c92ef397276ed2694d62ebf3a492475191fa"
+      "size": 3994,
+      "sha256": "903bd64dd47e35782057d8a7efdb99b3f58552101e1ab01632d84292015dc7f4"
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/client/CeilingPlayerPoseRenderer.java",
@@ -183,18 +193,18 @@
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/client/ClientEvents.java",
-      "size": 2067,
-      "sha256": "2cf94925108db7ddd8173087f9972cb072a2200025441a29f72b90a4b9c99733"
+      "size": 2468,
+      "sha256": "c75c37b583ca092716713132757d53ec13944e2fd2b4dc196dc85551dae9691e"
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/client/ClientModEvents.java",
-      "size": 778,
-      "sha256": "2c4158a2fd43e84fbedc9430024bf8270d5cad0536341a9697f6e1d4ca7cc71f"
+      "size": 1012,
+      "sha256": "5a898167dbab1292196997f16f95c491e19b517c9252ecb2b9e6d983460085dc"
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/client/ClientOptionsPresentationPolicy.java",
-      "size": 1177,
-      "sha256": "3e08e845bdc889563cb673bb87d79095f90ead7aa78db3f63d850094fc531734"
+      "size": 1305,
+      "sha256": "18a8b701ca8c5ec455d091cca962bfb19478614edb433a541137565490ec288e"
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/client/ClientPickClimberBootstrap.java",
@@ -212,6 +222,16 @@
       "sha256": "96ccd112800509ea16c1ed3502e180e90d32c33be6aef9c11f38e74b6eaef9a3"
     },
     {
+      "path": "src/main/java/dev/maicra/pickclimber/client/IndicatorColorIntensity.java",
+      "size": 695,
+      "sha256": "a7d5f51b0ee9e9ab19f2e09bab20dca2ae594570308b3b7340b0518dcbb04b42"
+    },
+    {
+      "path": "src/main/java/dev/maicra/pickclimber/client/IndicatorColorPalette.java",
+      "size": 1534,
+      "sha256": "5d29683e47974ea5097ce725d086192b7ac562696a5a6a420a364d4b43dc610d"
+    },
+    {
       "path": "src/main/java/dev/maicra/pickclimber/client/IndicatorIconRenderer.java",
       "size": 209,
       "sha256": "eedf3518676a529a9fbcdd283bf67ad236f1838321ca80ecabfa9c7d251c90b8"
@@ -223,18 +243,18 @@
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/client/IndicatorStyle.java",
-      "size": 625,
-      "sha256": "1bfa89a10bdb2f139c76c614b9e861de42951e96b9da37cac55ea0a0e2d674aa"
+      "size": 609,
+      "sha256": "327aaca13396d77d22e95fb0a42d1b0bf0cb779952a9c2694abc80b77d6c8aec"
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/client/PickClimberClientOptions.java",
-      "size": 5062,
-      "sha256": "b94f247c09730d7b1ef2aaf1a8b1adb07b5f37af3608f1ea04e74da9a851d1b3"
+      "size": 6446,
+      "sha256": "2c394ed97f13394cc98ae8a3c594c63cc56baafb31ad90138542a8203379aa35"
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/client/PickClimberClientOptionsStore.java",
-      "size": 8105,
-      "sha256": "2e094924b00aafd70871481285a8c7e52fedbb00300971d70626c2c750c7a885"
+      "size": 9923,
+      "sha256": "89f088cd4d4921c752376b28af10fb0f741f079ebf5eef078322d31480dc52c5"
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/client/PickClimberItemDecorator.java",
@@ -242,19 +262,19 @@
       "sha256": "cc66697d32449d1cf928c87beedf6d2d05898897e7d0c592102afd3f7a2601df"
     },
     {
-      "path": "src/main/java/dev/maicra/pickclimber/client/PickClimberOptionsEntry.java",
-      "size": 1356,
-      "sha256": "1e659781013cfc504a89dd8e006967e0b3c025dcb42602524561f8342c0e304d"
+      "path": "src/main/java/dev/maicra/pickclimber/client/PickClimberKeyMappings.java",
+      "size": 465,
+      "sha256": "2925c82fd38e4699a914899621845a6674721016a1140fbd577f781d7a94f775"
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/client/PickClimberOptionsScreen.java",
-      "size": 12618,
-      "sha256": "cf2331ad03d478c21c193305a743fe50eb7775de5f74f6b3349ad041e0cd8f0f"
+      "size": 15243,
+      "sha256": "c349b1994572baf022bd885760f0de423520506af58b362b94c4224146b66bab"
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/client/PickaxeOutlineIndicatorIconRenderer.java",
-      "size": 1733,
-      "sha256": "2683c4cdf80e2239ef61c9d8cfe36e31e1343a37e834a1905addeaacdf1a9ef2"
+      "size": 1504,
+      "sha256": "83002f3651110c31ba5971b4e795e35e65408d6adafe1b2fb5dcf2432b80ec7f"
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/client/PinnedPickaxeRenderer.java",
@@ -263,8 +283,8 @@
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/client/StringIndicatorIconRenderer.java",
-      "size": 1296,
-      "sha256": "8817b12985b844026c0a9113f1d5e5de9508901e664de86d986c85f6ded56d68"
+      "size": 1458,
+      "sha256": "d9b0a10c7c5c12fdfd97eb9c5a26ed0f5b4e5e8c7ce97e46cc752044595eb6c0"
     },
     {
       "path": "src/main/java/dev/maicra/pickclimber/climb/AnchorControlInput.java",
@@ -588,23 +608,28 @@
     },
     {
       "path": "src/main/resources/assets/pickclimber/lang/en_us.json",
-      "size": 2727,
-      "sha256": "a827c92c9f5af603312cdeccf1f6a723e55b8695247e3a79e14558b783a09944"
+      "size": 3266,
+      "sha256": "47f5cd3f0481a59bcdc547db65e95fd5d3a3065d6e17187aa77e361feb7ed4c3"
     },
     {
       "path": "src/main/resources/assets/pickclimber/lang/es_cl.json",
-      "size": 2915,
-      "sha256": "824c76370e5c7f2273b0d7351ae2f58627ccf1e0b8c1a3b82ff36611fd174c4f"
+      "size": 3514,
+      "sha256": "532416621570ba812a07ebea6dc969c8c3d2df152eec82fd8f144e1fbd59af22"
     },
     {
       "path": "src/main/resources/assets/pickclimber/lang/es_es.json",
-      "size": 2911,
-      "sha256": "d26474271337926205ac4539fa6bfb4adae5cc0e6685b1484ec56cdcafae1406"
+      "size": 3510,
+      "sha256": "e1f435fa0df60385c2241f3cc4831cf0b203bfeb9f902fa9779701aadbf56b79"
     },
     {
       "path": "src/main/resources/assets/pickclimber/models/item/climbing_pick_icon.json",
       "size": 116,
       "sha256": "5a4259fe3d60d37975224d53dd9dac8ff62ee8fad9cc521c0693d7fb07b444da"
+    },
+    {
+      "path": "src/main/resources/assets/pickclimber/textures/gui/pickaxe_indicator.png",
+      "size": 155,
+      "sha256": "7e9e188de5c44398da3e032a5c29eacc8cfb0b79de7c706a9c48f634ffcf0de5"
     },
     {
       "path": "src/main/resources/assets/pickclimber/textures/item/climbing_pick_icon.png",

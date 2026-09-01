@@ -40,14 +40,23 @@ public final class ClientEvents {
         Minecraft minecraft = Minecraft.getInstance();
         ClientPickClimberBootstrap.ensureInstalled();
         ClientRuntimePreferenceController.tick(minecraft);
+        handleOptionsKey(minecraft);
         ClientClimbInputController.tick(minecraft);
+    }
+
+    private static void handleOptionsKey(Minecraft minecraft) {
+        while (PickClimberKeyMappings.OPEN_OPTIONS.consumeClick()) {
+            if (minecraft.level != null && minecraft.player != null && minecraft.screen == null) {
+                minecraft.setScreen(new PickClimberOptionsScreen(null));
+            }
+        }
     }
 
     @SubscribeEvent
     public static void onRenderGui(RenderGuiEvent.Post event) {
         Minecraft minecraft = Minecraft.getInstance();
         Player player = minecraft.player;
-        if (player == null || minecraft.options.hideGui) {
+        if (player == null || minecraft.options.hideGui || minecraft.screen != null) {
             return;
         }
         AnchorIndicatorRenderer.render(minecraft, player, event.getGuiGraphics());

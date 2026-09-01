@@ -2,6 +2,7 @@ package dev.maicra.pickclimber.client;
 
 import dev.maicra.pickclimber.climb.AnchorIndicatorStatus;
 import dev.maicra.pickclimber.climb.ClimbPresentationPolicy;
+import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 
 final class ClientOptionsPresentationPolicy implements ClimbPresentationPolicy {
@@ -26,6 +27,7 @@ final class ClientOptionsPresentationPolicy implements ClimbPresentationPolicy {
 
     @Override
     public boolean showFailureText(Player player) {
-        return PickClimberClientOptionsStore.current().showFailureText();
+        return !(Minecraft.getInstance().screen instanceof PickClimberOptionsScreen)
+                && PickClimberClientOptionsStore.current().showFailureText();
     }
 }

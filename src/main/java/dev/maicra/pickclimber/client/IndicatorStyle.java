@@ -4,7 +4,7 @@ import net.minecraft.network.chat.Component;
 
 public enum IndicatorStyle {
     STRING("options.pickclimber.indicator_style.string"),
-    PICKAXE_OUTLINE("options.pickclimber.indicator_style.pickaxe_outline");
+    PICKAXE("options.pickclimber.indicator_style.pickaxe");
 
     private final String translationKey;
 

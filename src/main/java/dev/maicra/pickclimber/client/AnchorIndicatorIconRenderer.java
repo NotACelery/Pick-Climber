@@ -21,7 +21,7 @@ final class AnchorIndicatorIconRenderer {
     private static IndicatorIconRenderer rendererFor(IndicatorStyle style) {
         return switch (style) {
             case STRING -> StringIndicatorIconRenderer.INSTANCE;
-            case PICKAXE_OUTLINE -> PickaxeOutlineIndicatorIconRenderer.INSTANCE;
+            case PICKAXE -> PickaxeOutlineIndicatorIconRenderer.INSTANCE;
         };
     }
 }

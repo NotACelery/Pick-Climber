@@ -2,7 +2,7 @@
 
 Current stable line: **1.0.3**.
 
-Current development line: **1.1.0-dev.8** on the `preparacionUpdate` workstream.
+Current development line: **1.1.0-dev.11** on the `preparacionUpdate` workstream.
 
 The 1.0.x line is the behavioral regression baseline. Development is intentionally split into:
 
@@ -272,13 +272,13 @@ Final integration/behavior:
 
 ## 1.1.0 — Player Customization & Runtime Control
 
-Status: **SOURCE-COMPLETE CANDIDATE in `1.1.0-dev.8`**. No additional 1.1.0 feature is planned before the integration/QA pass unless testing exposes a concrete UX gap.
+Status: **SOURCE-COMPLETE CANDIDATE in `1.1.0-dev.11`**. No additional 1.1.0 feature is planned before the integration/QA pass unless testing exposes a concrete UX gap.
 
 ### In-world options entry
 
 Add **Pick Climber Options** to the vanilla Options screen only while a world/server is loaded.
 
-- [x] Do not show the button from the title screen.
+- [x] Do not inject a Pick Climber button into vanilla Options or the title-screen options flow.
 - [x] Add the entry only to `OptionsScreen` while a world/player is loaded.
 - [x] Use adaptive columns so the first options screen remains usable across narrow/small GUI layouts.
 - [x] Apply visual changes immediately while the screen is open when technically safe.
@@ -289,14 +289,13 @@ Provide:
 
 - [x] Indicator mode: `Contextual`, `Always`, `Off`.
 - [x] Show unclimbable indicator: On/Off, default Off.
-- [x] Icon style: `String`, `Pickaxe Outline` using separate renderers and no vanilla-pickaxe fallback.
+- [x] Icon style: `String`, `Pickaxe`; Pickaxe uses a dedicated monochrome 16x16 tool-slot mask and no vanilla-item fallback.
 - [x] Icon size (50%–200%).
 - [x] Icon opacity.
 - [x] Border/box visibility.
 - [x] Border/box opacity.
 - [x] Anchor failure messages: On/Off, mirrored transiently to the server so server-originated feedback respects the client choice.
-- [x] Reset HUD to Defaults without changing the runtime enable/disable preference.
-- [x] Reset All to restore HUD, failure feedback and runtime interactions to defaults.
+- [x] One `Reset to Defaults` action restores the complete client option set and resynchronizes runtime preferences.
 - [x] Disable visual child controls when their parent state makes them irrelevant.
 - [x] Version the client-options JSON (`configVersion: 1`) while retaining defensive loading of legacy/malformed known fields.
 - [x] Avoid redundant writes when an option value did not actually change.
@@ -333,7 +332,7 @@ Preserve the 1.0.2 shader/batch isolation invariant so Jade and other overlays n
 
 ### Hot-disable
 
-Status: **source-side implementation complete in `dev.8`; build/QA pending**.
+Status: **source-side implementation updated through `dev.11`; build/QA pending**.
 
 Add a personal **Enable Pick Climber interactions** toggle.
 
@@ -358,10 +357,10 @@ Protocol bump implemented source-side: **13 -> 14**.
 
 Validate:
 
-- options button only in-world;
+- configurable options keybind that opens the dedicated GUI only in-world;
 - responsive screen;
 - size/opacity extremes;
-- String and Pickaxe Outline;
+- String and Pickaxe;
 - border on/off;
 - messages on/off;
 - Contextual/Always/Off behavior;
@@ -369,7 +368,7 @@ Validate:
 - hot-disable while attached/unattached;
 - hot-enable without restart;
 - two multiplayer clients with different visual/enable preferences;
-- Reset HUD vs Reset All behavior and immediate runtime resync;
+- Reset to Defaults and immediate runtime resync;
 - disabled/enabled dependent controls at each indicator mode;
 - legacy client config without `configVersion` and future-version known-field loading;
 - complete 1.0.3 physics/interaction regression;
@@ -377,9 +376,42 @@ Validate:
 
 ---
 
+
+### 1.1.0 dev.9 UX correction pass
+
+- [x] Remove the injected vanilla Options-screen entry.
+- [x] Open the dedicated GUI from a configurable key mapping available in Controls.
+- [x] Keep the dedicated options GUI available only while a world/player is loaded.
+- [x] Move interactions to the first control and disable all dependent controls when runtime interactions are OFF.
+- [x] Place Failure Messages immediately under Indicator Mode.
+- [x] Place Indicator Style immediately above Indicator Box.
+- [x] Replace user-facing opacity semantics with transparency semantics.
+- [x] Apply String alpha through direct texture rendering instead of ItemRenderer.
+- [x] Add independent Muted / Normal / Neon color-intensity presets for icon and box.
+- [x] Replace the provisional Pickaxe renderer with a dedicated 16x16 tool-slot texture mask.
+- [x] Draw preview icon/text inside the options screen and suppress the normal HUD indicator while that screen is open.
+
+### 1.1.0 dev.10 integration repair
+
+- [x] Record the exact dev.9 compile failure: `Consumer<Double>` passed where `DoubleConsumer` is required.
+- [x] Change the shared transparency-slider factory to `DoubleConsumer`.
+- [x] Audit the client options package for additional boxed/primitive double callback mismatches.
+- [ ] Compile the exact dev.11 tree with Java 21 in the release environment.
+- [ ] Run the full dev.11 options/runtime regression once the build is green.
+
 ## 1.2.0 — Mapmaker Rules / Climbing Rules Jukebox
 
 Status: **PLANNED AFTER 1.1.0**.
+
+### 1.1.0 dev.11 pickaxe/reset simplification
+
+- [x] Rename the player-facing `Pickaxe Outline` style to `Pickaxe`.
+- [x] Replace the provisional procedural pixels with a dedicated 16x16 monochrome tool-slot texture mask.
+- [x] Preserve old `indicatorStyle: pickaxe_outline` configs through config-v3 migration.
+- [x] Replace `Reset HUD` and `Reset All` with one `Reset to Defaults` action.
+- [ ] Compile the exact dev.11 tree and verify the new texture-backed renderer in-game.
+- [ ] Confirm the Pickaxe silhouette reads immediately as a pickaxe at 50%, 100%, 164% and 200% size.
+
 
 ### Creative-only control block
 
@@ -559,7 +591,7 @@ These remain valid candidates for later 1.3.x+ work once the world-rule model is
 
 ## Current handoff / exact next step
 
-Current source target: **`1.1.0-dev.8`**.
+Current source target: **`1.1.0-dev.11`**.
 
 Current stable comparison target: **`1.0.3`**.
 
@@ -569,10 +601,10 @@ Structural passes **0.0 through 0.8 are implemented source-side**. The remaining
 2. Run the full Java 21 / NeoForge `clean build --stacktrace`.
 3. Repair compile/API/import/type errors without collapsing the new module boundaries.
 4. Confirm both Gradle verification tasks under configuration cache.
-5. Run `docs/testing/TESTING-1.1.0-dev.8.md` against the exact 1.0.3 baseline.
+5. Run `docs/testing/TESTING-1.1.0-dev.11.md` against the exact 1.0.3 baseline.
 6. Run multiplayer and representative mod/tag compatibility regression.
 7. Regenerate the manifest after any final repair.
 8. Mark Phase 0 complete only when the exact compiled JAR passes regression.
-9. Treat 1.1.0 as releasable only after the compiled dev.8-equivalent tree passes the full 1.0.3 + options/runtime regression.
+9. Treat 1.1.0 as releasable only after the compiled dev.11-equivalent tree passes the full 1.0.3 + options/runtime regression.
 
 This handoff is intentionally explicit so Phase 0 can continue safely in a new conversation without reconstructing the architecture from chat history.
