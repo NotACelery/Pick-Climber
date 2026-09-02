@@ -1,12 +1,12 @@
 @echo off
 setlocal EnableExtensions
 cd /d "%~dp0"
+
 set "GRADLE_VERSION=9.2.1"
 set "DIST_ROOT=%CD%\.gradle-dist"
 set "DIST_DIR=%DIST_ROOT%\gradle-%GRADLE_VERSION%"
 set "DIST_ZIP=%DIST_ROOT%\gradle-%GRADLE_VERSION%-bin.zip"
 set "JAVA_EXE="
-set "BUILD_FAILED=0"
 
 if not exist "gradle.properties" goto :metadata_missing
 for /f "usebackq tokens=1,* delims==" %%A in ("gradle.properties") do (
@@ -17,7 +17,7 @@ if not defined MOD_VERSION goto :metadata_missing
 if not defined MINECRAFT_VERSION goto :metadata_missing
 
 set "EXPECTED_JAR=build\libs\pickclimber-%MINECRAFT_VERSION%-%MOD_VERSION%.jar"
-title Pick Climber - %MOD_VERSION% build
+title Pick Climber - %MOD_VERSION% release build
 
 echo ============================================================
 echo        PICK CLIMBER - RELEASE BUILD %MOD_VERSION%
@@ -86,13 +86,12 @@ call "%DIST_DIR%\bin\gradle.bat" --no-daemon clean build --stacktrace
 if errorlevel 1 goto :build_failed
 
 if not exist "%EXPECTED_JAR%" goto :jar_missing
-set "JAR_FILE=%EXPECTED_JAR%"
 
 echo.
 echo ============================================================
 echo BUILD COMPLETED SUCCESSFULLY
 echo Generated JAR:
-echo   %CD%\%JAR_FILE%
+echo   %CD%\%EXPECTED_JAR%
 echo ============================================================
 goto :success
 
@@ -143,7 +142,7 @@ goto :failure
 echo.
 echo ============================================================
 echo BUILD FAILED
- echo Copy everything from "FAILURE: Build failed" to the end and send it.
+echo Copy everything from "FAILURE: Build failed" to the end and send it.
 echo ============================================================
 goto :failure
 
@@ -153,7 +152,6 @@ echo   %CD%\%EXPECTED_JAR%
 goto :failure
 
 :failure
-set "BUILD_FAILED=1"
 echo.
 echo This window will remain open so the error can be read or copied.
 pause
@@ -161,6 +159,6 @@ endlocal & exit /b 1
 
 :success
 echo.
-echo You can copy the JAR to the Prism Launcher instance's mods directory.
+echo The release JAR is ready to copy into the Prism Launcher instance's mods directory.
 pause
 endlocal & exit /b 0

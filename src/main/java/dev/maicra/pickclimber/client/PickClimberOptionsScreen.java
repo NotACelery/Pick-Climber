@@ -16,15 +16,28 @@ import net.minecraft.network.chat.Component;
 public final class PickClimberOptionsScreen extends Screen {
     private static final int CONTROL_HEIGHT = 20;
     private static final int GAP = 4;
-    private static final int COLUMN_WIDTH = 210;
-    private static final int CONTENT_WIDTH = COLUMN_WIDTH * 2 + GAP;
+    private static final int SIDE_MARGIN = 8;
+    private static final int MIN_COLUMN_WIDTH = 190;
+    private static final int MAX_COLUMN_WIDTH = 210;
+    private static final int MIN_FOOTER_BUTTON_WIDTH = 120;
     private static final int PREVIEW_TOP = 38;
     private static final int PREVIEW_HEIGHT = 40;
     private static final int PREVIEW_PADDING = 4;
     private static final int PREVIEW_MAX_ICON_SIZE = PREVIEW_HEIGHT - PREVIEW_PADDING * 2;
     private static final int CONTROLS_TOP = 84;
+    private static final int FOOTER_BOTTOM_MARGIN = 8;
+    private static final int SCROLL_STEP = CONTROL_HEIGHT + GAP;
 
     private final Screen parent;
+    private final List<OptionLayoutEntry> optionEntries = new ArrayList<>();
+
+    private boolean twoColumnLayout;
+    private int layoutLeft;
+    private int layoutWidth;
+    private int controlsBottom;
+    private int visibleRows = 1;
+    private int totalRows = 1;
+    private int scrollRow;
 
     public PickClimberOptionsScreen(Screen parent) {
         super(Component.translatable("options.pickclimber.title"));
@@ -36,11 +49,7 @@ public final class PickClimberOptionsScreen extends Screen {
         ClientPickClimberBootstrap.ensureInstalled();
         PickClimberClientOptions options = PickClimberClientOptionsStore.current();
         List<AbstractWidget> modDependentControls = new ArrayList<>();
-
-        int left = Math.max(8, (width - CONTENT_WIDTH) / 2);
-        int right = left + COLUMN_WIDTH + GAP;
-        int fullWidth = Math.min(CONTENT_WIDTH, width - 16);
-        int fullLeft = (width - fullWidth) / 2;
+        optionEntries.clear();
 
         Button interactions = toggleButton(
                 "options.pickclimber.interactions",
@@ -51,15 +60,13 @@ public final class PickClimberOptionsScreen extends Screen {
                     rebuildWidgets();
                 }
         );
-        place(interactions, fullLeft, CONTROLS_TOP, fullWidth);
-        addRenderableWidget(interactions);
+        registerOption(interactions, -1, 0, 0, true);
 
-        int row1 = CONTROLS_TOP + CONTROL_HEIGHT + GAP;
         Button indicatorMode = Button.builder(indicatorModeMessage(options), button -> {
             PickClimberClientOptionsStore.update(current -> current.withIndicatorMode(current.indicatorMode().next()));
             rebuildWidgets();
-        }).bounds(left, row1, COLUMN_WIDTH, CONTROL_HEIGHT).build();
-        addRenderableWidget(indicatorMode);
+        }).bounds(0, 0, MAX_COLUMN_WIDTH, CONTROL_HEIGHT).build();
+        registerOption(indicatorMode, 0, 1, 1, false);
         modDependentControls.add(indicatorMode);
 
         Button indicatorStyle = Button.builder(indicatorStyleMessage(options), button -> {
@@ -67,11 +74,10 @@ public final class PickClimberOptionsScreen extends Screen {
                     current -> current.withIndicatorStyle(current.indicatorStyle().next())
             );
             button.setMessage(indicatorStyleMessage(PickClimberClientOptionsStore.current()));
-        }).bounds(right, row1, COLUMN_WIDTH, CONTROL_HEIGHT).build();
-        addRenderableWidget(indicatorStyle);
+        }).bounds(0, 0, MAX_COLUMN_WIDTH, CONTROL_HEIGHT).build();
+        registerOption(indicatorStyle, 1, 1, 4, false);
         modDependentControls.add(indicatorStyle);
 
-        int row2 = row1 + CONTROL_HEIGHT + GAP;
         Button failureMessages = toggleButton(
                 "options.pickclimber.failure_text",
                 () -> PickClimberClientOptionsStore.current().showFailureText(),
@@ -80,8 +86,7 @@ public final class PickClimberOptionsScreen extends Screen {
                     ClientRuntimePreferenceController.requestImmediateSync(minecraft);
                 }
         );
-        place(failureMessages, left, row2, COLUMN_WIDTH);
-        addRenderableWidget(failureMessages);
+        registerOption(failureMessages, 0, 2, 2, false);
         modDependentControls.add(failureMessages);
 
         Button showBox = toggleButton(
@@ -92,42 +97,36 @@ public final class PickClimberOptionsScreen extends Screen {
                     rebuildWidgets();
                 }
         );
-        place(showBox, right, row2, COLUMN_WIDTH);
-        addRenderableWidget(showBox);
+        registerOption(showBox, 1, 2, 5, false);
         modDependentControls.add(showBox);
 
-        int row3 = row2 + CONTROL_HEIGHT + GAP;
         Button showUnclimbable = toggleButton(
                 "options.pickclimber.show_unclimbable",
                 () -> PickClimberClientOptionsStore.current().showUnclimbableIndicator(),
                 value -> PickClimberClientOptionsStore.update(current -> current.withShowUnclimbableIndicator(value))
         );
-        place(showUnclimbable, left, row3, COLUMN_WIDTH);
-        addRenderableWidget(showUnclimbable);
+        registerOption(showUnclimbable, 0, 3, 3, false);
         modDependentControls.add(showUnclimbable);
 
         DoubleOptionSlider boxTransparency = transparencySlider(
-                right,
-                row3,
                 options.boxTransparency(),
                 "options.pickclimber.box_transparency",
                 value -> PickClimberClientOptionsStore.update(current -> current.withBoxTransparency(value))
         );
-        addRenderableWidget(boxTransparency);
+        registerOption(boxTransparency, 1, 3, 9, false);
         modDependentControls.add(boxTransparency);
 
-        int row4 = row3 + CONTROL_HEIGHT + GAP;
         DoubleOptionSlider iconScale = new DoubleOptionSlider(
-                left,
-                row4,
-                COLUMN_WIDTH,
+                0,
+                0,
+                MAX_COLUMN_WIDTH,
                 options.iconScale(),
                 PickClimberClientOptions.MIN_ICON_SCALE,
                 PickClimberClientOptions.MAX_ICON_SCALE,
                 value -> percentMessage("options.pickclimber.icon_size", value),
                 value -> PickClimberClientOptionsStore.update(current -> current.withIconScale(value))
         );
-        addRenderableWidget(iconScale);
+        registerOption(iconScale, 0, 4, 6, false);
         modDependentControls.add(iconScale);
 
         Button boxColor = intensityButton(
@@ -135,29 +134,23 @@ public final class PickClimberOptionsScreen extends Screen {
                 () -> PickClimberClientOptionsStore.current().boxColorIntensity(),
                 value -> PickClimberClientOptionsStore.update(current -> current.withBoxColorIntensity(value))
         );
-        place(boxColor, right, row4, COLUMN_WIDTH);
-        addRenderableWidget(boxColor);
+        registerOption(boxColor, 1, 4, 10, false);
         modDependentControls.add(boxColor);
 
-        int row5 = row4 + CONTROL_HEIGHT + GAP;
         DoubleOptionSlider iconTransparency = transparencySlider(
-                left,
-                row5,
                 options.iconTransparency(),
                 "options.pickclimber.icon_transparency",
                 value -> PickClimberClientOptionsStore.update(current -> current.withIconTransparency(value))
         );
-        addRenderableWidget(iconTransparency);
+        registerOption(iconTransparency, 0, 5, 7, false);
         modDependentControls.add(iconTransparency);
 
-        int row6 = row5 + CONTROL_HEIGHT + GAP;
         Button iconColor = intensityButton(
                 "options.pickclimber.icon_color_intensity",
                 () -> PickClimberClientOptionsStore.current().iconColorIntensity(),
                 value -> PickClimberClientOptionsStore.update(current -> current.withIconColorIntensity(value))
         );
-        place(iconColor, left, row6, COLUMN_WIDTH);
-        addRenderableWidget(iconColor);
+        registerOption(iconColor, 0, 6, 8, false);
         modDependentControls.add(iconColor);
 
         applyAvailability(
@@ -172,7 +165,9 @@ public final class PickClimberOptionsScreen extends Screen {
                 boxTransparency,
                 boxColor
         );
+
         addFooterControls(options.interactionsEnabled());
+        layoutOptions();
     }
 
     @Override
@@ -188,6 +183,27 @@ public final class PickClimberOptionsScreen extends Screen {
                 0xB0B0B0
         );
         renderPreviewPanel(gui);
+        renderScrollIndicator(gui);
+    }
+
+    @Override
+    public boolean mouseScrolled(
+            double mouseX,
+            double mouseY,
+            double scrollX,
+            double scrollY
+    ) {
+        if (scrollY != 0.0D
+                && maxScrollRows() > 0
+                && mouseY >= CONTROLS_TOP
+                && mouseY < controlsBottom) {
+            int steps = Math.max(1, (int) Math.round(Math.abs(scrollY)));
+            int direction = scrollY > 0.0D ? -steps : steps;
+            if (setScrollRow(scrollRow + direction)) {
+                return true;
+            }
+        }
+        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
     @Override
@@ -196,7 +212,8 @@ public final class PickClimberOptionsScreen extends Screen {
     }
 
     private void renderPreviewPanel(GuiGraphics gui) {
-        int panelWidth = Math.min(CONTENT_WIDTH, width - 16);
+        int panelWidth = Math.max(1, width - SIDE_MARGIN * 2);
+        panelWidth = Math.min(MAX_COLUMN_WIDTH * 2 + GAP, panelWidth);
         int panelLeft = (width - panelWidth) / 2;
         gui.fill(panelLeft, PREVIEW_TOP, panelLeft + panelWidth, PREVIEW_TOP + PREVIEW_HEIGHT, 0xE0101010);
         gui.fill(panelLeft, PREVIEW_TOP, panelLeft + panelWidth, PREVIEW_TOP + 1, 0xFF606060);
@@ -218,8 +235,14 @@ public final class PickClimberOptionsScreen extends Screen {
             return;
         }
 
+        Component status = Component.translatable("options.pickclimber.preview_status_ready");
+        int statusWidth = font.width(status);
         int previewCenterY = PREVIEW_TOP + PREVIEW_HEIGHT / 2;
-        int iconCenter = width / 2 - 46;
+        int contentWidth = PREVIEW_MAX_ICON_SIZE + GAP * 2 + statusWidth;
+        int contentLeft = Math.max(panelLeft + PREVIEW_PADDING, width / 2 - contentWidth / 2);
+        int iconCenter = contentLeft + PREVIEW_MAX_ICON_SIZE / 2;
+        int statusX = iconCenter + PREVIEW_MAX_ICON_SIZE / 2 + GAP * 2;
+
         AnchorIndicatorRenderer.renderPreview(
                 gui,
                 iconCenter,
@@ -229,8 +252,8 @@ public final class PickClimberOptionsScreen extends Screen {
         );
         gui.drawString(
                 font,
-                Component.translatable("options.pickclimber.preview_status_ready"),
-                width / 2 - 20,
+                status,
+                statusX,
                 PREVIEW_TOP + (PREVIEW_HEIGHT - font.lineHeight) / 2,
                 0xFFFFFF
         );
@@ -247,14 +270,112 @@ public final class PickClimberOptionsScreen extends Screen {
     }
 
     private void addFooterControls(boolean interactionsEnabled) {
-        int buttonWidth = Math.min(200, Math.max(120, (width - 24) / 2));
-        int totalWidth = buttonWidth * 2 + GAP;
-        int startX = (width - totalWidth) / 2;
-        int y = height - 28;
-        Button resetDefaults = resetDefaultsButton(startX, y, buttonWidth);
+        int availableWidth = Math.max(1, width - SIDE_MARGIN * 2);
+        boolean stacked = availableWidth < MIN_FOOTER_BUTTON_WIDTH * 2 + GAP;
+        int footerHeight = stacked ? CONTROL_HEIGHT * 2 + GAP : CONTROL_HEIGHT;
+        int footerTop = height - FOOTER_BOTTOM_MARGIN - footerHeight;
+        controlsBottom = Math.max(CONTROLS_TOP + CONTROL_HEIGHT, footerTop - GAP * 2);
+
+        Button resetDefaults;
+        Button done;
+        if (stacked) {
+            int buttonWidth = Math.min(MAX_COLUMN_WIDTH * 2 + GAP, availableWidth);
+            int startX = (width - buttonWidth) / 2;
+            resetDefaults = resetDefaultsButton(startX, footerTop, buttonWidth);
+            done = doneButton(startX, footerTop + CONTROL_HEIGHT + GAP, buttonWidth);
+        } else {
+            int footerWidth = Math.min(MAX_COLUMN_WIDTH * 2 + GAP, availableWidth);
+            int buttonWidth = (footerWidth - GAP) / 2;
+            int startX = (width - footerWidth) / 2;
+            resetDefaults = resetDefaultsButton(startX, footerTop, buttonWidth);
+            done = doneButton(startX + buttonWidth + GAP, footerTop, buttonWidth);
+        }
+
         resetDefaults.active = interactionsEnabled;
         addRenderableWidget(resetDefaults);
-        addRenderableWidget(doneButton(startX + buttonWidth + GAP, y, buttonWidth));
+        addRenderableWidget(done);
+    }
+
+    private void layoutOptions() {
+        int availableWidth = Math.max(1, width - SIDE_MARGIN * 2);
+        twoColumnLayout = availableWidth >= MIN_COLUMN_WIDTH * 2 + GAP;
+
+        int columnWidth;
+        if (twoColumnLayout) {
+            columnWidth = Math.min(MAX_COLUMN_WIDTH, (availableWidth - GAP) / 2);
+            layoutWidth = columnWidth * 2 + GAP;
+            totalRows = 7;
+        } else {
+            columnWidth = Math.min(MAX_COLUMN_WIDTH * 2 + GAP, availableWidth);
+            layoutWidth = columnWidth;
+            totalRows = optionEntries.size();
+        }
+        layoutLeft = (width - layoutWidth) / 2;
+
+        int availableHeight = Math.max(CONTROL_HEIGHT, controlsBottom - CONTROLS_TOP);
+        visibleRows = Math.max(1, (availableHeight + GAP) / SCROLL_STEP);
+        visibleRows = Math.min(visibleRows, totalRows);
+        scrollRow = clamp(scrollRow, 0, maxScrollRows());
+
+        for (OptionLayoutEntry entry : optionEntries) {
+            int row = twoColumnLayout ? entry.wideRow() : entry.narrowRow();
+            boolean visible = row >= scrollRow && row < scrollRow + visibleRows;
+            entry.widget().visible = visible;
+            if (!visible) {
+                continue;
+            }
+
+            int y = CONTROLS_TOP + (row - scrollRow) * SCROLL_STEP;
+            if (!twoColumnLayout || entry.fullWidth()) {
+                place(entry.widget(), layoutLeft, y, layoutWidth);
+                continue;
+            }
+
+            int x = layoutLeft + entry.wideColumn() * (columnWidth + GAP);
+            place(entry.widget(), x, y, columnWidth);
+        }
+    }
+
+    private void renderScrollIndicator(GuiGraphics gui) {
+        int maxScroll = maxScrollRows();
+        if (maxScroll <= 0) {
+            return;
+        }
+
+        int trackTop = CONTROLS_TOP;
+        int trackHeight = Math.max(CONTROL_HEIGHT, controlsBottom - CONTROLS_TOP);
+        int thumbHeight = Math.max(8, trackHeight * visibleRows / totalRows);
+        int travel = Math.max(0, trackHeight - thumbHeight);
+        int thumbTop = trackTop + travel * scrollRow / maxScroll;
+        int x = Math.min(width - 3, layoutLeft + layoutWidth + 3);
+
+        gui.fill(x, trackTop, x + 2, trackTop + trackHeight, 0x50303030);
+        gui.fill(x, thumbTop, x + 2, thumbTop + thumbHeight, 0xFFC0C0C0);
+    }
+
+    private boolean setScrollRow(int next) {
+        int clamped = clamp(next, 0, maxScrollRows());
+        if (clamped == scrollRow) {
+            return false;
+        }
+        scrollRow = clamped;
+        layoutOptions();
+        return true;
+    }
+
+    private int maxScrollRows() {
+        return Math.max(0, totalRows - visibleRows);
+    }
+
+    private void registerOption(
+            AbstractWidget widget,
+            int wideColumn,
+            int wideRow,
+            int narrowRow,
+            boolean fullWidth
+    ) {
+        optionEntries.add(new OptionLayoutEntry(widget, wideColumn, wideRow, narrowRow, fullWidth));
+        addRenderableWidget(widget);
     }
 
     private Button resetDefaultsButton(int x, int y, int buttonWidth) {
@@ -304,16 +425,14 @@ public final class PickClimberOptionsScreen extends Screen {
     }
 
     private static DoubleOptionSlider transparencySlider(
-            int x,
-            int y,
             double value,
             String translationKey,
             DoubleConsumer setter
     ) {
         return new DoubleOptionSlider(
-                x,
-                y,
-                COLUMN_WIDTH,
+                0,
+                0,
+                MAX_COLUMN_WIDTH,
                 value,
                 0.0D,
                 1.0D,
@@ -331,7 +450,7 @@ public final class PickClimberOptionsScreen extends Screen {
             boolean next = !valueSupplier.getAsBoolean();
             setter.accept(next);
             button.setMessage(toggleMessage(translationKey, next));
-        }).bounds(0, 0, COLUMN_WIDTH, CONTROL_HEIGHT).build();
+        }).bounds(0, 0, MAX_COLUMN_WIDTH, CONTROL_HEIGHT).build();
     }
 
     private static Button intensityButton(
@@ -343,7 +462,7 @@ public final class PickClimberOptionsScreen extends Screen {
             IndicatorColorIntensity next = valueSupplier.get().next();
             setter.accept(next);
             button.setMessage(intensityMessage(translationKey, next));
-        }).bounds(0, 0, COLUMN_WIDTH, CONTROL_HEIGHT).build();
+        }).bounds(0, 0, MAX_COLUMN_WIDTH, CONTROL_HEIGHT).build();
     }
 
     private static void place(AbstractWidget widget, int x, int y, int widgetWidth) {
@@ -371,5 +490,18 @@ public final class PickClimberOptionsScreen extends Screen {
 
     private static Component percentMessage(String translationKey, double value) {
         return Component.translatable(translationKey, Math.round(value * 100.0D) + "%");
+    }
+
+    private static int clamp(int value, int min, int max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    private record OptionLayoutEntry(
+            AbstractWidget widget,
+            int wideColumn,
+            int wideRow,
+            int narrowRow,
+            boolean fullWidth
+    ) {
     }
 }

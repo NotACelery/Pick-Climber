@@ -4,14 +4,14 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 
-final class PickaxeOutlineIndicatorIconRenderer implements IndicatorIconRenderer {
-    static final PickaxeOutlineIndicatorIconRenderer INSTANCE = new PickaxeOutlineIndicatorIconRenderer();
+final class PickaxeIndicatorIconRenderer implements IndicatorIconRenderer {
+    static final PickaxeIndicatorIconRenderer INSTANCE = new PickaxeIndicatorIconRenderer();
     private static final ResourceLocation PICKAXE_TEXTURE = ResourceLocation.fromNamespaceAndPath(
             "pickclimber",
             "textures/gui/pickaxe_indicator.png"
     );
 
-    private PickaxeOutlineIndicatorIconRenderer() {
+    private PickaxeIndicatorIconRenderer() {
     }
 
     @Override
