@@ -62,11 +62,15 @@ final class ToolWearService {
             ServerPlayer player,
             ItemStack stack,
             InteractionHand hand,
-            int amount
+            int baseAmount
     ) {
         if (stack.isEmpty()) {
             return false;
         }
+
+        int multiplierPercent = ClimbRulesBridge.durabilityMultiplierPercent(player);
+        long policyRevision = ClimbRulesBridge.durabilityPolicyRevision(player);
+        int amount = ToolWearState.scaleDamage(stack, baseAmount, multiplierPercent, policyRevision);
         if (amount <= 0) {
             return true;
         }

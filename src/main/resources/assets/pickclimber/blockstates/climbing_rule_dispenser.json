@@ -1,0 +1,26 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "pickclimber:block/climbing_rule_dispenser_vertical",
+      "x": 180
+    },
+    "facing=up": {
+      "model": "pickclimber:block/climbing_rule_dispenser_vertical"
+    },
+    "facing=north": {
+      "model": "pickclimber:block/climbing_rule_dispenser"
+    },
+    "facing=east": {
+      "model": "pickclimber:block/climbing_rule_dispenser",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "pickclimber:block/climbing_rule_dispenser",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "pickclimber:block/climbing_rule_dispenser",
+      "y": 270
+    }
+  }
+}

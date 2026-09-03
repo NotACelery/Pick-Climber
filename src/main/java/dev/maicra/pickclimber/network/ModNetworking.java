@@ -4,9 +4,16 @@ import dev.maicra.pickclimber.climb.ClientAnchorSync;
 import dev.maicra.pickclimber.climb.ClientClimbSynchronizer;
 import dev.maicra.pickclimber.climb.ClimbManager;
 import dev.maicra.pickclimber.climb.ClimbRuntimeGate;
+import dev.maicra.pickclimber.climb.ClimbSynchronization;
 import dev.maicra.pickclimber.climb.PlayerClimbPresentationPreferences;
 import dev.maicra.pickclimber.climb.PlayerClimbRuntimePreferences;
-import dev.maicra.pickclimber.climb.ClimbSynchronization;
+import dev.maicra.pickclimber.rules.ClimbingRulesSynchronization;
+import dev.maicra.pickclimber.rules.PlayerRulesSynchronization;
+import dev.maicra.pickclimber.rules.TemporaryRuleBookSynchronization;
+import dev.maicra.pickclimber.rules.network.ClimbingRulesNetworking;
+import dev.maicra.pickclimber.rules.network.NeoForgeClimbingRulesSyncSink;
+import dev.maicra.pickclimber.rules.network.NeoForgePlayerRulesSyncSink;
+import dev.maicra.pickclimber.rules.network.NeoForgeTemporaryRuleBookSyncSink;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -22,7 +29,10 @@ public final class ModNetworking {
 
     public static void registerPayloads(RegisterPayloadHandlersEvent event) {
         ClimbSynchronization.install(NeoForgeAnchorSyncSink.INSTANCE);
-        PayloadRegistrar registrar = event.registrar("14");
+        ClimbingRulesSynchronization.install(NeoForgeClimbingRulesSyncSink.INSTANCE);
+        PlayerRulesSynchronization.install(NeoForgePlayerRulesSyncSink.INSTANCE);
+        TemporaryRuleBookSynchronization.install(NeoForgeTemporaryRuleBookSyncSink.INSTANCE);
+        PayloadRegistrar registrar = event.registrar("15");
 
         registrar.playToClient(
                 AnchorSyncPayload.TYPE,
@@ -54,6 +64,7 @@ public final class ModNetworking {
                 RuntimePreferencePayload.STREAM_CODEC,
                 ModNetworking::handleRuntimePreference
         );
+        ClimbingRulesNetworking.register(registrar);
     }
 
     private static void handleAnchorSync(AnchorSyncPayload payload, IPayloadContext context) {

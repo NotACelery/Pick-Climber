@@ -1,6 +1,8 @@
 package dev.maicra.pickclimber;
 
 import dev.maicra.pickclimber.climb.ModEnchantments;
+import dev.maicra.pickclimber.rules.ClimbingRulesProfile;
+import dev.maicra.pickclimber.rules.item.ClimbingRuleBookData;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -27,6 +29,15 @@ public final class ModCreativeTabs {
                         addEnchantedBook(parameters, output, ModEnchantments.PICK_CLIMBER, 3);
                         addEnchantedBook(parameters, output, ModEnchantments.STURDY_LATCH, 1);
                         addEnchantedBook(parameters, output, ModEnchantments.STRONG_GRIP, 1);
+                        String defaultProfileName = Component.translatable(
+                                "gui.pickclimber.rules.new_profile"
+                        ).getString();
+                        output.accept(ClimbingRuleBookData.create(
+                                ClimbingRulesProfile.defaults(defaultProfileName)
+                        ));
+                        output.accept(ModItems.CLIMBING_RULES_TABLE.get());
+                        output.accept(ModItems.CLIMBING_RULES_TERMINAL.get());
+                        output.accept(ModItems.CLIMBING_RULE_DISPENSER.get());
                     })
                     .build()
     );

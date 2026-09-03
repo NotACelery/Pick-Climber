@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "pickclimber:block/climbing_rules_table_side",
+    "down": "pickclimber:block/climbing_rules_table_bottom",
+    "up": "pickclimber:block/climbing_rules_table_top",
+    "north": "pickclimber:block/climbing_rules_table_front",
+    "south": "pickclimber:block/climbing_rules_table_side",
+    "west": "pickclimber:block/climbing_rules_table_side",
+    "east": "pickclimber:block/climbing_rules_table_side"
+  }
+}

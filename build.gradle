@@ -12,6 +12,33 @@ base {
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
+repositories {
+    mavenCentral()
+    maven {
+        name = 'BlameJared'
+        url = 'https://maven.blamejared.com'
+        content {
+            includeGroup 'mezz.jei'
+        }
+    }
+    maven {
+        name = 'SleepingTown'
+        url = 'https://repo.sleeping.town/'
+        content {
+            includeGroup 'dev.emi'
+        }
+    }
+}
+
+dependencies {
+    compileOnly "mezz.jei:jei-${minecraft_version}-common-api:${jei_version}"
+    compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
+    compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.11.4'
+}
+
 neoForge {
     version = project.neo_version
 
@@ -42,6 +69,11 @@ neoForge {
             sourceSet(sourceSets.main)
         }
     }
+
+    unitTest {
+        enable()
+        testedMod = mods.pickclimber
+    }
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
@@ -71,11 +103,15 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
+tasks.named('test').configure {
+    useJUnitPlatform()
+}
+
 tasks.register('verifySourceQuality') {
     group = 'verification'
     description = 'Checks source formatting invariants and validates JSON resources.'
 
-    def javaSources = fileTree('src/main/java') {
+    def javaSources = fileTree('src') {
         include '**/*.java'
     }
     def jsonResources = fileTree('src/main/resources') {
@@ -176,6 +212,21 @@ tasks.register('verifyArchitectureBoundaries') {
             if (source.contains('dev.maicra.pickclimber.network') || source.contains('PacketDistributor')) {
                 violations << "${sourceFile} introduces climb -> network coupling"
             }
+            if (source.contains('dev.maicra.pickclimber.rules')) {
+                violations << "${sourceFile} introduces climb -> rules implementation coupling"
+            }
+            if (sourceFile.name != 'AnchorSurfaceResolver.java'
+                    && source.contains('ClimbRulesBridge.resolveSurface(')) {
+                violations << "${sourceFile} bypasses the surface rules seam"
+            }
+            if (sourceFile.name != 'ToolWearService.java'
+                    && source.contains('ClimbRulesBridge.durabilityMultiplierPercent(')) {
+                violations << "${sourceFile} bypasses the wear rules seam"
+            }
+            if (sourceFile.name != 'ToolWearService.java'
+                    && source.contains('ClimbRulesBridge.durabilityPolicyRevision(')) {
+                violations << "${sourceFile} bypasses the wear revision seam"
+            }
         }
 
         def climbManager = new File(climbSourceDir, 'ClimbManager.java')
@@ -198,7 +249,316 @@ tasks.register('verifyArchitectureBoundaries') {
     }
 }
 
+
+tasks.register('verifyLocalizationParity') {
+    group = 'verification'
+    description = 'Ensures every supported locale exposes the canonical en_us translation keys.'
+
+    def localeCodes = ['en_us', 'en_gb', 'es_cl', 'es_es', 'es_ar', 'es_mx', 'pt_br', 'pt_pt']
+    def langDir = layout.projectDirectory.dir('src/main/resources/assets/pickclimber/lang').asFile
+    def localeFiles = localeCodes.collect { code -> new File(langDir, "${code}.json") }
+    inputs.files(localeFiles)
+
+    doLast {
+        def parser = new groovy.json.JsonSlurper()
+        def missingFiles = localeFiles.findAll { !it.exists() }
+        if (!missingFiles.isEmpty()) {
+            throw new GradleException(
+                    'Localization parity verification failed: missing locale files: '
+                            + missingFiles.join(', ')
+            )
+        }
+
+        def canonical = parser.parseText(localeFiles.first().getText('UTF-8')).keySet() as Set
+        def violations = []
+        localeFiles.drop(1).each { file ->
+            def keys = parser.parseText(file.getText('UTF-8')).keySet() as Set
+            def missing = canonical - keys
+            def extra = keys - canonical
+            if (!missing.isEmpty()) {
+                violations << "${file.name} is missing keys: ${missing.sort().join(', ')}"
+            }
+            if (!extra.isEmpty()) {
+                violations << "${file.name} has non-canonical keys: ${extra.sort().join(', ')}"
+            }
+        }
+
+        if (!violations.isEmpty()) {
+            throw new GradleException("Localization parity verification failed:\n - " + violations.join('\n - '))
+        }
+    }
+}
+
 tasks.named('check').configure {
     dependsOn tasks.named('verifySourceQuality')
     dependsOn tasks.named('verifyArchitectureBoundaries')
+    dependsOn tasks.named('verifyLocalizationParity')
 }
+
+
+def rulesSourceDir = layout.projectDirectory.dir('src/main/java/dev/maicra/pickclimber/rules').asFile
+def clientRulesSourceDir = layout.projectDirectory.dir('src/main/java/dev/maicra/pickclimber/client/rules').asFile
+def modNetworkingFile = layout.projectDirectory.file(
+        'src/main/java/dev/maicra/pickclimber/network/ModNetworking.java'
+).asFile
+def canonicalLocaleFile = layout.projectDirectory.file(
+        'src/main/resources/assets/pickclimber/lang/en_us.json'
+).asFile
+def modCreativeTabsFile = layout.projectDirectory.file(
+        'src/main/java/dev/maicra/pickclimber/ModCreativeTabs.java'
+).asFile
+def rulesIntegritySources = fileTree(rulesSourceDir) {
+    include '**/*.java'
+}
+def rulesClientSources = fileTree(clientRulesSourceDir) {
+    include '**/*.java'
+}
+def sourceTextResources = fileTree('src/main/resources') {
+    include '**/*.json'
+    include '**/*.mcmeta'
+}
+def rulesScreenSources = fileTree(clientRulesSourceDir) {
+    include '**/*Screen.java'
+}
+def mainRulesTextSources = fileTree('src/main') {
+    include '**/*.java'
+    include '**/*.json'
+    include '**/*.mcmeta'
+}
+def recipeResources = fileTree('src/main/resources/data') {
+    include '**/recipe/**/*.json'
+    include '**/recipes/**/*.json'
+}
+def lootTableResources = fileTree('src/main/resources/data') {
+    include '**/loot_table/**/*.json'
+    include '**/loot_tables/**/*.json'
+}
+def retiredTerminalAdminFiles = [
+        layout.projectDirectory.file(
+                'src/main/java/dev/maicra/pickclimber/rules/block/ClimbingRulesTerminalBlockEntity.java'
+        ).asFile,
+        layout.projectDirectory.file(
+                'src/main/java/dev/maicra/pickclimber/rules/menu/ClimbingRulesTerminalMenu.java'
+        ).asFile,
+        layout.projectDirectory.file(
+                'src/main/java/dev/maicra/pickclimber/client/rules/ClimbingRulesTerminalScreen.java'
+        ).asFile
+]
+
+tasks.register('verifyRulesIntegrity') {
+    group = 'verification'
+    description = 'Protects 1.2 Rule Book/Table/Terminal/Dispenser authority, transport and localization invariants.'
+
+    inputs.files(
+            rulesIntegritySources,
+            rulesClientSources,
+            rulesScreenSources,
+            mainRulesTextSources,
+            sourceTextResources,
+            recipeResources,
+            lootTableResources,
+            modNetworkingFile,
+            modCreativeTabsFile,
+            canonicalLocaleFile
+    )
+
+    doLast {
+        def violations = []
+        def canonicalKeys = new groovy.json.JsonSlurper()
+                .parseText(canonicalLocaleFile.getText('UTF-8'))
+                .keySet() as Set
+        def translationKeyPattern = java.util.regex.Pattern.compile(
+                '"((?:gui|message|tooltip|block|item|container)\\.pickclimber\\.[a-zA-Z0-9_.-]+)"'
+        )
+
+        (rulesIntegritySources + rulesClientSources).each { sourceFile ->
+            def source = sourceFile.getText('UTF-8')
+            def matcher = translationKeyPattern.matcher(source)
+            while (matcher.find()) {
+                def key = matcher.group(1)
+                if (!canonicalKeys.contains(key)) {
+                    violations << "${sourceFile} references missing en_us key ${key}"
+                }
+            }
+        }
+
+        rulesScreenSources.each { sourceFile ->
+            def source = sourceFile.getText('UTF-8')
+            if (source.contains('PacketDistributor') || source.contains('dev.maicra.pickclimber.rules.network')) {
+                violations << "${sourceFile} owns packet transport instead of ClimbingRulesClientRequests"
+            }
+        }
+
+        rulesIntegritySources.each { sourceFile ->
+            def relative = rulesSourceDir.toPath().relativize(sourceFile.toPath()).toString()
+                    .replace(java.io.File.separator, '/')
+            def source = sourceFile.getText('UTF-8')
+            if (!relative.startsWith('network/') && source.contains('PacketDistributor')) {
+                violations << "${sourceFile} owns NeoForge transport outside rules/network"
+            }
+            if (relative.startsWith('network/') && source.contains('ByteBufCodecs.COMPOUND_TAG')) {
+                violations << "${sourceFile} uses unbounded CompoundTag transport instead of RuleBookNetworkLimits"
+            }
+            if (relative.startsWith('persistence/') && source.contains('net.minecraft.client')) {
+                violations << "${sourceFile} introduces persistence -> client coupling"
+            }
+        }
+
+        mainRulesTextSources.each { sourceFile ->
+            def lowerPath = sourceFile.path.toLowerCase(java.util.Locale.ROOT)
+            def source = sourceFile.getText('UTF-8')
+            def lowerSource = source.toLowerCase(java.util.Locale.ROOT)
+            if (lowerPath.contains('climbingrulesjukebox')
+                    || source.contains('ClimbingRulesJukebox')
+                    || lowerSource.contains('climbing_rules_jukebox')) {
+                violations << "${sourceFile} still contains the retired Rules Jukebox identity"
+            }
+            if (lowerPath.contains('climbingrulescard')
+                    || source.contains('ClimbingRulesCard')
+                    || lowerSource.contains('climbing_rules_card')) {
+                violations << "${sourceFile} still contains the retired Card identity"
+            }
+        }
+
+        def protectedRuleIds = [
+                'climbing_rule_book',
+                'climbing_rules_table',
+                'climbing_rules_terminal',
+                'climbing_rule_dispenser',
+                'temporary_rule_book'
+        ]
+        recipeResources.each { resourceFile ->
+            def source = resourceFile.getText('UTF-8')
+            if (protectedRuleIds.any { id ->
+                resourceFile.name.contains(id) || source.contains("pickclimber:${id}")
+            }) {
+                violations << "${resourceFile} gives a survival recipe to Creative/mapmaker rules content"
+            }
+        }
+
+        lootTableResources.each { resourceFile ->
+            def source = resourceFile.getText('UTF-8')
+            if (protectedRuleIds.any { id ->
+                resourceFile.name.contains(id) || source.contains("pickclimber:${id}")
+            }) {
+                violations << "${resourceFile} exposes protected rules infrastructure through survival loot"
+            }
+        }
+
+        def creativeTabsSource = modCreativeTabsFile.getText('UTF-8')
+        if (!creativeTabsSource.contains('ModItems.CLIMBING_RULES_TABLE.get()')
+                || !creativeTabsSource.contains('ModItems.CLIMBING_RULES_TERMINAL.get()')
+                || !creativeTabsSource.contains('ModItems.CLIMBING_RULE_DISPENSER.get()')
+                || !creativeTabsSource.contains('ClimbingRuleBookData.create(')) {
+            violations << "${modCreativeTabsFile} must expose Table, Terminal, Dispenser and one normal Rule Book"
+        }
+        if (creativeTabsSource.contains('TEMPORARY_RULE_BOOK')) {
+            violations << "${modCreativeTabsFile} must never expose Temporary Rule Book directly"
+        }
+
+        retiredTerminalAdminFiles.findAll { it.exists() }.each { sourceFile ->
+            violations << "${sourceFile} restores authoring responsibilities to the input-only Terminal"
+        }
+
+        def profileSource = rulesIntegritySources.find { it.name == 'ClimbingRulesProfile.java' }
+        if (profileSource == null || !profileSource.getText('UTF-8').contains('MAX_EXPLICIT_BLOCKS = 8192')) {
+            violations << 'ClimbingRulesProfile must keep the 1.2 explicit override cap at 8192'
+        }
+        def networkLimitsSource = rulesIntegritySources.find { it.name == 'RuleBookNetworkLimits.java' }
+        if (networkLimitsSource == null
+                || !networkLimitsSource.getText('UTF-8').contains('NbtAccounter.create(MAX_NETWORK_BYTES)')) {
+            violations << 'RuleBookNetworkLimits must keep bounded NBT decoding enabled'
+        }
+
+        def networkingSource = modNetworkingFile.getText('UTF-8')
+        if (!networkingSource.contains('event.registrar("15")')) {
+            violations << "${modNetworkingFile} no longer exposes the frozen 1.2 protocol version 15"
+        }
+
+        if (!violations.isEmpty()) {
+            throw new GradleException("Rules integrity verification failed:\n - " + violations.join('\n - '))
+        }
+    }
+}
+
+tasks.named('check').configure {
+    dependsOn tasks.named('verifyRulesIntegrity')
+}
+
+
+def integrationSourceDir = layout.projectDirectory.dir(
+        'src/main/java/dev/maicra/pickclimber/integration'
+).asFile
+def mainJavaSourceDir = layout.projectDirectory.dir(
+        'src/main/java/dev/maicra/pickclimber'
+).asFile
+def optionalIntegrationSources = fileTree(mainJavaSourceDir) {
+    include '**/*.java'
+}
+def optionalIntegrationBuildFile = layout.projectDirectory.file('build.gradle').asFile
+def optionalIntegrationMetadata = fileTree('src/main/templates') {
+    include '**/*.toml'
+}
+
+tasks.register('verifyOptionalIntegrations') {
+    group = 'verification'
+    description = 'Ensures JEI and EMI stay compile-only and isolated from Pick Climber core classloading.'
+
+    inputs.files(optionalIntegrationSources, optionalIntegrationBuildFile, optionalIntegrationMetadata)
+
+    doLast {
+        def violations = []
+
+        optionalIntegrationSources.each { sourceFile ->
+            def source = sourceFile.getText('UTF-8')
+            def relative = mainJavaSourceDir.toPath().relativize(sourceFile.toPath()).toString()
+                    .replace(java.io.File.separator, '/')
+            def isJeiIntegration = relative.startsWith('integration/jei/')
+            def isEmiIntegration = relative.startsWith('integration/emi/')
+            def isExternalIntegration = isJeiIntegration || isEmiIntegration
+
+            if (!isJeiIntegration && source.contains('mezz.jei.')) {
+                violations << "${sourceFile} references JEI outside integration/jei"
+            }
+            if (!isEmiIntegration && source.contains('dev.emi.emi.')) {
+                violations << "${sourceFile} references EMI outside integration/emi"
+            }
+            if (!isExternalIntegration
+                    && (source.contains('integration.jei.') || source.contains('integration.emi.'))) {
+                violations << "${sourceFile} hard-links an optional recipe viewer integration"
+            }
+        }
+
+        optionalIntegrationMetadata.each { metadataFile ->
+            def source = metadataFile.getText('UTF-8')
+            if (source.contains('modId="jei"') || source.contains("modId='jei'")) {
+                violations << "${metadataFile} declares JEI as a loader dependency"
+            }
+            if (source.contains('modId="emi"') || source.contains("modId='emi'")) {
+                violations << "${metadataFile} declares EMI as a loader dependency"
+            }
+        }
+
+        def buildSource = optionalIntegrationBuildFile.getText('UTF-8')
+        def forbiddenDependencyPatterns = [
+                ~/\b(?:implementation|api|runtimeOnly)\s+["']mezz\.jei:/,
+                ~/\b(?:implementation|api|runtimeOnly)\s+["']dev\.emi:/
+        ]
+        forbiddenDependencyPatterns.each { pattern ->
+            if (pattern.matcher(buildSource).find()) {
+                violations << 'Optional recipe viewer dependencies must remain compileOnly'
+            }
+        }
+
+        if (!violations.isEmpty()) {
+            throw new GradleException(
+                    "Optional integration verification failed:\n - " + violations.join('\n - ')
+            )
+        }
+    }
+}
+
+tasks.named('check').configure {
+    dependsOn tasks.named('verifyOptionalIntegrations')
+}
+

@@ -108,6 +108,13 @@ public final class ClimbManager {
         AnchorLifecycle.detachServer(player, jump);
     }
 
+    public static void revalidateRules(ServerPlayer player) {
+        ServerClimbState state = ClimbStateStore.server(player.getUUID());
+        if (state != null && !AnchorStateValidator.isValid(player, state)) {
+            AnchorLifecycle.detachServer(player, false);
+        }
+    }
+
     public static void updateSlideInput(
             ServerPlayer player,
             float forward,

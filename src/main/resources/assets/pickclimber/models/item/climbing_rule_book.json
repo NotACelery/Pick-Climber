@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "pickclimber:item/climbing_rule_book_cover",
+    "layer1": "pickclimber:item/climbing_rule_book_details"
+  }
+}

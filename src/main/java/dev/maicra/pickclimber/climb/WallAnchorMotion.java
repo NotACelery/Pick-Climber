@@ -77,7 +77,7 @@ final class WallAnchorMotion {
             return null;
         }
 
-        AnchorSurface nextSurface = AnchorSurfaceResolver.resolve(player.level(), nextAnchorBlock, nextBlockState);
+        AnchorSurface nextSurface = AnchorSurfaceResolver.resolve(player, nextAnchorBlock, nextBlockState);
         if (state.surface() == AnchorSurface.UNSTABLE && nextSurface != AnchorSurface.UNSTABLE) {
             nextMotion = AnchorMotion.FIXED;
             nextVelocity = 0.0D;

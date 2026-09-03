@@ -1,6 +1,8 @@
 package dev.maicra.pickclimber;
 
+import dev.maicra.pickclimber.climb.ClimbRulesBridge;
 import dev.maicra.pickclimber.network.ModNetworking;
+import dev.maicra.pickclimber.rules.ClimbingRulesIntegration;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -11,7 +13,11 @@ public final class PickClimber {
     public static final String MOD_ID = "pickclimber";
 
     public PickClimber(IEventBus modEventBus, ModContainer modContainer) {
+        ClimbRulesBridge.install(ClimbingRulesIntegration.INSTANCE);
+        ModBlocks.BLOCKS.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);
+        ModBlockEntities.BLOCK_ENTITIES.register(modEventBus);
+        ModMenus.MENUS.register(modEventBus);
         ModCreativeTabs.TABS.register(modEventBus);
         modEventBus.addListener(ModNetworking::registerPayloads);
     }

@@ -1,6 +1,8 @@
 package dev.maicra.pickclimber.client;
 
 import dev.maicra.pickclimber.PickClimber;
+import dev.maicra.pickclimber.rules.ClimbingRulesClientState;
+import dev.maicra.pickclimber.rules.TemporaryRuleBookClientState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.api.distmarker.Dist;
@@ -19,6 +21,8 @@ public final class ClientEvents {
     @SubscribeEvent
     public static void onClientLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
         ClientClimbInputController.onLogout(event.getPlayer());
+        ClimbingRulesClientState.clear();
+        TemporaryRuleBookClientState.clear();
         if (event.getPlayer() instanceof net.minecraft.client.player.LocalPlayer localPlayer) {
             ClientRuntimePreferenceController.onLogout(localPlayer);
         }
@@ -60,5 +64,6 @@ public final class ClientEvents {
             return;
         }
         AnchorIndicatorRenderer.render(minecraft, player, event.getGuiGraphics());
+        ClimbingRulesTimerHudRenderer.render(minecraft, event.getGuiGraphics());
     }
 }

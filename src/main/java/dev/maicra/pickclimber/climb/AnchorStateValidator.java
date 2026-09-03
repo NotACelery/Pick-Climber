@@ -63,6 +63,9 @@ final class AnchorStateValidator {
         }
 
         BlockState blockState = player.level().getBlockState(state.anchorBlock());
+        if (AnchorSurfaceResolver.resolve(player, state.anchorBlock(), blockState) == AnchorSurface.UNCLIMBABLE) {
+            return false;
+        }
         if (state.anchorFace() == Direction.DOWN) {
             return AnchorGeometry.hasValidCeilingAnchor(player, blockState, state.anchorBlock(), held);
         }

@@ -16,7 +16,7 @@ final class AnchorEvaluator {
 
     static AnchorEvaluation evaluate(Player player, BlockHitResult hit) {
         BlockState state = player.level().getBlockState(hit.getBlockPos());
-        AnchorSurface surface = AnchorSurfaceResolver.resolve(player.level(), hit.getBlockPos(), state);
+        AnchorSurface surface = AnchorSurfaceResolver.resolve(player, hit.getBlockPos(), state);
         boolean validAnchorFace = AnchorGeometry.hasValidAnchorFace(
                 player,
                 state,

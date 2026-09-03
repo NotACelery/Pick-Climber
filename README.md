@@ -1,150 +1,744 @@
-# Pick Climber — 1.1.0
+# Pick Climber
 
-Pick Climber convierte picotas compatibles en herramientas de movilidad vertical para **Minecraft 1.21.1** con **NeoForge 21.1.235** y **Java 21**.
+Pick Climber convierte picotas compatibles en herramientas de movilidad vertical para **Minecraft 1.21.1**.
+El proyecto utiliza **NeoForge 21.1.235** y **Java 21**.
 
-La release 1.1.0 mantiene como base el comportamiento de gameplay validado en 1.0.3 y añade personalización completa del HUD, control runtime por jugador, un menú responsivo y una arquitectura interna preparada para futuras reglas de mapa.
+La release pública estable actual es **1.1.0**. El desarrollo siguiente se divide deliberadamente en dos releases minor
+para mantener un alcance publicable y evitar convertir una sola actualización en un salto artificial a 2.0.0:
 
-## Mecánicas principales
+- **1.2.0 — Mapmaker Climbing Rules**
+- **1.3.0 — Dimensional Rules**
 
-- Clic derecho sobre una cara válida para engancharse o ejecutar el impulso contextual.
-- `Shift + clic derecho` fuerza el intento de anclaje cuando un bloque normalmente consume la interacción.
-- Movimiento horizontal y diagonal entre puntos de apoyo dentro del alcance permitido.
-- Frenado progresivo de caídas peligrosas y descenso controlado sobre superficies inestables.
-- Wall jump al soltar y volver a pulsar Espacio después de engancharse.
-- Transferencia del mismo pico entre manos con `F` sin recrear el ancla ni cobrar desgaste adicional.
-- Strong Grip permite anclajes de techo y balanceo.
-- Sturdy Latch vuelve firmes las superficies inestables compatibles.
-- Pick Climber I–III aumenta el impulso y el wall jump.
+La línea 1.x continúa siendo compatible conceptualmente con el gameplay base de Pick Climber. Las nuevas capas de reglas
+no deben alterar el comportamiento normal cuando no existe una configuración de mapa activa.
 
-El servidor sigue siendo autoritativo para posición, física, durabilidad, cooldown y lifecycle del ancla.
+> **Estado de este snapshot:** el source materializado está en `1.2.0-dev.21`. Ya existen Rule Book v2, Rules Table
+> separada, Terminal de gameplay, authoring transaccional, JSON `.rules.json`, Effective Rules, Permanent/Temporary
+> WORLD + Temporary PLAYER, Climbing Rule Dispenser con Temporary Rule Book de transporte/HUD dual, Structural
+> Geometry Safety, Viewer read-only, Duplicate GUI y hardening portable/JSON/migración. `1.2.0-dev.20` fue confirmado
+> con `clean build` SUCCESS en Windows y es el baseline estable. dev.21 añade JEI/EMI opcionales como documentación
+> visual sintética, sin recipes survival ni hard dependency. Tras aceptar su build, sólo queda el refinamiento vertical
+> del Dispenser antes del feature freeze; QA/release siguen en `docs/WAITLIST.md`.
 
-## Herramientas y compatibilidad
+---
 
-La selección de herramientas es data-driven:
+## 1. Gameplay estable
 
-- `#pickclimber:climbing_tools` incluye por defecto `#minecraft:pickaxes`.
-- `#pickclimber:excluded_climbing_tools` tiene prioridad y excluye herramientas concretas.
-- La picota de madera está excluida por defecto.
-- Integraciones externas pueden añadirse mediante tags sin hardcodes de clases.
+El runtime base conserva las mecánicas introducidas y estabilizadas antes de la línea Mapmaker Rules:
 
-La clasificación de superficies también es extensible:
+- anclaje a paredes;
+- movimiento entre anchors;
+- wall jump;
+- climbing boost;
+- frenado progresivo de caída;
+- superficies inestables;
+- dos picotas y transferencia de mano;
+- Strong Grip para techos;
+- Sturdy Latch para superficies inestables;
+- Pick Climber I–III;
+- cooldown, alcance, colisiones y tool eligibility;
+- detach normal y por movimiento;
+- interacción con bloques interactivos;
+- HUD y opciones cliente.
 
-- `pickclimber:stable_anchor_blocks`
-- `pickclimber:unstable_anchor_blocks`
-- `pickclimber:unclimbable_blocks`
-- `pickclimber:interactive_blocks`
+Las reglas de mapa nunca deben duplicar estas físicas. Deben entrar mediante seams centrales como clasificación de
+superficie, desgaste y políticas de interacción.
 
-Los bloques interactivos conservan el clic derecho normal. El indicador se oculta preventivamente sobre menús,
-BlockEntities y bloques marcados como interactivos; mantener Shift vuelve a mostrar el preview de force-anchor cuando corresponde.
+---
 
-## Encantamientos
+# 2. Pick Climber 1.2.0 — Mapmaker Climbing Rules
 
-### Pick Climber I–III
+La 1.2.0 será la gran actualización de **autoría y aplicación de reglas de escalada**.
 
-Especialización de movilidad para paredes. Mejora el impulso y el wall jump.
+Su objetivo es permitir que creadores de mapas y pack makers preparen conjuntos portables de reglas de Pick Climber,
+los inspeccionen, los dupliquen, los importen/exporten y los apliquen durante gameplay sin convertir Pick Climber en un
+gestor de checkpoints, regiones u objetivos de parkour.
 
-### Strong Grip I
+## 2.1. Componentes principales
 
-Permite anclajes en la cara inferior de techos firmes y habilita el balanceo bajo techo. Los techos inestables requieren además Sturdy Latch.
+La arquitectura final de 1.2.0 se divide en cuatro responsabilidades.
 
-### Sturdy Latch I
+### Climbing Rule Book
 
-Convierte superficies inestables en anclajes firmes y reduce su cooldown inicial al valor estable.
+Objeto portable de reglas.
 
-Strong Grip y Pick Climber son especializaciones excluyentes.
+Reemplaza el concepto experimental anterior de **Climbing Rules Card**.
 
-## HUD de anclaje
+Características previstas:
 
-El indicador reutiliza la misma evaluación mecánica del intento real de anclaje y comunica estados como:
+- item Creative-only;
+- sin receta survival;
+- `maxStackSize = 64`;
+- sólo stackea con Rule Books que tengan **exactamente la misma información interna**;
+- nombre personalizado;
+- tapa teñible usando los 16 pigmentos vanilla;
+- hojas visualmente claras/blancas;
+- Permanent o Temporary;
+- Temporary WORLD o Temporary PLAYER;
+- duración definida en la propia Rules Table;
+- reglas de superficie;
+- multiplicador de durability;
+- Player Mining;
+- Unmineable Terminals;
+- import/export JSON;
+- IDs de bloques de mods ausentes preservados;
+- visor gráfico read-only al usar el libro fuera de una interacción prioritaria.
 
-- READY
-- UNSTABLE
-- UNCLIMBABLE
-- REQUIRES_STRONG_GRIP
-- REQUIRES_STURDY_LATCH
-- COOLDOWN
-- OUT_OF_RANGE
-- OBSTRUCTED
+El nombre, pigmento, reglas, duración, activation mode y scope forman parte de su identidad de stacking.
 
-El tinte de los iconos está aislado al draw de Pick Climber. Jade y otros overlays no heredan sus colores.
+### Climbing Rules Table
 
-## Pick Climber Options
+Estación Creative-only de autoría.
 
-El menú se abre dentro de una partida mediante un keybind configurable en **Controles**. La tecla por defecto es `K`.
+Responsabilidades:
 
-Opciones disponibles:
+- crear Rule Books desde `minecraft:book`;
+- editar un Rule Book existente;
+- importar las reglas activas del mundo a un Book;
+- importar JSON;
+- exportar JSON;
+- duplicar Rule Books;
+- cambiar pigmento;
+- restaurar defaults mundiales;
+- abrir editor con búsqueda;
+- realizar toda mutación server-side con permisos y stale-session protection.
 
-- Enable Pick Climber Interactions.
-- Indicator Mode: `Contextual / Always / Off`.
-- Failure Messages.
-- Show Unclimbable.
-- Indicator Style: `String / Pickaxe`.
-- Icon Size: `50%–200%`.
-- Icon Transparency.
-- Icon Colors: `Muted / Normal / Neon`.
-- Indicator Box.
-- Box Transparency.
-- Box Colors: `Muted / Normal / Neon`.
-- Reset to Defaults.
+Diseño visual objetivo: estación blanca/gris inspirada estructuralmente en una Cartography Table, pero con recursos
+propios de Pick Climber.
 
-Los cambios visuales se aplican inmediatamente.
-
-### Hot-disable
-
-`Enable Pick Climber Interactions` es una preferencia por jugador. Al apagarla mientras existe un anclaje activo:
-
-- se usa el lifecycle normal de detach;
-- se restaura el estado físico correspondiente;
-- se limpian cracks y pose;
-- se detienen nuevos inputs de Pick Climber;
-- las interacciones vanilla ajenas al mod siguen funcionando.
-
-La preferencia se sincroniza de forma transitoria con el servidor mediante el protocolo 14.
-
-### Diseño responsivo
-
-El menú usa dos columnas cuando existe ancho suficiente y cambia automáticamente a una columna en ventanas estrechas.
-Si la altura disponible no alcanza, sólo la lista de opciones se vuelve scrollable: preview y footer permanecen accesibles.
-
-El preview del indicador limita únicamente su tamaño visual dentro del panel del menú. El tamaño real del HUD conserva el valor configurado hasta 200%.
-
-## Configuración persistente
-
-Las opciones cliente viven en:
+Slots conceptuales:
 
 ```text
-config/pickclimber-client.json
+[Rule Book x1] [Book xN] [Dye xN]
 ```
 
-Formato actual: `configVersion: 3`.
+El slot de Rule Book de la Table acepta **una sola unidad**, aunque el item pueda stackear 64 fuera de la Table.
 
-La carga migra y normaliza automáticamente configuraciones anteriores compatibles:
+### Climbing Rules Terminal
 
-- configs antiguas sin `configVersion`;
-- `iconOpacity` / `boxOpacity` antiguos;
-- `colorIntensity` compartido;
-- `indicatorStyle: "pickaxe_outline"`.
+Bloque de **aplicación durante gameplay**.
 
-Los archivos de versión futura se leen defensivamente usando sólo campos conocidos y no se degradan automáticamente.
+No es editor, no aloja inventario administrativo y no debe convertirse otra vez en la estación de autoría de dev.8.
 
-## Idiomas incluidos
+Características previstas:
 
-- English (US) — `en_us`
-- English (UK) — `en_gb`
-- Español (Chile) — `es_cl`
-- Español (España) — `es_es`
-- Español (Argentina) — `es_ar`
-- Español (México) — `es_mx`
-- Português (Brasil) — `pt_br`
-- Português (Portugal) — `pt_pt`
+- Creative-only como item/bloque obtenido;
+- utilizable por Survival, Adventure o Creative;
+- orientación en seis direcciones;
+- la cara/ranura frontal mira hacia quien lo colocó;
+- Rule Book en mano + interacción válida -> server valida -> aplica -> consume exactamente uno;
+- rechazo sin consumo cuando la aplicación no es válida;
+- Permanent WORLD;
+- Temporary WORLD;
+- Temporary PLAYER;
+- refresh del timer cuando corresponde;
+- rechazo de no-ops según las reglas definidas;
+- soporte de `Unmineable Terminals`.
 
-## Build
+### Climbing Rule Dispenser
 
-Requisitos:
+Infraestructura Creative-only para distribuir **copias temporales** de un Rule Book maestro.
 
-- Java 21
-- Minecraft 1.21.1
-- NeoForge 21.1.235
+Características previstas:
+
+- estética blanca/gris inspirada estructuralmente en un Dispenser;
+- master Rule Book x1;
+- sólo acepta master configurada como Temporary;
+- la master nunca se consume;
+- emite un **Temporary Rule Book** especial;
+- copia owner-bound;
+- una issuance pendiente por jugador;
+- distintos jugadores pueden utilizar el mismo Dispenser;
+- lifetime de transporte obligatorio configurado entre 1 y 60 segundos;
+- desaparece al expirar;
+- comportamiento equivalente a Curse of Vanishing al morir;
+- no puede ser robado/utilizado por otro jugador;
+- timer HUD propio;
+- no entrega una copia si sus reglas ya son efectivas para el scope correspondiente.
+
+---
+
+## 2.2. Autoridad de reglas
+
+El servidor es la autoridad.
+
+El cliente puede:
+
+- mostrar GUI;
+- editar drafts autorizados;
+- leer/escribir JSON local;
+- mostrar timers;
+- mostrar el perfil sincronizado;
+- solicitar acciones.
+
+El cliente no decide:
+
+- si un Rule Book es válido;
+- si debe consumirse;
+- si una temporal puede comenzar;
+- si un timer puede refrescarse;
+- qué reglas son efectivas;
+- si un anchor sigue siendo válido;
+- si una Terminal es rompible para un jugador.
+
+---
+
+## 2.3. Resolución efectiva 1.2.0
+
+La 1.2.0 seguirá siendo world-global como baseline, pero podrá superponer una temporal personal:
+
+```text
+Temporary PLAYER
+      ↓
+WORLD rules
+      ↓
+Pick Climber defaults
+```
+
+No existirán reglas permanentes PLAYER.
+
+Una regla `PERMANENT` siempre implica:
+
+```text
+scope = WORLD
+```
+
+Una regla `TEMPORARY` podrá usar:
+
+```text
+scope = WORLD
+scope = PLAYER
+```
+
+---
+
+## 2.4. Temporales WORLD
+
+Una Temporary WORLD:
+
+1. captura snapshot del estado WORLD anterior;
+2. instala su perfil;
+3. persiste expiration usando game time del servidor;
+4. muestra countdown;
+5. al expirar restaura el snapshot;
+6. revalida anchors;
+7. desengancha sólo a quienes ya no tengan un anchor válido.
+
+No se permiten temporales WORLD anidadas.
+
+Una Permanent aplicada durante una Temporary WORLD:
+
+- cancela la temporal;
+- descarta el snapshot anterior;
+- cancela el timer;
+- se convierte en el nuevo baseline permanente.
+
+---
+
+## 2.5. Temporales PLAYER
+
+Una Temporary PLAYER modifica sólo la vista efectiva de quien la activa.
+
+Reglas de lifecycle:
+
+- logout -> cancelar temporal personal;
+- muerte -> cancelar temporal personal;
+- un cambio WORLD posterior invalida la temporal personal y hace prevalecer inmediatamente el nuevo WORLD;
+- nunca debe restaurar un snapshot personal antiguo encima de reglas WORLD más nuevas;
+- al desaparecer el overlay personal, el jugador vuelve a resolver las reglas WORLD actuales;
+- los anchors deben revalidarse al cambiar la vista efectiva.
+
+---
+
+## 2.6. Timers
+
+Si sólo existe un timer relevante, puede mostrarse de forma limpia:
+
+```text
+0:42
+```
+
+Si coinciden una sesión temporal de reglas y un Temporary Rule Book de transporte:
+
+```text
+Rules 0:42
+Book  0:18
+```
+
+Las etiquetas deben localizarse en los ocho idiomas soportados.
+
+---
+
+## 2.7. Viewer read-only
+
+Usar un Rule Book sin que una interacción de bloque de mayor prioridad lo consuma abre un visor read-only.
+
+Debe permitir:
+
+- Overview;
+- Stable;
+- Unstable;
+- Unclimbable;
+- búsqueda por nombre localizado;
+- búsqueda por namespace;
+- búsqueda por ResourceLocation.
+
+Debe cerrarse mediante:
+
+- Escape;
+- el keybind real de Inventory del jugador, no una `E` hardcodeada.
+
+No permite modificar el libro.
+
+---
+
+## 2.8. Editor y búsqueda
+
+Create, Edit y Viewer comparten el mismo criterio de catálogo/búsqueda.
+
+El editor debe soportar:
+
+- Stable;
+- Unstable;
+- Unclimbable;
+- selección múltiple;
+- scroll;
+- Select Visible;
+- Clear Selection;
+- Restore Selected;
+- Unlisted Policy;
+- Durability Multiplier;
+- Player Mining;
+- Unmineable Terminals;
+- Permanent/Temporary;
+- duración;
+- WORLD/PLAYER cuando Temporary;
+- Search.
+
+Los IDs pertenecientes a mods no instalados:
+
+- permanecen en la definición;
+- permanecen en JSON;
+- no se muestran en catálogo/editor/viewer mientras no existan en el registry;
+- no participan de la clasificación efectiva mientras estén ausentes.
+
+---
+
+## 2.9. Stacking y edición
+
+Dos Rule Books sólo stackean si coinciden completamente en:
+
+- nombre;
+- pigmento;
+- versión de formato compatible;
+- listas Stable/Unstable/Unclimbable;
+- Unlisted Policy;
+- Durability Multiplier;
+- Player Mining;
+- Unmineable Terminals;
+- Permanent/Temporary;
+- duración;
+- scope.
+
+La antigua `revision` portable de Cards de dev.7/dev.8 no forma parte del diseño final.
+
+La protección stale pertenece a una sesión server-side de la Rules Table:
+
+```text
+player
++ dimension
++ table position
++ session token
++ exact source ItemStack snapshot
+```
+
+---
+
+## 2.10. Pigmentos y duplicación
+
+La tapa de un Rule Book normal usa un pigmento vanilla.
+
+Default:
+
+```text
+WHITE
+```
+
+Al crear:
+
+- Book + sin dye -> Rule Book blanco;
+- Book + dye -> Rule Book de ese color.
+
+Al duplicar:
+
+```text
+[Source Rule Book x1] + [Book xN] + [Dye opcional]
+```
+
+Sin dye override:
+
+- hereda nombre;
+- hereda pigmento;
+- hereda reglas;
+- hereda activation/scope/duration.
+
+Con dye override:
+
+- conserva todo salvo el pigmento;
+- requiere un dye por copia recoloreada;
+- consume exactamente tantos Books como copias producidas.
+
+La fuente nunca se consume.
+
+---
+
+## 2.11. Import Current Rules
+
+La Rules Table puede convertir un Book vanilla en un Rule Book que representa el estado WORLD activo.
+
+Sólo se habilita cuando:
+
+- existe Book en el slot de material;
+- las reglas WORLD no son Pick Climber defaults.
+
+Debe copiar:
+
+- reglas mecánicas;
+- duración original configurada si el WORLD activo es temporal;
+- activation metadata portable relevante.
+
+No debe copiar:
+
+- remaining ticks;
+- runtime expiration timestamp;
+- snapshot runtime;
+- session IDs.
+
+---
+
+## 2.12. JSON
+
+Directorio predeterminado:
+
+```text
+.minecraft/config/pickclimber/rules/
+```
+
+No se usará Desktop como default.
+
+El archivo se nombra desde el Rule Book:
+
+```text
+<My Rule Book>.rules.json
+```
+
+El nombre debe ser seguro en Windows/Linux/macOS.
+
+Se deben rechazar:
+
+- path traversal;
+- separadores de ruta;
+- control characters;
+- `.` / `..`;
+- nombres reservados Windows (`CON`, `PRN`, `AUX`, `NUL`, `COM1..9`, `LPT1..9`, incluso con extensión);
+- nombres incompatibles con la política portable definida.
+
+El JSON jamás se ejecuta.
+
+No debe existir:
+
+- shell execution;
+- command evaluation;
+- scripting;
+- reflection basada en contenido externo.
+
+La importación se decodifica exclusivamente mediante el schema/codec de Pick Climber.
+
+Al importar:
+
+- el nombre del Rule Book se toma del filename;
+- el pigmento se toma del JSON;
+- pigmento ausente -> WHITE;
+- legacy compatible -> Table intenta regularizar/migrar;
+- Terminal no regulariza legacy.
+
+---
+
+## 2.13. Legacy
+
+Política final:
+
+```text
+Terminal = strict consumer
+Table    = migration/repair boundary
+```
+
+Un Rule Book/Card de schema antiguo utilizado directamente en Terminal:
+
+- se rechaza;
+- muestra mensaje de formato antiguo;
+- no se consume.
+
+Insertado en Rules Table:
+
+- se intenta migrar;
+- se agregan defaults seguros para campos nuevos;
+- se preservan ResourceLocations desconocidas;
+- tras guardar/exportar queda regularizado al schema vigente.
+
+---
+
+## 2.14. No-op y refresh
+
+La aplicación compara **gameplay efectivo**, no metadata cosmética.
+
+Nombre y pigmento influyen en stacking, no en determinar si aplicar el Book cambiaría gameplay.
+
+Reglas previstas:
+
+- Permanent idéntica a las reglas efectivas -> rechazo sin consumo;
+- Temporary igual a una Permanent/default ya efectiva -> rechazo sin consumo;
+- Temporary idéntica a una Temporary activa del mismo scope -> refresh del timer y operación válida;
+- una Temporary distinta sobre otra Temporary incompatible -> rechazo; no se anidan snapshots.
+
+---
+
+## 2.15. Unmineable Terminals
+
+Regla opcional del perfil.
+
+Cuando está activa para un jugador Survival:
+
+- Climbing Rules Terminal no puede romperse;
+- el servidor cancela el break;
+- el cliente no debe presentar progreso engañoso cuando sea viable evitarlo.
+
+Creative queda exento.
+
+Rules Table y Rule Dispenser son infraestructura de mapmaker y deben estar protegidos de Survival independientemente de
+esta regla, para impedir robar masters o romper la lógica del mapa.
+
+---
+
+## 2.16. Geometry safety
+
+La 1.2.0 introduce un invariant estructural independiente de las listas editables:
+
+```text
+Structurally Non-Anchorable
+```
+
+Objetivo: impedir que el editor fuerce como anchorable geometrías que Pick Climber no soporta de forma segura.
+
+Implementación dev.13:
+
+- `StructuralAnchorSafety` evalúa el `BlockState` concreto con `isCollisionShapeFullBlock`;
+- collision vacía o parcial => `STRUCTURALLY_NON_ANCHORABLE`;
+- slabs simples, stairs, panes, fences, walls, doors, trapdoors y otros partial shapes quedan bloqueados;
+- estados full-collision del mismo ID siguen siendo válidos (por ejemplo, un slab `DOUBLE`);
+- shapes dinámicos se evalúan con su estado/world actuales y la validación activa vuelve a ejecutarse durante el anchor;
+- sin reglas activas no se altera el baseline 1.1.0; con Rules activas la seguridad estructural precede Stable/Unstable.
+
+Esta capa:
+
+- no es editable por Rule Book;
+- no desaparece con operaciones Clear futuras;
+- tiene precedencia sobre overrides configurables;
+- está centralizada y no reparte `instanceof` por múltiples clases.
+
+La clasificación automática avanzada de todo el registry se reserva para 1.3.0.
+
+---
+
+## 2.17. JEI / EMI
+
+Los objetos del sistema siguen siendo Creative-only y **no reciben recetas survival reales**.
+
+Sin embargo deben documentarse en JEI/EMI.
+
+Representación visual mínima prevista:
+
+```text
+[Book] + [Climbing Rules Table] => [Rule Book]
+```
+
+Y una segunda relación de uso:
+
+```text
+[Rule Book] => [Climbing Rules Terminal]
+```
+
+EMI debe priorizar una representación visual mediante slots/iconos, sin depender de una página larga de texto.
+
+JEI puede complementar con información breve si su API y estilo lo permiten sin introducir dependencias duras
+innecesarias.
+
+La compatibilidad con JEI/EMI es opcional: las APIs sólo se usan desde paquetes de integración `compileOnly`, el core
+no importa clases de ningún recipe viewer y no se declara dependencia obligatoria en NeoForge. Las dos relaciones son
+sintéticas y documentales, por lo que no crean recipes survival ni handlers de recipe transfer.
+
+---
+
+# 3. Pick Climber 1.3.0 — Dimensional Rules
+
+La 1.3.0 amplía el Rules System sin inflar la release 1.2.0.
+
+Su identidad es:
+
+> **reglas de Pick Climber por dimensión, con soporte dinámico para dimensiones vanilla y modded.**
+
+## 3.1. Dimensiones base
+
+La UI debe ofrecer siempre:
+
+- Overworld;
+- Nether;
+- End.
+
+## 3.2. Dimensiones externas
+
+No se deben hardcodear Twilight Forest, Eternal Starlight u otros mods.
+
+Las dimensiones externas deben descubrirse dinámicamente a partir del servidor/registry y conservarse como
+`ResourceKey<Level>`/ResourceLocation.
+
+Ejemplos de uso esperados:
+
+- Twilight Forest;
+- Eternal Starlight;
+- dimensiones de otros mods instalados;
+- dimensiones custom de modpacks.
+
+## 3.3. Global + Dimension Overrides
+
+Modelo previsto:
+
+```text
+Global Rules
+    ↓
+Dimension Overrides
+```
+
+Una dimensión sin override usa Global.
+
+Una dimensión con override puede modificar su comportamiento sin duplicar innecesariamente todo el Rule Book.
+
+Resolución conceptual futura:
+
+```text
+Temporary PLAYER for current dimension
+        ↓
+WORLD dimension override
+        ↓
+WORLD global rules
+        ↓
+Pick Climber defaults
+```
+
+La implementación exacta se cerrará antes de comenzar 1.3.0 para mantener compatibilidad con temporales 1.2.0.
+
+## 3.4. Rule Book schema v3
+
+La 1.2.0 debe poder publicar un schema portable estable.
+
+La 1.3.0 puede introducir un nuevo format version con migración determinista:
+
+```text
+1.2 Rule Book
+    ↓ migrate
+Global Rules = antiguo perfil
+Dimension Overrides = {}
+```
+
+No se debe perder información al actualizar.
+
+## 3.5. Editor dimensional
+
+La Rules Table de 1.3.0 añadirá selección de contexto:
+
+- Global;
+- Overworld;
+- Nether;
+- End;
+- dimensiones modded detectadas.
+
+Search/Create/Edit/View deben seguir compartiendo catálogo y semántica de IDs ausentes.
+
+## 3.6. Defaults y clasificación automática avanzada
+
+La 1.3.0 añadirá generación de defaults más inteligente a partir de:
+
+- tags de Pick Climber;
+- registry actual;
+- comportamiento del bloque;
+- geometría;
+- gravedad;
+- full-solid classification;
+- structural exclusions.
+
+Objetivo:
+
+- bloques sólidos completos -> candidatos Stable;
+- bloques con comportamiento de caída/gravedad -> candidatos Unstable;
+- geometrías no compatibles -> Structurally Non-Anchorable.
+
+Debe beneficiar automáticamente a mods externos sin una lista hardcodeada por mod.
+
+## 3.7. Clear / Empty
+
+La UI dimensional avanzada podrá ofrecer **Clear / Vaciar** para comenzar una clasificación desde cero.
+
+Debe limpiar únicamente categorías editables.
+
+Nunca puede eliminar:
+
+```text
+Structurally Non-Anchorable
+```
+
+Los invariants de seguridad siguen vigentes.
+
+---
+
+# 4. Versionado y estrategia de releases
+
+La progresión objetivo queda:
+
+```text
+1.0.x  Core climbing gameplay
+1.1.0  Player customization / HUD / options
+1.2.0  Mapmaker Rules / Rule Books / Table / Terminal / Dispenser
+1.3.0  Dimensional Rules / dynamic dimensions / advanced defaults
+```
+
+No se utilizará un salto a 2.0.0 sólo porque una minor release sea grande.
+
+Cada `1.X.0` debe representar una feature principal coherente y publicable.
+
+---
+
+# 5. Documentación de desarrollo
+
+Los documentos autoritativos para esta línea son:
+
+- `docs/ROADMAP.md` — alcance y arquitectura por versión;
+- `docs/WAITLIST.md` — lista viva de trabajo pendiente/estado;
+- `docs/BUILD-STATUS.md` — estado del build cuando comience la campaña de compilación;
+- `docs/testing/` — QA ejecutable por corte;
+- `../reference/POST-dev8-RULE-SYSTEM-SPEC-v2.md` en el snapshot — especificación detallada de la expansión posterior a dev.8.
+
+Cuando se implemente o descarte una feature, **WAITLIST debe actualizarse en la misma pasada** para que el handoff nunca
+dependa de recordar una conversación.
+
+---
+
+# 6. Build
+
+Baseline técnica actual:
+
+- Minecraft 1.21.1;
+- NeoForge 21.1.235;
+- Java 21.
 
 Windows:
 
@@ -158,26 +752,5 @@ Linux/WSL:
 ./build.sh
 ```
 
-La versión se obtiene desde `gradle.properties`. Para 1.1.0 el artefacto esperado es:
-
-```text
-build/libs/pickclimber-1.21.1-1.1.0.jar
-```
-
-`gradle clean build` ejecuta además `verifySourceQuality` y `verifyArchitectureBoundaries`.
-
-## Documentación técnica
-
-- `docs/DEVELOPMENT.md` — arquitectura actual e invariantes runtime.
-- `docs/BUILD-STATUS.md` — estado de aceptación/build de la release.
-- `docs/CHANGELOG.md` — historial público de versiones.
-- `docs/ROADMAP.md` — trabajo planificado después de 1.1.0.
-- `docs/testing/TESTING-1.1.0.md` — registro de QA de la release.
-- `docs/STRONG-GRIP-DESIGN.md` — especificación histórica de Strong Grip/Sturdy Latch.
-- `docs/ARCHITECTURE-AUDIT-1.1.0.md` — auditoría histórica que originó la modularización.
-
-## Identidad visual
-
-El logo oficial está en `src/main/resources/pickclimber_logo.png`.
-
-Autor: **celerbi**.
+El source materializado de este snapshot usa `mod_version=1.2.0-dev.19`. `docs/WAITLIST.md` es la fuente operativa
+para distinguir lo completado de lo pendiente; no se debe cambiar a `1.2.0` hasta cerrar features, build y QA.

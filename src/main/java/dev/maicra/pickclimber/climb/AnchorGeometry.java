@@ -22,7 +22,7 @@ final class AnchorGeometry {
             BlockPos position,
             Direction face
     ) {
-        AnchorSurface surface = AnchorSurfaceResolver.resolve(player.level(), position, state);
+        AnchorSurface surface = AnchorSurfaceResolver.resolve(player, position, state);
         if (state.isAir() || surface == AnchorSurface.UNCLIMBABLE) {
             return false;
         }
@@ -37,7 +37,7 @@ final class AnchorGeometry {
             BlockPos position,
             ItemStack tool
     ) {
-        AnchorSurface surface = AnchorSurfaceResolver.resolve(player.level(), position, state);
+        AnchorSurface surface = AnchorSurfaceResolver.resolve(player, position, state);
         if (!ModEnchantments.hasStrongGrip(player.level(), tool)
                 || surface == AnchorSurface.UNCLIMBABLE
                 || surface == AnchorSurface.UNSTABLE
