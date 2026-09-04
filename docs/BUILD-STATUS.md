@@ -1,4 +1,4 @@
-# Pick Climber 1.2.0-dev.21 — Build / Acceptance Status
+# Pick Climber 1.2.0-dev.37 — Build / Acceptance Status
 
 ## Current source
 
@@ -6,7 +6,7 @@
 Minecraft 1.21.1
 NeoForge 21.1.235
 Java 21
-mod_version 1.2.0-dev.21
+mod_version 1.2.0-dev.37
 network protocol 15
 Rule Book portable format 2
 mechanical profile format 1
@@ -24,7 +24,7 @@ Source history for this reconstruction:
   -> dev.13 Structural Geometry Safety + Windows Rules integrity path fix
 ```
 
-## dev.21 optional integration pass
+## dev.21 optional integration pass (historical)
 
 The user confirmed the exact dev.20 root-ready source completes `clean build` successfully on Windows. dev.20 is therefore
 the current build-clean baseline. dev.21 layers the final optional code integration pass on top:
@@ -37,7 +37,7 @@ the current build-clean baseline. dev.21 layers the final optional code integrat
 - no survival recipe JSON, no recipe-transfer handler and no loader dependency on either viewer;
 - `verifyOptionalIntegrations` to prevent accidental external API leakage into core packages.
 
-A fresh external build is required before promoting dev.21 to build-clean.
+dev.21 was subsequently superseded by dev.22 before standalone build promotion; dev.22 is the current acceptance target.
 
 ## Real dev.11 build result supplied 2026-09-02
 
@@ -238,3 +238,43 @@ dev.18 was confirmed with Windows build SUCCESS and remained the accepted baseli
 Source materialized from the build-clean dev.18 baseline. Adds final Table confirmation/ghost UX and Rule Book network
 hardening (8192 explicit overrides, 512 KiB bounded NBT transport, client/server validation). The user subsequently
 confirmed the exact dev.19 root-ready source with Windows `clean build` SUCCESS, promoting dev.19 to baseline.
+
+## 1.2.0-dev.22 — reconstructed UX/correctness pass
+
+Built from the complete dev.21 source after the previous dev.22 execution was interrupted before packaging. This pass
+reworks Table/Processing/Dispenser UX, flat Pickaxe Wear semantics, catalog filtering and placement orientation. Static
+source-quality, architecture, localization, Rules-integrity and optional-integration equivalents pass in the packaging
+workspace. The exact root-ready dev.22 still requires the user's Windows `clean build` before promotion to build-clean.
+
+### Packaging-environment build attempt
+
+`build.sh` was invoked for dev.22, but this environment still cannot resolve `services.gradle.org`; Gradle did not start.
+This is the same external DNS limitation seen on earlier passes, not a reported Java/NeoForge failure. The Windows build
+remains the authoritative compile/test acceptance step for this snapshot.
+
+## 1.2.0-dev.34 — Rule Definition transport completion
+
+Materialized after dev.32 to finish the remaining reference architecture work:
+
+- normal Rule Books remain compact references to a persistent world/server definition library;
+- Temporary Rule Books are now compact references too and no longer embed full rule lists;
+- Terminal resolution of temporary copies is authoritative server-side;
+- same-world multiplayer book transfer does not create or require client rule files;
+- custom editor saves are fail-closed and the obsolete Unlisted selector is removed;
+- active WORLD/PLAYER definitions are registered in the persistent definition library;
+- source-quality simulation reports 0 violations and all eight locale JSON files remain key-parity clean.
+
+This environment cannot resolve `services.gradle.org`, so dev.33 still requires the user's Windows `clean build` before
+being promoted to build-clean. Runtime acceptance should specifically include FPS regression testing and two-player
+reference-only drop/pick/view/apply behavior.
+
+## 1.2.0-dev.37 — Rule Book edit persistence / redstone dispenser / item rendering
+
+- [x] Rule Book classification saves commit a fresh reference-only ItemStack to the newly registered content ID.
+- [x] Temporary Rule Book timer moved out of the vanilla selected-item-name zone.
+- [x] Rule Dispenser reacts once per redstone rising edge.
+- [x] Redstone-dispensed Temporary Rule Books are unclaimed until pickup; first eligible player claims them and starts the configured lifetime.
+- [x] Rule Book item rendering uses opaque tinted backing + tinted cover + untinted fixed details.
+- [x] Item texture layers contain no semi-transparent pixels.
+- [x] Static source-quality scan: zero Java lines over 120 characters; zero TODO/FIXME/HACK markers; resource JSON parses cleanly.
+- [ ] External Windows clean build / runtime QA.

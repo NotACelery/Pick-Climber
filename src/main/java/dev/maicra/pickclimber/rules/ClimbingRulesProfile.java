@@ -12,13 +12,13 @@ public record ClimbingRulesProfile(
         Set<ResourceLocation> unstableBlocks,
         Set<ResourceLocation> unclimbableBlocks,
         UnlistedPolicy unlistedPolicy,
-        int durabilityMultiplierPercent,
+        int pickaxeWear,
         boolean playerMiningEnabled,
         boolean unmineableTerminals
 ) {
     public static final int CURRENT_FORMAT_VERSION = 1;
-    public static final int DEFAULT_DURABILITY_MULTIPLIER_PERCENT = 100;
-    public static final int MAX_DURABILITY_MULTIPLIER_PERCENT = 500;
+    public static final int DEFAULT_PICKAXE_WEAR = 15;
+    public static final int MAX_PICKAXE_WEAR = 100;
     public static final int MAX_PROFILE_NAME_LENGTH = 64;
     public static final int MAX_EXPLICIT_BLOCKS = 8192;
 
@@ -36,7 +36,7 @@ public record ClimbingRulesProfile(
                 && unstableBlocks.equals(other.unstableBlocks)
                 && unclimbableBlocks.equals(other.unclimbableBlocks)
                 && unlistedPolicy == other.unlistedPolicy
-                && durabilityMultiplierPercent == other.durabilityMultiplierPercent
+                && pickaxeWear == other.pickaxeWear
                 && playerMiningEnabled == other.playerMiningEnabled
                 && unmineableTerminals == other.unmineableTerminals;
     }
@@ -49,7 +49,7 @@ public record ClimbingRulesProfile(
                 Set.of(),
                 Set.of(),
                 UnlistedPolicy.USE_PICK_CLIMBER_DEFAULTS,
-                DEFAULT_DURABILITY_MULTIPLIER_PERCENT,
+                DEFAULT_PICKAXE_WEAR,
                 true,
                 false
         );

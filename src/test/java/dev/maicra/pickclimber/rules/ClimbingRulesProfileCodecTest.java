@@ -19,7 +19,7 @@ class ClimbingRulesProfileCodecTest {
                 Set.of(),
                 Set.of(),
                 UnlistedPolicy.UNCLIMBABLE,
-                150,
+                75,
                 false,
                 false
         );
@@ -48,5 +48,30 @@ class ClimbingRulesProfileCodecTest {
         ClimbingRulesProfile decoded = ClimbingRulesProfileCodec.decodeFromJson(encoded).getOrThrow();
 
         assertEquals(source, decoded);
+        String serialized = encoded.toString();
+        org.junit.jupiter.api.Assertions.assertTrue(serialized.contains("pickaxe_wear"));
+        org.junit.jupiter.api.Assertions.assertFalse(serialized.contains("durability_multiplier"));
     }
+
+    @Test
+    void legacyDurabilityMultiplierMigratesToFlatPickaxeWear() {
+        String json = """
+                {
+                  "format_version": 1,
+                  "name": "Legacy",
+                  "stable": [],
+                  "unstable": [],
+                  "unclimbable": [],
+                  "unlisted_policy": "use_pick_climber_defaults",
+                  "durability_multiplier": 1.5,
+                  "player_mining": true,
+                  "unmineable_terminals": false
+                }
+                """;
+        var element = com.google.gson.JsonParser.parseString(json);
+        ClimbingRulesProfile decoded = ClimbingRulesProfileCodec.decodeFromJson(element).getOrThrow();
+
+        assertEquals(23, decoded.pickaxeWear());
+    }
+
 }

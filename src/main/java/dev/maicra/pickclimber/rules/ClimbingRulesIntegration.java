@@ -41,14 +41,11 @@ public final class ClimbingRulesIntegration implements ClimbRulesPolicy {
     }
 
     @Override
-    public int durabilityMultiplierPercent(Player player) {
-        return EffectiveClimbingRulesService.resolve(player).durabilityMultiplierPercent();
+    public int pickaxeWear(Player player) {
+        ClimbingRulesRuntimeView rules = EffectiveClimbingRulesService.resolve(player);
+        return rules.active() ? rules.pickaxeWear() : -1;
     }
 
-    @Override
-    public long durabilityPolicyRevision(Player player) {
-        return EffectiveClimbingRulesService.policyRevision(player);
-    }
 
     private static AnchorSurface map(SurfaceClassification classification) {
         return switch (classification) {

@@ -131,7 +131,7 @@ final class AnchorFeedbackResolver {
             case COOLDOWN -> Component.translatable("message.pickclimber.anchor.cooldown");
             case OUT_OF_RANGE -> Component.translatable("message.pickclimber.anchor.out_of_range");
             case UNCLIMBABLE -> Component.translatable(
-                    "message.pickclimber.anchor.blocked_by",
+                    "message.pickclimber.anchor.unclimbable_block",
                     evaluation.blockState().getBlock().getName()
             );
             case OBSTRUCTED -> obstructionMessage(evaluation);

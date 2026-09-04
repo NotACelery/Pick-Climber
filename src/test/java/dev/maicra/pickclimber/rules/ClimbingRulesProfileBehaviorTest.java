@@ -29,7 +29,7 @@ class ClimbingRulesProfileBehaviorTest {
                 first.unstableBlocks(),
                 first.unclimbableBlocks(),
                 first.unlistedPolicy(),
-                first.durabilityMultiplierPercent(),
+                first.pickaxeWear(),
                 first.playerMiningEnabled(),
                 false
         );
@@ -40,7 +40,7 @@ class ClimbingRulesProfileBehaviorTest {
                 first.unstableBlocks(),
                 first.unclimbableBlocks(),
                 first.unlistedPolicy(),
-                first.durabilityMultiplierPercent(),
+                first.pickaxeWear(),
                 first.playerMiningEnabled(),
                 true
         );

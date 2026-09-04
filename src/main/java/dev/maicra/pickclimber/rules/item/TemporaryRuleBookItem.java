@@ -31,10 +31,10 @@ public final class TemporaryRuleBookItem extends Item {
             List<Component> tooltip,
             TooltipFlag flag
     ) {
-        TemporaryRuleBookData.readValidated(stack).ifPresentOrElse(data -> {
+        TemporaryRuleBookData.readDisplayMetadata(stack).ifPresentOrElse(data -> {
             tooltip.add(Component.translatable("tooltip.pickclimber.temporary_rule_book.owner_bound")
                     .withStyle(ChatFormatting.GRAY));
-            tooltip.add(Component.literal(data.definition().bookName()).withStyle(ChatFormatting.DARK_GRAY));
+            tooltip.add(Component.literal(data.bookName()).withStyle(ChatFormatting.DARK_GRAY));
         }, () -> tooltip.add(Component.translatable("tooltip.pickclimber.rule_book.invalid")
                 .withStyle(ChatFormatting.RED)));
         super.appendHoverText(stack, context, tooltip, flag);
@@ -42,9 +42,9 @@ public final class TemporaryRuleBookItem extends Item {
 
     @Override
     public int getEntityLifespan(ItemStack stack, Level level) {
-        return TemporaryRuleBookData.readValidated(stack)
-                .map(data -> {
-                    long remaining = data.expiresAtGameTime() - level.getGameTime();
+        return TemporaryRuleBookData.readExpiry(stack)
+                .map(expiresAt -> {
+                    long remaining = expiresAt - level.getGameTime();
                     return (int) Math.max(1L, Math.min(Integer.MAX_VALUE, remaining));
                 })
                 .orElse(1);

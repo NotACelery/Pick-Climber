@@ -1,6 +1,6 @@
 package dev.maicra.pickclimber.rules.item;
 
-import dev.maicra.pickclimber.rules.ClimbingRulesClientUi;
+import dev.maicra.pickclimber.rules.network.ClimbingRuleBookViewerNetworking;
 import dev.maicra.pickclimber.rules.RuleBookActivationMode;
 import dev.maicra.pickclimber.rules.RuleBookScope;
 import net.minecraft.ChatFormatting;
@@ -22,23 +22,19 @@ public final class ClimbingRuleBookItem extends Item {
 
     @Override
     public Component getName(ItemStack stack) {
-        var definition = ClimbingRuleBookData.readDefinitionValidated(stack);
-        if (definition.isPresent()) {
-            return Component.literal(definition.get().bookName());
-        }
-        return super.getName(stack);
+        return ClimbingRuleBookData.readReference(stack)
+                .<Component>map(reference -> Component.literal(reference.bookName()))
+                .orElseGet(() -> super.getName(stack));
     }
-
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        var definition = ClimbingRuleBookData.readDefinitionValidated(stack);
-        if (definition.isEmpty()) {
+        if (!ClimbingRuleBookData.hasCurrentSchema(stack)) {
             return InteractionResultHolder.pass(stack);
         }
         if (level.isClientSide()) {
-            ClimbingRulesClientUi.openViewer(definition.get());
+            ClimbingRuleBookViewerNetworking.request(hand);
         }
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
     }
@@ -50,36 +46,34 @@ public final class ClimbingRuleBookItem extends Item {
             List<Component> tooltip,
             TooltipFlag flag
     ) {
-        ClimbingRuleBookData.readDefinitionValidated(stack).ifPresentOrElse(definition -> {
-            var profile = definition.profile();
-            int assigned = profile.stableBlocks().size()
-                    + profile.unstableBlocks().size()
-                    + profile.unclimbableBlocks().size();
-            tooltip.add(Component.translatable("tooltip.pickclimber.rule_book.blocks", assigned)
+        ClimbingRuleBookData.readReference(stack).ifPresentOrElse(reference -> {
+            tooltip.add(Component.translatable("tooltip.pickclimber.rule_book.blocks", reference.assignedBlocks())
                     .withStyle(ChatFormatting.GRAY));
             tooltip.add(Component.translatable(
-                    "tooltip.pickclimber.rule_book.durability",
-                    profile.durabilityMultiplierPercent()
+                    "tooltip.pickclimber.rule_book.durability", reference.pickaxeWear()
             ).withStyle(ChatFormatting.GRAY));
             tooltip.add(Component.translatable(
-                    profile.playerMiningEnabled()
+                    reference.playerMiningEnabled()
                             ? "tooltip.pickclimber.rule_book.mining_enabled"
                             : "tooltip.pickclimber.rule_book.mining_disabled"
             ).withStyle(ChatFormatting.GRAY));
             tooltip.add(Component.translatable(
-                    profile.unmineableTerminals()
+                    reference.unmineableTerminals()
                             ? "tooltip.pickclimber.rule_book.terminals_locked"
                             : "tooltip.pickclimber.rule_book.terminals_mineable"
             ).withStyle(ChatFormatting.GRAY));
             tooltip.add(Component.translatable(
-                    definition.activationMode() == RuleBookActivationMode.PERMANENT
+                    reference.activationMode() == RuleBookActivationMode.PERMANENT
                             ? "tooltip.pickclimber.rule_book.permanent"
                             : "tooltip.pickclimber.rule_book.temporary",
-                    definition.durationSeconds()
+                    reference.durationSeconds()
             ).withStyle(ChatFormatting.DARK_GRAY));
-            if (definition.activationMode() == RuleBookActivationMode.TEMPORARY) {
+            if (!reference.authorName().isBlank()) {
+                tooltip.add(Component.literal("Author: " + reference.authorName()).withStyle(ChatFormatting.DARK_GRAY));
+            }
+            if (reference.activationMode() == RuleBookActivationMode.TEMPORARY) {
                 tooltip.add(Component.translatable(
-                        definition.scope() == RuleBookScope.WORLD
+                        reference.scope() == RuleBookScope.WORLD
                                 ? "tooltip.pickclimber.rule_book.scope_world"
                                 : "tooltip.pickclimber.rule_book.scope_player"
                 ).withStyle(ChatFormatting.DARK_GRAY));

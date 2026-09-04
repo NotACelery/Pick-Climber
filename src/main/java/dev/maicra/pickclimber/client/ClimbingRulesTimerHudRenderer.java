@@ -7,7 +7,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 
 final class ClimbingRulesTimerHudRenderer {
-    private static final int HOTBAR_OFFSET_Y = 46;
+    private static final int EVENT_TIMER_OFFSET_Y = 56;
 
     private ClimbingRulesTimerHudRenderer() {
     }
@@ -32,7 +32,7 @@ final class ClimbingRulesTimerHudRenderer {
                             "gui.pickclimber.rules.timer_rules",
                             formatRemaining(rulesRemaining)
                     ),
-                    HOTBAR_OFFSET_Y + 10
+                    EVENT_TIMER_OFFSET_Y + 10
             );
             drawCentered(
                     minecraft,
@@ -41,13 +41,13 @@ final class ClimbingRulesTimerHudRenderer {
                             "gui.pickclimber.rules.timer_book",
                             formatRemaining(bookRemaining)
                     ),
-                    HOTBAR_OFFSET_Y
+                    EVENT_TIMER_OFFSET_Y
             );
             return;
         }
 
         long remaining = rulesRemaining > 0L ? rulesRemaining : bookRemaining;
-        drawCentered(minecraft, gui, Component.literal(formatRemaining(remaining)), HOTBAR_OFFSET_Y);
+        drawCentered(minecraft, gui, Component.literal(formatRemaining(remaining)), EVENT_TIMER_OFFSET_Y);
     }
 
     private static long remaining(long expiresAtGameTime, long gameTime) {

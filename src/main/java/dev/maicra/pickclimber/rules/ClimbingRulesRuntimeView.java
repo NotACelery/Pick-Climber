@@ -12,7 +12,7 @@ public final class ClimbingRulesRuntimeView {
             "",
             Map.of(),
             UnlistedPolicy.USE_PICK_CLIMBER_DEFAULTS,
-            ClimbingRulesProfile.DEFAULT_DURABILITY_MULTIPLIER_PERCENT,
+            ClimbingRulesProfile.DEFAULT_PICKAXE_WEAR,
             true,
             false
     );
@@ -21,7 +21,7 @@ public final class ClimbingRulesRuntimeView {
     private final String profileName;
     private final Map<ResourceLocation, SurfaceClassification> overrides;
     private final UnlistedPolicy unlistedPolicy;
-    private final int durabilityMultiplierPercent;
+    private final int pickaxeWear;
     private final boolean playerMiningEnabled;
     private final boolean unmineableTerminals;
 
@@ -30,7 +30,7 @@ public final class ClimbingRulesRuntimeView {
             String profileName,
             Map<ResourceLocation, SurfaceClassification> overrides,
             UnlistedPolicy unlistedPolicy,
-            int durabilityMultiplierPercent,
+            int pickaxeWear,
             boolean playerMiningEnabled,
             boolean unmineableTerminals
     ) {
@@ -38,7 +38,7 @@ public final class ClimbingRulesRuntimeView {
         this.profileName = profileName;
         this.overrides = Map.copyOf(overrides);
         this.unlistedPolicy = unlistedPolicy;
-        this.durabilityMultiplierPercent = durabilityMultiplierPercent;
+        this.pickaxeWear = pickaxeWear;
         this.playerMiningEnabled = playerMiningEnabled;
         this.unmineableTerminals = unmineableTerminals;
     }
@@ -57,7 +57,7 @@ public final class ClimbingRulesRuntimeView {
                 profile.profileName(),
                 overrides,
                 profile.unlistedPolicy(),
-                profile.durabilityMultiplierPercent(),
+                profile.pickaxeWear(),
                 profile.playerMiningEnabled(),
                 profile.unmineableTerminals()
         );
@@ -79,8 +79,8 @@ public final class ClimbingRulesRuntimeView {
         return unlistedPolicy;
     }
 
-    public int durabilityMultiplierPercent() {
-        return durabilityMultiplierPercent;
+    public int pickaxeWear() {
+        return pickaxeWear;
     }
 
     public boolean playerMiningEnabled() {

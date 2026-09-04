@@ -1,5 +1,6 @@
 package dev.maicra.pickclimber;
 
+import dev.maicra.pickclimber.rules.menu.ClimbingRuleBookProcessingMenu;
 import dev.maicra.pickclimber.rules.menu.ClimbingRulesTableMenu;
 import dev.maicra.pickclimber.rules.menu.ClimbingRuleDispenserMenu;
 import net.minecraft.core.registries.Registries;
@@ -18,6 +19,13 @@ public final class ModMenus {
             MENUS.register(
                     "climbing_rules_table",
                     () -> IMenuTypeExtension.create(ClimbingRulesTableMenu::new)
+            );
+
+
+    public static final DeferredHolder<MenuType<?>, MenuType<ClimbingRuleBookProcessingMenu>>
+            CLIMBING_RULE_BOOK_PROCESSING = MENUS.register(
+                    "climbing_rule_book_processing",
+                    () -> IMenuTypeExtension.create(ClimbingRuleBookProcessingMenu::new)
             );
 
     public static final DeferredHolder<MenuType<?>, MenuType<ClimbingRuleDispenserMenu>> CLIMBING_RULE_DISPENSER =

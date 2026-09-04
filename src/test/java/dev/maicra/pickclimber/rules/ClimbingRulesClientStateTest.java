@@ -32,13 +32,13 @@ class ClimbingRulesClientStateTest {
         ClimbingRulesClientState.applyPlayerDefinition(player, 600L, 999L);
 
         assertEquals("Player", ClimbingRulesClientState.runtimeView().profileName());
-        assertEquals(40, ClimbingRulesClientState.runtimeView().durabilityMultiplierPercent());
+        assertEquals(40, ClimbingRulesClientState.runtimeView().pickaxeWear());
         assertEquals(999L, ClimbingRulesClientState.policyRevision());
 
         ClimbingRulesClientState.clearPlayerRules();
 
         assertEquals("World", ClimbingRulesClientState.runtimeView().profileName());
-        assertEquals(80, ClimbingRulesClientState.runtimeView().durabilityMultiplierPercent());
+        assertEquals(80, ClimbingRulesClientState.runtimeView().pickaxeWear());
     }
 
     private static ClimbingRulesProfile profile(String name, int durabilityPercent) {

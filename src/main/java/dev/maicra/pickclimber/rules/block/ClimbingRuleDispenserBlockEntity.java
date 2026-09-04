@@ -2,7 +2,6 @@ package dev.maicra.pickclimber.rules.block;
 
 import dev.maicra.pickclimber.ModBlockEntities;
 import dev.maicra.pickclimber.ModItems;
-import dev.maicra.pickclimber.rules.RuleBookActivationMode;
 import dev.maicra.pickclimber.rules.item.ClimbingRuleBookData;
 import dev.maicra.pickclimber.rules.menu.ClimbingRuleDispenserMenu;
 import net.minecraft.core.BlockPos;
@@ -20,7 +19,7 @@ import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 public final class ClimbingRuleDispenserBlockEntity extends BaseContainerBlockEntity implements ContainerData {
-    public static final int MASTER_SLOT = 0;
+    public static final int SOURCE_SLOT = 0;
     public static final int SLOT_COUNT = 1;
     public static final int MIN_LIFETIME_SECONDS = 1;
     public static final int MAX_LIFETIME_SECONDS = 60;
@@ -33,14 +32,26 @@ public final class ClimbingRuleDispenserBlockEntity extends BaseContainerBlockEn
         super(ModBlockEntities.CLIMBING_RULE_DISPENSER.get(), position, state);
     }
 
-    public ItemStack getMaster() {
-        return getItem(MASTER_SLOT);
+    public ItemStack getSource() {
+        return getItem(SOURCE_SLOT);
     }
 
     public int getLifetimeSeconds() {
         return lifetimeSeconds;
     }
 
+
+    @Override
+    public void onLoad() {
+        super.onLoad();
+        if (level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+            ItemStack stack = getSource();
+            if (stack.is(ModItems.CLIMBING_RULE_BOOK.get())
+                    && ClimbingRuleBookData.resolveDefinition(serverLevel.getServer(), stack).isPresent()) {
+                setChanged();
+            }
+        }
+    }
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
@@ -80,11 +91,9 @@ public final class ClimbingRuleDispenserBlockEntity extends BaseContainerBlockEn
 
     @Override
     public boolean canPlaceItem(int slot, ItemStack stack) {
-        return slot == MASTER_SLOT
+        return slot == SOURCE_SLOT
                 && stack.is(ModItems.CLIMBING_RULE_BOOK.get())
-                && ClimbingRuleBookData.readCurrentDefinitionValidated(stack)
-                .map(definition -> definition.activationMode() == RuleBookActivationMode.TEMPORARY)
-                .orElse(false);
+                && ClimbingRuleBookData.hasCurrentSchema(stack);
     }
 
     @Override

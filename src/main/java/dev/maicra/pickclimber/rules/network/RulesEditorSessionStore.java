@@ -55,7 +55,6 @@ public final class RulesEditorSessionStore {
 
     public enum Operation {
         CREATE,
-        IMPORT,
         EDIT
     }
 

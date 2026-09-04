@@ -1,10 +1,13 @@
 package dev.maicra.pickclimber.client.rules;
 
+import dev.maicra.pickclimber.rules.network.ClearRuleBookPayload;
 import dev.maicra.pickclimber.rules.network.CreateRuleBookPayload;
-import dev.maicra.pickclimber.rules.network.DuplicateRuleBookPayload;
-import dev.maicra.pickclimber.rules.network.EjectRuleBookPayload;
+import dev.maicra.pickclimber.rules.network.DispenseRuleBookTestPayload;
 import dev.maicra.pickclimber.rules.network.ImportCurrentRulesPayload;
 import dev.maicra.pickclimber.rules.network.ImportRuleBookPayload;
+import dev.maicra.pickclimber.rules.network.OpenRuleBookProcessingPayload;
+import dev.maicra.pickclimber.rules.network.OpenRuleBookExportRequestPayload;
+import dev.maicra.pickclimber.rules.network.OpenRulesTablePayload;
 import dev.maicra.pickclimber.rules.network.OpenRulesEditorRequestPayload;
 import dev.maicra.pickclimber.rules.network.RestoreWorldDefaultsPayload;
 import dev.maicra.pickclimber.rules.network.RuleBookNetworkLimits;
@@ -39,6 +42,22 @@ public final class ClimbingRulesClientRequests {
         PacketDistributor.sendToServer(new OpenRulesEditorRequestPayload(position));
     }
 
+    public static void openProcessing(BlockPos position) {
+        PacketDistributor.sendToServer(new OpenRuleBookProcessingPayload(position));
+    }
+
+    public static void exportRuleBook(BlockPos position) {
+        PacketDistributor.sendToServer(new OpenRuleBookExportRequestPayload(position));
+    }
+
+    public static void openRulesTable(BlockPos position) {
+        PacketDistributor.sendToServer(new OpenRulesTablePayload(position));
+    }
+
+    public static void clearRuleBook(BlockPos position) {
+        PacketDistributor.sendToServer(new ClearRuleBookPayload(position));
+    }
+
     public static void updateRuleBook(BlockPos position, int sessionToken, CompoundTag definitionTag) {
         if (!allowDefinitionPayload(definitionTag)) {
             return;
@@ -46,16 +65,12 @@ public final class ClimbingRulesClientRequests {
         PacketDistributor.sendToServer(new UpdateRuleBookPayload(position, sessionToken, definitionTag));
     }
 
-    public static void duplicateRuleBook(BlockPos position, int copies) {
-        PacketDistributor.sendToServer(new DuplicateRuleBookPayload(position, copies));
-    }
-
-    public static void eject(BlockPos position) {
-        PacketDistributor.sendToServer(new EjectRuleBookPayload(position));
-    }
-
     public static void updateRuleDispenserLifetime(BlockPos position, int seconds) {
         PacketDistributor.sendToServer(new UpdateRuleDispenserLifetimePayload(position, seconds));
+    }
+
+    public static void dispenseRuleBookTest(BlockPos position) {
+        PacketDistributor.sendToServer(new DispenseRuleBookTestPayload(position));
     }
 
     public static void restoreWorldDefaults(BlockPos position) {

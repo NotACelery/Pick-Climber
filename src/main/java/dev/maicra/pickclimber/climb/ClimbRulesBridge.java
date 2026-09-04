@@ -27,11 +27,9 @@ public final class ClimbRulesBridge {
         return resolved == null ? baseline : resolved;
     }
 
-    static int durabilityMultiplierPercent(Player player) {
-        return Math.max(0, Math.min(500, policy.durabilityMultiplierPercent(player)));
+    static int pickaxeWear(Player player) {
+        int configured = policy.pickaxeWear(player);
+        return configured < 0 ? -1 : Math.min(100, configured);
     }
 
-    static long durabilityPolicyRevision(Player player) {
-        return policy.durabilityPolicyRevision(player);
-    }
 }

@@ -1,6 +1,7 @@
 package dev.maicra.pickclimber.rules;
 
 import com.google.gson.JsonElement;
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
@@ -17,27 +18,43 @@ import java.util.List;
 import java.util.Set;
 
 public final class ClimbingRulesProfileCodec {
-    private static final Codec<Integer> MULTIPLIER_CODEC = Codec.DOUBLE.comapFlatMap(
-            ClimbingRulesProfileCodec::decodeMultiplier,
-            percent -> percent / 100.0D
-    );
     private static final Codec<Set<ResourceLocation>> BLOCK_SET_CODEC = ResourceLocation.CODEC
             .listOf()
             .xmap(LinkedHashSet::new, ClimbingRulesProfileCodec::sortedBlocks);
 
-    public static final Codec<ClimbingRulesProfile> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    private static final Codec<ClimbingRulesProfile> CURRENT_CODEC = RecordCodecBuilder.create(
+            instance -> instance.group(
             Codec.INT.fieldOf("format_version").forGetter(ClimbingRulesProfile::formatVersion),
             Codec.STRING.fieldOf("name").forGetter(ClimbingRulesProfile::profileName),
             BLOCK_SET_CODEC.fieldOf("stable").forGetter(ClimbingRulesProfile::stableBlocks),
             BLOCK_SET_CODEC.fieldOf("unstable").forGetter(ClimbingRulesProfile::unstableBlocks),
             BLOCK_SET_CODEC.fieldOf("unclimbable").forGetter(ClimbingRulesProfile::unclimbableBlocks),
             UnlistedPolicy.CODEC.fieldOf("unlisted_policy").forGetter(ClimbingRulesProfile::unlistedPolicy),
-            MULTIPLIER_CODEC.fieldOf("durability_multiplier")
-                    .forGetter(ClimbingRulesProfile::durabilityMultiplierPercent),
+            Codec.INT.fieldOf("pickaxe_wear").forGetter(ClimbingRulesProfile::pickaxeWear),
             Codec.BOOL.fieldOf("player_mining").forGetter(ClimbingRulesProfile::playerMiningEnabled),
             Codec.BOOL.optionalFieldOf("unmineable_terminals", false)
                     .forGetter(ClimbingRulesProfile::unmineableTerminals)
-    ).apply(instance, ClimbingRulesProfile::new));
+            ).apply(instance, ClimbingRulesProfile::new)
+    );
+
+    private static final Codec<ClimbingRulesProfile> LEGACY_CODEC = RecordCodecBuilder.create(
+            instance -> instance.group(
+            Codec.INT.fieldOf("format_version").forGetter(ClimbingRulesProfile::formatVersion),
+            Codec.STRING.fieldOf("name").forGetter(ClimbingRulesProfile::profileName),
+            BLOCK_SET_CODEC.fieldOf("stable").forGetter(ClimbingRulesProfile::stableBlocks),
+            BLOCK_SET_CODEC.fieldOf("unstable").forGetter(ClimbingRulesProfile::unstableBlocks),
+            BLOCK_SET_CODEC.fieldOf("unclimbable").forGetter(ClimbingRulesProfile::unclimbableBlocks),
+            UnlistedPolicy.CODEC.fieldOf("unlisted_policy").forGetter(ClimbingRulesProfile::unlistedPolicy),
+            Codec.DOUBLE.fieldOf("durability_multiplier")
+                    .forGetter(profile -> profile.pickaxeWear() / 15.0D),
+            Codec.BOOL.fieldOf("player_mining").forGetter(ClimbingRulesProfile::playerMiningEnabled),
+            Codec.BOOL.optionalFieldOf("unmineable_terminals", false)
+                    .forGetter(ClimbingRulesProfile::unmineableTerminals)
+            ).apply(instance, ClimbingRulesProfileCodec::fromLegacy)
+    );
+
+    public static final Codec<ClimbingRulesProfile> CODEC = Codec.either(CURRENT_CODEC, LEGACY_CODEC)
+            .xmap(either -> either.map(profile -> profile, profile -> profile), Either::left);
 
     private ClimbingRulesProfileCodec() {
     }
@@ -58,19 +75,30 @@ public final class ClimbingRulesProfileCodec {
         return CODEC.parse(JsonOps.INSTANCE, json);
     }
 
-    private static DataResult<Integer> decodeMultiplier(double value) {
-        if (!Double.isFinite(value)) {
-            return DataResult.error(() -> "Durability multiplier must be finite");
-        }
-        double percent = value * 100.0D;
-        long rounded = Math.round(percent);
-        if (Math.abs(percent - rounded) > 0.000001D) {
-            return DataResult.error(() -> "Durability multiplier supports 1% increments");
-        }
-        if (rounded < Integer.MIN_VALUE || rounded > Integer.MAX_VALUE) {
-            return DataResult.error(() -> "Durability multiplier is outside the supported numeric range");
-        }
-        return DataResult.success((int) rounded);
+    private static ClimbingRulesProfile fromLegacy(
+            int formatVersion,
+            String profileName,
+            Set<ResourceLocation> stable,
+            Set<ResourceLocation> unstable,
+            Set<ResourceLocation> unclimbable,
+            UnlistedPolicy policy,
+            double multiplier,
+            boolean playerMining,
+            boolean unmineableTerminals
+    ) {
+        int migratedWear = (int) Math.round(ClimbingRulesProfile.DEFAULT_PICKAXE_WEAR * multiplier);
+        migratedWear = Math.max(0, Math.min(ClimbingRulesProfile.MAX_PICKAXE_WEAR, migratedWear));
+        return new ClimbingRulesProfile(
+                formatVersion,
+                profileName,
+                stable,
+                unstable,
+                unclimbable,
+                policy,
+                migratedWear,
+                playerMining,
+                unmineableTerminals
+        );
     }
 
     private static DataResult<CompoundTag> requireCompound(Tag tag) {

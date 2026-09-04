@@ -2,6 +2,7 @@ package dev.maicra.pickclimber.rules.block;
 
 import dev.maicra.pickclimber.ModBlockEntities;
 import dev.maicra.pickclimber.ModItems;
+import dev.maicra.pickclimber.rules.item.ClimbingRuleBookData;
 import dev.maicra.pickclimber.rules.menu.ClimbingRulesTableMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -12,17 +13,14 @@ import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
-import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 public final class ClimbingRulesTableBlockEntity extends BaseContainerBlockEntity {
-    public static final int RULE_BOOK_SLOT = 0;
-    public static final int MATERIAL_BOOK_SLOT = 1;
-    public static final int DYE_SLOT = 2;
-    public static final int SLOT_COUNT = 3;
+    public static final int WORK_SLOT = 0;
+    public static final int SLOT_COUNT = 1;
 
     private NonNullList<ItemStack> items = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
 
@@ -30,6 +28,18 @@ public final class ClimbingRulesTableBlockEntity extends BaseContainerBlockEntit
         super(ModBlockEntities.CLIMBING_RULES_TABLE.get(), position, state);
     }
 
+
+    @Override
+    public void onLoad() {
+        super.onLoad();
+        if (level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+            ItemStack stack = getItem(WORK_SLOT);
+            if (stack.is(ModItems.CLIMBING_RULE_BOOK.get())
+                    && ClimbingRuleBookData.resolveDefinition(serverLevel.getServer(), stack).isPresent()) {
+                setChanged();
+            }
+        }
+    }
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
@@ -60,17 +70,13 @@ public final class ClimbingRulesTableBlockEntity extends BaseContainerBlockEntit
 
     @Override
     public int getMaxStackSize() {
-        return 64;
+        return 1;
     }
 
     @Override
     public boolean canPlaceItem(int slot, ItemStack stack) {
-        return switch (slot) {
-            case RULE_BOOK_SLOT -> stack.is(ModItems.CLIMBING_RULE_BOOK.get()) && stack.getCount() == 1;
-            case MATERIAL_BOOK_SLOT -> stack.is(Items.BOOK);
-            case DYE_SLOT -> stack.getItem() instanceof DyeItem;
-            default -> false;
-        };
+        return slot == WORK_SLOT
+                && (stack.is(Items.BOOK) || stack.is(ModItems.CLIMBING_RULE_BOOK.get()));
     }
 
     @Override

@@ -20,12 +20,12 @@ public final class RuleBookItemColors {
 
         DyeColor coverColor;
         if (stack.is(ModItems.TEMPORARY_RULE_BOOK.get())) {
-            coverColor = TemporaryRuleBookData.readValidated(stack)
-                    .map(data -> data.definition().coverColor())
+            coverColor = TemporaryRuleBookData.readDisplayMetadata(stack)
+                    .map(TemporaryRuleBookData.DisplayMetadata::coverColor)
                     .orElse(DyeColor.WHITE);
         } else {
-            coverColor = ClimbingRuleBookData.readDefinitionValidated(stack)
-                    .map(definition -> definition.coverColor())
+            coverColor = ClimbingRuleBookData.readReference(stack)
+                    .map(ClimbingRuleBookData.Reference::coverColor)
                     .orElse(DyeColor.WHITE);
         }
 

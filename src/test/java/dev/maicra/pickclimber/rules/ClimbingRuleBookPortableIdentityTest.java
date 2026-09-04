@@ -73,7 +73,7 @@ class ClimbingRuleBookPortableIdentityTest {
                 profile.unstableBlocks(),
                 profile.unclimbableBlocks(),
                 profile.unlistedPolicy(),
-                profile.durabilityMultiplierPercent(),
+                profile.pickaxeWear(),
                 profile.playerMiningEnabled(),
                 profile.unmineableTerminals()
         );
@@ -136,7 +136,7 @@ class ClimbingRuleBookPortableIdentityTest {
                 Set.of(ResourceLocation.fromNamespaceAndPath("minecraft", "sand")),
                 profile.unclimbableBlocks(),
                 profile.unlistedPolicy(),
-                profile.durabilityMultiplierPercent(),
+                profile.pickaxeWear(),
                 profile.playerMiningEnabled(),
                 profile.unmineableTerminals()
         );
@@ -159,7 +159,7 @@ class ClimbingRuleBookPortableIdentityTest {
                 profile.unstableBlocks(),
                 profile.unclimbableBlocks(),
                 profile.unlistedPolicy(),
-                profile.durabilityMultiplierPercent(),
+                profile.pickaxeWear(),
                 profile.playerMiningEnabled(),
                 profile.unmineableTerminals()
         );

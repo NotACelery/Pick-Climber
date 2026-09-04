@@ -58,7 +58,9 @@ public final class ClimbingRuleBookValidator {
                 normalizedProfile,
                 definition.activationMode(),
                 normalizedScope,
-                normalizedDuration
+                normalizedDuration,
+                definition.authorUuid(),
+                definition.authorName()
         );
         ClimbingRuleBookCodec.encodeToNbt(normalized).result().ifPresentOrElse(tag -> {
             if (tag.sizeInBytes() > ClimbingRuleBookDefinition.MAX_SERIALIZED_BYTES) {
@@ -87,7 +89,7 @@ public final class ClimbingRuleBookValidator {
                 profile.unstableBlocks(),
                 profile.unclimbableBlocks(),
                 profile.unlistedPolicy(),
-                profile.durabilityMultiplierPercent(),
+                profile.pickaxeWear(),
                 profile.playerMiningEnabled(),
                 profile.unmineableTerminals()
         );

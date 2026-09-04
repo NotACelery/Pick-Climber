@@ -12,13 +12,13 @@ para mantener un alcance publicable y evitar convertir una sola actualización e
 La línea 1.x continúa siendo compatible conceptualmente con el gameplay base de Pick Climber. Las nuevas capas de reglas
 no deben alterar el comportamiento normal cuando no existe una configuración de mapa activa.
 
-> **Estado de este snapshot:** el source materializado está en `1.2.0-dev.21`. Ya existen Rule Book v2, Rules Table
-> separada, Terminal de gameplay, authoring transaccional, JSON `.rules.json`, Effective Rules, Permanent/Temporary
-> WORLD + Temporary PLAYER, Climbing Rule Dispenser con Temporary Rule Book de transporte/HUD dual, Structural
-> Geometry Safety, Viewer read-only, Duplicate GUI y hardening portable/JSON/migración. `1.2.0-dev.20` fue confirmado
-> con `clean build` SUCCESS en Windows y es el baseline estable. dev.21 añade JEI/EMI opcionales como documentación
-> visual sintética, sin recipes survival ni hard dependency. Tras aceptar su build, sólo queda el refinamiento vertical
-> del Dispenser antes del feature freeze; QA/release siguen en `docs/WAITLIST.md`.
+> **Estado de este snapshot:** el source materializado está en `1.2.0-dev.37`. Sobre la línea completa de Rule Book v2,
+> Rules Table, Terminal, Dispenser, reglas WORLD/PLAYER, Viewer y JEI/EMI opcionales. dev.33 completa la migración
+> reference-first de Rule Books: las definiciones pesadas viven una sola vez en SavedData del mundo/server, los libros
+> normales y temporales transportan IDs + metadata liviana, y render/name/tooltips no decodifican perfiles completos.
+> Las reglas WORLD siguen sincronizándose y revalidándose en caliente; el editor custom es fail-closed para bloques no
+> clasificados. `1.2.0-dev.20` sigue siendo el último baseline confirmado build-clean; dev.33 requiere Windows clean build,
+> benchmark FPS y QA multiplayer antes de promoción.
 
 ---
 
@@ -752,5 +752,5 @@ Linux/WSL:
 ./build.sh
 ```
 
-El source materializado de este snapshot usa `mod_version=1.2.0-dev.19`. `docs/WAITLIST.md` es la fuente operativa
+El source materializado de este snapshot usa `mod_version=1.2.0-dev.37`. `docs/WAITLIST.md` es la fuente operativa
 para distinguir lo completado de lo pendiente; no se debe cambiar a `1.2.0` hasta cerrar features, build y QA.

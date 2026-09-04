@@ -84,7 +84,7 @@ class ClimbingRulesValidatorTest {
     }
 
     @Test
-    void multiplierOutsideSafeRangeIsRejected() {
+    void pickaxeWearOutsideSafeRangeIsRejected() {
         ClimbingRulesProfile profile = new ClimbingRulesProfile(
                 1,
                 "Too Expensive",
@@ -92,7 +92,7 @@ class ClimbingRulesValidatorTest {
                 Set.of(),
                 Set.of(),
                 UnlistedPolicy.USE_PICK_CLIMBER_DEFAULTS,
-                501,
+                101,
                 true,
                 false
         );

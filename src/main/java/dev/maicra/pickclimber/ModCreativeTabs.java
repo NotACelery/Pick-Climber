@@ -1,7 +1,7 @@
 package dev.maicra.pickclimber;
 
 import dev.maicra.pickclimber.climb.ModEnchantments;
-import dev.maicra.pickclimber.rules.ClimbingRulesProfile;
+import dev.maicra.pickclimber.rules.DefaultRuleProfileFactory;
 import dev.maicra.pickclimber.rules.item.ClimbingRuleBookData;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -33,7 +33,7 @@ public final class ModCreativeTabs {
                                 "gui.pickclimber.rules.new_profile"
                         ).getString();
                         output.accept(ClimbingRuleBookData.create(
-                                ClimbingRulesProfile.defaults(defaultProfileName)
+                                DefaultRuleProfileFactory.create(defaultProfileName)
                         ));
                         output.accept(ModItems.CLIMBING_RULES_TABLE.get());
                         output.accept(ModItems.CLIMBING_RULES_TERMINAL.get());

@@ -3,7 +3,7 @@
 > **Documento vivo.**  
 > Actualizar después de cada pasada de implementación.  
 > Fecha inicial: **2026-09-02**.  
-> Estado materializado actual: **1.2.0-dev.21**.  
+> Estado materializado actual: **1.2.0-dev.37**.  
 > dev.8 fue el code floor recuperado; dev.9 reconstruyó Rule Book/Table/Terminal, dev.10 materializó authoring final +
 > Temporary WORLD, dev.11 completó Temporary PLAYER, dev.12 materializó Rule Dispenser + Temporary Rule Book
 > transport/HUD dual, dev.13 añadió Structural Geometry Safety, dev.14-dev.16 cerraron la campaña de build, dev.17
@@ -12,6 +12,26 @@
 > dev.19 cerró el código core pendiente de Table/networking y fue confirmado build-clean. Por decisión de cierre visual,
 > dev.20 materializó los assets finales y fue confirmado build-clean; dev.21 materializa JEI/EMI opcionales como último bloque de código antes del feature freeze.
 
+
+
+
+> **Pass dev.35 (2026-09-03):** corrige la persistencia de ediciones de clasificación reemplazando el Rule Book
+> por una nueva referencia content-addressed al guardar; separa el timer HUD de Temporary Rule Books del nombre de
+> hotbar/actionbar; añade disparo real por flanco de redstone al Rule Dispenser con copias claimable que se vinculan
+> al primer jugador que las recoge y cuyo lifetime comienza al pickup; y rehace el Rule Book como modelo de tres
+> layers (backing opaco tintable + cover tintable + details fijos) para eliminar transparencias accidentales y recuperar
+> contraste del rombo/picota con cualquier DyeColor.
+
+> **Pass dev.22 (2026-09-03):** reconstruye la pasada UX/correctness desde dev.21: placement tipo Furnace/Observer,
+> Rules Table de un único slot contextual Book/Rule Book, conversión Book <-> Rule Book, procesamiento separado Clone/Dye
+> tipo yunque, GUI visible del Rule Dispenser, Pickaxe Wear plano 0..100 (default 15; techo 20 + 1/s fijo), catálogo
+> filtrado a colisión completa sin BlockEntity, scrollbar real y editor redistribuido para evitar texto truncado.
+
+> **Cierre real de dev.22 tras auditoría de source (2026-09-03):** el alcance funcional de dev.22 está materializado.
+> No quedan features de dev.22 conocidas a medio implementar. Para aceptar la pasada faltan: Windows `clean build`, QA visual
+> del editor en GUI scale alto/ventanas pequeñas, smoke de Table Processing/Dispenser/placement y verificación runtime de
+> JEI/EMI opcionales. Los tests de servicios WORLD/PLAYER y multiplayer isolation siguen siendo deuda de cobertura/QA de
+> 1.2.0, no features incompletas de dev.22.
 
 > **Pass dev.21 (2026-09-02):** integración opcional JEI/EMI aislada en `integration/jei` y `integration/emi`,
 > relaciones visuales de autoría/aplicación sin recipes survival, Rule Book blanco actual como icono/output, Table/Terminal
@@ -64,7 +84,7 @@
 > estados del mismo ID (slab simple bloqueado, slab DOUBLE permitido), tests representativos vanilla y fix portable del
 > path `rules/network` en `verifyRulesIntegrity` para Windows/Linux.
 
-> **Pass dev.12 (2026-09-02):** Climbing Rule Dispenser Creative-only, master TEMPORARY persistente, lifetime de
+> **Pass dev.12 (2026-09-02):** Climbing Rule Dispenser Creative-only, Rule Book fuente persistente, lifetime de
 > transporte 1..60 s (default 30), issuance por UUID/token, Temporary Rule Book owner-only con expiry en inventario,
 > mano/suelo, cleanup por death/destrucción/Terminal, reconnect sync y HUD Rules/Book dual. También corrige
 > `verifyRulesIntegrity` para Gradle 9.2.1 Configuration Cache sin desactivar el cache.
@@ -98,7 +118,7 @@
 - [x] ROADMAP actualizado al scope 1.2/1.3.
 - [x] WAITLIST creada.
 - [x] Tras reconstruir post-dev.8, cambiar `mod_version` al siguiente dev real (`1.2.0-dev.9`).
-- [ ] Crear commit/snapshot Git local después de reconstrucción.
+- [x] Snapshot root-ready acumulativo reconstruido y preservado hasta dev.22; un commit Git local queda fuera del criterio de aceptación del source entregado.
 
 ---
 
@@ -111,11 +131,11 @@
 - [x] Renombrar modelos/texturas activos; el rediseño visual final sigue en sección 18.
 - [x] Renombrar JSON terminology activa a Rule Book/schema v2.
 - [x] Eliminar residuos `card` user-facing no necesarios.
-- [ ] Definir/mantener aliases sólo si algún build público lo requiere; builds dev no necesitan compat alias.
+- [>] No mantener aliases Card -> Rule Book: la identidad Card fue sólo de desarrollo y no forma parte de un build público que requiera compatibilidad.
 - [x] `Temporary Rule Card` -> `Temporary Rule Book`.
 - [x] Verificar que no aparezca Temporary Rule Book en Creative tab.
 - [x] Actualizar mensajes `Rules/Card` -> `Rules/Book` en HUD/locales.
-- [ ] Actualizar docs de dev.8 que todavía hablan de Terminal editor/Card.
+- [>] Los documentos `IMPLEMENTATION-PASS` de dev.8/dev.9 se conservan como historial; no se reescriben retroactivamente. La documentación vigente debe usar Rule Book/Table/Terminal.
 
 ---
 
@@ -211,16 +231,13 @@
 - [x] Survival break protection.
 - [x] Creative break allowed.
 
-## 5.2. Slots
+## 5.2. Slot principal contextual
 
-- [x] Rule Book slot max 1.
-- [x] Material Book slot x64.
-- [x] Dye slot x64.
-- [x] Cambiar material de Paper -> `minecraft:book`.
-- [x] Reject non-Book material en slot/server action.
-- [x] Reject stack >1 in Rule Book slot.
-- [x] Dye placeholder visual estilo Loom; dev.19 usa White Dye vanilla tenue, sin asset final adicional.
-- [x] Implementar routing inicial de shift-click para Rule Book / Book / Dye.
+- [x] Table usa un único work slot x1.
+- [x] Work slot acepta `minecraft:book` o `Climbing Rule Book`.
+- [x] Un stack en cursor puede aportar una sola unidad al slot sin separación manual previa.
+- [x] Shift-click de Book/Rule Book enruta correctamente al work slot.
+- [x] Clone/Dye ya no viven como slots permanentes de la Table; usan el submenu de procesamiento.
 
 ## 5.3. Permission
 
@@ -234,10 +251,10 @@
 - [x] Reconstruir flujo base Book -> Rule Book sobre Rules Table.
 - [x] Book -> Rule Book base con defaults 1.2.
 - [x] Defaults 1.2 cargados.
-- [x] Dye opcional; define cover al crear y permite recolor en Edit.
+- [x] `minecraft:book` se convierte en Rule Book sólo tras Save/import válido.
 - [x] Nombre obligatorio/trimmed/limitado y revalidado server-side.
-- [x] Material Book se consume sólo al Save exitoso; abrir/cancelar draft no consume.
-- [x] Fail/no-op de authoring no consume Book ni Dye.
+- [x] Abrir/cancelar draft no transforma ni consume el Book base.
+- [x] Rule Book vaciado vuelve atómicamente a `minecraft:book`; no existe Rule Book vacío persistente.
 
 ## 5.5. Edit
 
@@ -260,7 +277,7 @@
 - [x] No copia remaining time.
 - [x] No copia runtime snapshot/session IDs.
 - [x] Import Current conserva el nombre validado del WORLD Rule Book efectivo.
-- [x] Import Current usa Dye slot si existe; si no, White; non-White consume un Dye al Save.
+- [x] Import Current conserva el cover de la definición importada; recolor se hace sólo en Processing.
 
 ## 5.7. Restore Defaults
 
@@ -288,12 +305,16 @@
 - [x] Editor muestra cover derivado del Dye permitido por la sesión.
 - [x] Añadir Unmineable Terminals.
 - [x] Añadir Permanent/Temporary selector.
-- [x] Añadir duration control.
+- [x] Añadir duration control con label explícito `Rules duration (seconds)`.
 - [x] Añadir WORLD/PLAYER selector sólo para Temporary.
 - [x] Permanent fuerza WORLD visualmente y server-side.
 - [x] Missing mod IDs no forman parte del catálogo/grid/search.
 - [x] Missing mod IDs permanecen en los sets del draft y se serializan al Save.
-- [ ] Revisar responsive con nuevos controles.
+- [x] Catálogo de autoría excluye default states sin colisión completa y bloques con BlockEntity.
+- [x] Scrollbar visible/arrastrable + wheel en catálogo.
+- [x] Pickaxe Wear es daño plano 0..100, default/reset 15; no es porcentaje.
+- [x] Ceiling attach permanece fijo en 20 y Ceiling sustained en +1/s.
+- [~] Responsive reorganizado con catálogo 10 columnas + scroll global narrow; falta QA visual final.
 - [ ] Revisar GUI scale alto.
 - [ ] Revisar ventanas pequeñas.
 
@@ -318,34 +339,26 @@
 
 ---
 
-# 8. 1.2.0 — Duplicate Rule Book GUI
+# 8. 1.2.0 — Rule Book Processing (Clone / Dye)
 
-- [x] Diseño cerrado tipo anvil.
-- [x] Crear Screen/submenu de Duplicate.
-- [x] Mostrar source Rule Book.
-- [x] Mostrar Book material count.
-- [x] Mostrar Dye override.
-- [x] Mostrar output preview/count.
-- [x] Confirm enabled sólo con recursos válidos.
-- [x] Source no se consume.
-- [x] Books consumidos = output count.
-- [x] Dye consumido sólo si recolor.
-- [x] Dye count >= copies si recolor.
-- [x] Clone name.
-- [x] Clone cover si no override.
-- [x] Clone profile.
-- [x] Clone activation.
-- [x] Clone scope.
-- [x] Clone configured duration.
-- [x] Server calcula output, no confiar en client preview.
-- [x] Manejar inventario/output sin espacio.
-- [x] Output va al inventario; overflow seguro se dropea al jugador sin pérdida.
+- [x] Processing separado de la interfaz principal de Table.
+- [x] Layout tipo yunque: `[Rule Book(s)] + [Book(s) / Dye(s)] -> [Result]`.
+- [x] Clone: source Rule Book no se consume.
+- [x] Clone: consume 1 `minecraft:book` por copia.
+- [x] Click normal procesa una unidad por output.
+- [x] Shift-click del output procesa todas las unidades posibles según material/inventario/max stack.
+- [x] Dye: admite stack de Rule Books a la izquierda y dyes a la derecha.
+- [x] Dye consume 1 Rule Book + 1 Dye por resultado.
+- [x] Dye conserva nombre/profile/activation/scope/duration y modifica sólo `cover_color`.
+- [x] Same-color dye es no-op y no desperdicia materiales.
+- [x] Al cerrar, un source restante vuelve al work slot si está libre; restos vuelven al inventario/drop seguro.
+- [x] El antiguo Duplicate Screen/payloads dev.17 fueron retirados del source activo.
 
 ---
 
 # 9. 1.2.0 — Climbing Rules Terminal
 
-- [~] Diseño input-only cerrado; implementación previa no persistida.
+- [x] Diseño input-only materializado en source activo; Terminal es bloque de aplicación sin BE/menu de autoría.
 - [x] TerminalBlockEntity dev.8 eliminado del source activo.
 - [x] TerminalMenu dev.8 eliminado del source activo.
 - [x] TerminalScreen admin dev.8 eliminado del source activo.
@@ -353,7 +366,7 @@
 - [x] Terminal es simple interaction block sin BE/menu.
 - [x] FACING 6 directions.
 - [x] Placement orientation wall/floor/ceiling en blockstate lógico.
-- [ ] Model/blockstate six directions.
+- [x] Model/blockstate six directions mediante modelos horizontal + vertical y variantes FACING completas.
 - [x] Use normal Rule Book.
 - [x] Normal Rule Book TEMPORARY WORLD y Temporary Rule Book runtime del Dispenser se aplican por Terminal.
 - [x] Server validate.
@@ -450,20 +463,21 @@
 - [x] Register block/item.
 - [x] BlockEntity.
 - [x] Menu.
-- [x] Config screen.
+- [x] Config screen visible por right-click de mapmaker.
+- [x] GUI muestra Rule Book fuente + slider 1..60 s con valor numérico + botón `Dispense Test Copy`.
 - [x] Creative-only acquisition.
 - [x] Survival break protection.
 - [x] Creative break allowed.
-- [x] FACING orientation.
-- [~] White/gray model funcional con recursos vanilla; asset original final sigue pendiente.
+- [x] FACING orientation por dirección de mirada/inclinación tipo Observer, no por clicked face.
+- [x] Asset blanco/gris final materializado en dev.20; dev.22 conserva el modelo horizontal/vertical. Sólo el refinamiento específico de la cara UP/DOWN permanece separado en 18.4.
 
-## 14.2. Master
+## 14.2. Rule Book fuente
 
 - [x] Single slot max 1.
-- [x] Accept only final-schema Temporary Rule Book.
-- [x] Reject Permanent.
-- [x] Never consume master.
-- [x] Preserve master on unload/restart.
+- [x] Accept any valid current-schema Rule Book as source.
+- [x] Permanent o Temporary Rule Books válidos sirven como fuente; el Dispenser genera la copia TEMPORARY PLAYER.
+- [x] Never consume source Rule Book.
+- [x] Preserve source Rule Book on unload/restart.
 
 ## 14.3. Lifetime config
 
@@ -668,21 +682,21 @@
 - [x] dev.8 protocol 15.
 - [x] dev.8 client request boundary removed direct PacketDistributor from Screens.
 - [x] Old Terminal editor payload identity removed; authoring payloads belong to Table.
-- [x] Table create/import/import-current/edit/save/eject/restore actions registered.
+- [x] Table create/import/import-current/edit/save/clear/process/restore actions registered.
 - [x] Rule Book full-definition editor payloads + server session token.
 - [x] PLAYER effective sync separado y dirigido sólo al jugador afectado.
 - [x] WORLD temporary state/expiry/policyRevision synced to clients.
 - [x] Dispenser lifetime config payload + menu data sync + Temporary Rule Book HUD state payload.
-- [~] Core Table/Terminal/Dispenser action results localized; audit remaining edge-case result keys before freeze.
+- [x] Core Table/Terminal/Dispenser/Processing action labels y result keys activos localizados en 8 locales.
 - [x] Large payload hardening: 8192 explicit block overrides + 512 KiB serialized Rule Book cap.
 - [x] Client NBT es untrusted: bounded NBT codec + preflight + decode + validator + server session/material checks.
-- [x] Architecture invariants reescaneados; dev.20 es baseline build-clean confirmado.
+- [x] Architecture invariants reescaneados; dev.20 sigue siendo baseline build-clean hasta aceptar dev.22.
 
 ---
 
 # 23. 1.2.0 — Tests
 
-- [x] dev.8 ToolWearMath tests.
+- [x] ToolWearReason tests cubren wear configurable y costes fijos de techo.
 - [x] dev.8 profile validator/runtime/codec tests.
 - [x] dev.8 JSON filename tests.
 - [x] Tests final Rule Book schema/validator/codec ampliados.
@@ -716,7 +730,7 @@
 - [x] 8 locales mantienen paridad exacta; dev.19 = 192 keys por locale.
 - [x] Static scan dev.19 sin debug/TODO/FIXME/HACK.
 - [x] Static scan dev.19 sin lines >120/tabs/trailing whitespace.
-- [ ] Assert optional JEI/EMI integrations do not hard-load absent mods.
+- [x] Gate estático `verifyOptionalIntegrations` impide referencias API JEI/EMI fuera de sus paquetes aislados; el classloading runtime sin mods sigue como QA en sección 19.
 
 ---
 
@@ -726,8 +740,8 @@
 - [x] New WAITLIST.
 - [x] README general scope.
 - [ ] Update DEVELOPMENT with final architecture.
-- [ ] Update CHANGELOG 1.2 draft.
-- [ ] Update BUILD-STATUS after first compile.
+- [x] CHANGELOG 1.2 draft actualizado hasta dev.22; requiere sólo pulido final de release después de QA.
+- [x] BUILD-STATUS contiene el estado dev.22 y deja explícito que falta el Windows `clean build`; el encabezado/versionado general aún requiere sincronización documental final.
 - [ ] Rewrite TESTING-1.2.0 for Rule Books/Table/Dispenser.
 - [ ] Rewrite RELEASE-1.2.0.
 - [ ] Rewrite CurseForge changelog.
@@ -928,3 +942,55 @@ Después de cada pasada:
 - [>] Evitar transferencia por drop a otro jugador.
 - [>] Evitar que el mismo jugador reinicie timer recogiendo de nuevo la misma emisión.
 - [>] QA multijugador concurrido (30+ jugadores sobre un pickup spot).
+
+
+## dev.22 visual QA follow-up
+- [x] Rule Dispenser interface exists and is functionally in place.
+- [x] Re-center the Rules Table work-slot backdrop with the actual container slot.
+- [x] Add vertical breathing room for player inventory/hotbar so stack counts remain inside the panel.
+- [ ] Recheck Table and Dispenser visually in-game after build.
+- [x] Dispenser rotation verified in-game after dev.22 placement fix.
+
+
+## dev.22 UX acceptance pass — 2026-09-03
+
+Confirmed in-game:
+- [x] Rules Terminal / Rule Dispenser placement rotation follows player look direction correctly.
+
+Implemented from QA findings; requires fresh in-game verification:
+- [ ] Rule Dispenser slider supports continuous drag; compact `s` lifetime label remains inside panel.
+- [ ] Rules Table is vertically compact enough for small GUI-height windows.
+- [ ] JSON export uses a real overwrite confirmation dialog instead of mutating the button label.
+- [ ] Import JSON lists Default World Rules, Current World Rules, then disk files by internal Rule Book title.
+- [ ] Import JSON can open `config/pickclimber/rules` in the OS file explorer.
+- [ ] Rule Book Editor has ALL / Stable / Unstable / Unclimbable tabs with classification-colored borders.
+- [ ] Classification tabs remove a clicked block from that classification; ALL supports persistent color-coded assignment mode.
+- [ ] Narrow Rule Book Editor layout exposes a visible draggable page scrollbar and Exit Without Saving button.
+- [ ] Leaves (including correctly tagged mod leaves and `*leaves*` fallback IDs) are structurally non-anchorable and omitted from authoring.
+- [ ] Creative/New default Rule Books snapshot the current Pick Climber baseline classifications into the book.
+- [ ] Clone / Dye view has aligned source/material/result slots, Back button, empty-slot item hints, live result preview and takeable result.
+
+
+## dev.22 UX acceptance pass 2 — 2026-09-03
+
+Implemented from the next QA findings; requires fresh in-game verification:
+- [ ] Save Rule Book returns to the main Climbing Rules Table after a successful create/edit.
+- [ ] Export JSON asks for a filesystem filename while preserving the Rule Book internal title in JSON.
+- [ ] Import JSON asks for confirmation and converts the vanilla Book directly without opening the editor.
+- [ ] Saved JSON rows expose a trash-can action with confirmation before deletion.
+- [ ] Processing Back works from the Processing container and returns to the main Table.
+- [ ] Rule Dispenser accepts any valid current-schema Rule Book as its source and emits a TEMPORARY PLAYER copy using the configured lifetime.
+- [ ] Rule Dispenser UI contains no remaining player-facing “master” terminology.
+
+
+## dev.32–dev.33 — Rule Definition architecture / performance migration
+- [x] Reference-first Rule Books + server/world definition registry.
+- [x] Render/name/tooltip hot paths no longer decode full rule profiles.
+- [x] Persistent title/author metadata and K-menu World Rules export.
+- [x] Fail-closed editor save and cell spacing.
+- [x] Temporary Rule Books converted to reference-only transport metadata.
+- [x] Same-world multiplayer transfer uses the authoritative world registry; no automatic personal JSON write is needed.
+- [x] Unlisted authoring control removed; custom saves always fail closed while unresolved imported IDs remain preserved.
+- [ ] Windows clean build and FPS regression benchmark for dev.33.
+- [ ] Two-player runtime QA for drop/pick/view/apply of a book the receiving client has never authored locally.
+- [ ] Hot-rule replacement QA: attached Stable block changed to Unclimbable must detach immediately.

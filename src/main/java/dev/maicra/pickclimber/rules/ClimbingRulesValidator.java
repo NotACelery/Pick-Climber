@@ -20,7 +20,7 @@ public final class ClimbingRulesValidator {
                 profile.unstableBlocks(),
                 profile.unclimbableBlocks(),
                 profile.unlistedPolicy(),
-                profile.durabilityMultiplierPercent(),
+                profile.pickaxeWear(),
                 profile.playerMiningEnabled(),
                 profile.unmineableTerminals()
         );
@@ -28,7 +28,7 @@ public final class ClimbingRulesValidator {
         List<ClimbingRulesValidationIssue> issues = new ArrayList<>();
         validateFormat(normalized, issues);
         validateName(normalized, issues);
-        validateMultiplier(normalized, issues);
+        validatePickaxeWear(normalized, issues);
         validateBlockCount(normalized, issues);
         validateClassificationConflicts(normalized, issues);
         return new ClimbingRulesValidationResult(normalized, issues);
@@ -60,17 +60,15 @@ public final class ClimbingRulesValidator {
         }
     }
 
-    private static void validateMultiplier(
+    private static void validatePickaxeWear(
             ClimbingRulesProfile profile,
             List<ClimbingRulesValidationIssue> issues
     ) {
-        int multiplier = profile.durabilityMultiplierPercent();
-        if (multiplier < 0 || multiplier > ClimbingRulesProfile.MAX_DURABILITY_MULTIPLIER_PERCENT) {
+        int wear = profile.pickaxeWear();
+        if (wear < 0 || wear > ClimbingRulesProfile.MAX_PICKAXE_WEAR) {
             issues.add(new ClimbingRulesValidationIssue(
-                    "invalid_durability_multiplier",
-                    "Durability multiplier must be between 0% and "
-                            + ClimbingRulesProfile.MAX_DURABILITY_MULTIPLIER_PERCENT
-                            + "%"
+                    "invalid_pickaxe_wear",
+                    "Pickaxe wear must be between 0 and " + ClimbingRulesProfile.MAX_PICKAXE_WEAR
             ));
         }
     }

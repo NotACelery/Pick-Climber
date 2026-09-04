@@ -22,7 +22,8 @@ final class ToolWearService {
             int units
     ) {
         ItemStack stack = player.getItemInHand(hand);
-        return damageStack(player, stack, hand, reason.amount(units));
+        int amount = reason.amount(units, ClimbRulesBridge.pickaxeWear(player));
+        return damageStack(player, stack, hand, amount);
     }
 
     static boolean damageEquipped(ServerPlayer player, UUID toolId, ToolWearReason reason) {
@@ -43,7 +44,8 @@ final class ToolWearService {
         InteractionHand hand = ToolIdentity.matches(player.getMainHandItem(), toolId)
                 ? InteractionHand.MAIN_HAND
                 : InteractionHand.OFF_HAND;
-        return damageStack(player, stack, hand, reason.amount(units));
+        int amount = reason.amount(units, ClimbRulesBridge.pickaxeWear(player));
+        return damageStack(player, stack, hand, amount);
     }
 
     static boolean damageEquipped(ServerPlayer player, UUID toolId, int amount) {
@@ -62,15 +64,11 @@ final class ToolWearService {
             ServerPlayer player,
             ItemStack stack,
             InteractionHand hand,
-            int baseAmount
+            int amount
     ) {
         if (stack.isEmpty()) {
             return false;
         }
-
-        int multiplierPercent = ClimbRulesBridge.durabilityMultiplierPercent(player);
-        long policyRevision = ClimbRulesBridge.durabilityPolicyRevision(player);
-        int amount = ToolWearState.scaleDamage(stack, baseAmount, multiplierPercent, policyRevision);
         if (amount <= 0) {
             return true;
         }

@@ -11,6 +11,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent;
 import net.neoforged.neoforge.common.util.TriState;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+import dev.maicra.pickclimber.rules.item.ClimbingRuleBookData;
 import dev.maicra.pickclimber.rules.item.TemporaryRuleBookData;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
@@ -34,6 +35,7 @@ public final class ClimbingRulesEvents {
         if (server == null) {
             return;
         }
+        migrateRuleBooks(serverPlayer);
         ClimbingRulesSynchronization.sendToPlayer(serverPlayer, ClimbingRulesService.snapshot(server));
         PlayerRulesSynchronization.sendToPlayer(serverPlayer, PlayerRulesSnapshot.inactive());
         TemporaryRuleBookIssuanceService.syncPlayer(serverPlayer);
@@ -68,14 +70,30 @@ public final class ClimbingRulesEvents {
         if (!(event.getPlayer() instanceof ServerPlayer serverPlayer)) {
             return;
         }
+        ClimbingRuleBookData.resolveDefinition(
+                serverPlayer.serverLevel().getServer(), event.getItemEntity().getItem()
+        );
         TemporaryRuleBookData.readValidated(event.getItemEntity().getItem()).ifPresent(data -> {
             long gameTime = serverPlayer.serverLevel().getServer().overworld().getGameTime();
+            if (TemporaryRuleBookIssuanceService.isUnclaimed(data)) {
+                if (!TemporaryRuleBookIssuanceService.claim(event.getItemEntity().getItem(), serverPlayer)) {
+                    event.setCanPickup(TriState.FALSE);
+                }
+                return;
+            }
             if (!data.owner().equals(serverPlayer.getUUID())
                     || data.expiresAtGameTime() <= gameTime
                     || !TemporaryRuleBookIssuanceService.isActive(data.owner(), data.issuanceToken(), gameTime)) {
                 event.setCanPickup(TriState.FALSE);
             }
         });
+    }
+
+    private static void migrateRuleBooks(ServerPlayer player) {
+        MinecraftServer server = player.serverLevel().getServer();
+        for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
+            ClimbingRuleBookData.resolveDefinition(server, player.getInventory().getItem(slot));
+        }
     }
 
     @SubscribeEvent

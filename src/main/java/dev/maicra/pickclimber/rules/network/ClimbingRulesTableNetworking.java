@@ -8,18 +8,24 @@ import dev.maicra.pickclimber.rules.ClimbingRuleBookValidator;
 import dev.maicra.pickclimber.rules.ClimbingRulesClientUi;
 import dev.maicra.pickclimber.rules.ClimbingRulesProfile;
 import dev.maicra.pickclimber.rules.ClimbingRulesService;
+import dev.maicra.pickclimber.rules.DefaultRuleProfileFactory;
 import dev.maicra.pickclimber.rules.MapmakerPermissions;
+import dev.maicra.pickclimber.rules.RuleBookActivationMode;
+import dev.maicra.pickclimber.rules.RuleBookScope;
+import dev.maicra.pickclimber.rules.RuleDefinitionId;
 import dev.maicra.pickclimber.rules.WorldRulesSnapshot;
 import dev.maicra.pickclimber.rules.block.ClimbingRulesTableBlockEntity;
 import dev.maicra.pickclimber.rules.item.ClimbingRuleBookData;
+import dev.maicra.pickclimber.rules.menu.ClimbingRuleBookProcessingMenu;
 import dev.maicra.pickclimber.rules.menu.ClimbingRulesTableMenu;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -40,10 +46,16 @@ public final class ClimbingRulesTableNetworking {
                 ClimbingRulesTableNetworking::handleImport);
         registrar.playToServer(ImportCurrentRulesPayload.TYPE, ImportCurrentRulesPayload.STREAM_CODEC,
                 ClimbingRulesTableNetworking::handleImportCurrent);
-        registrar.playToServer(DuplicateRuleBookPayload.TYPE, DuplicateRuleBookPayload.STREAM_CODEC,
-                ClimbingRulesTableNetworking::handleDuplicate);
-        registrar.playToServer(EjectRuleBookPayload.TYPE, EjectRuleBookPayload.STREAM_CODEC,
-                ClimbingRulesTableNetworking::handleEject);
+        registrar.playToServer(OpenRuleBookProcessingPayload.TYPE, OpenRuleBookProcessingPayload.STREAM_CODEC,
+                ClimbingRulesTableNetworking::handleOpenProcessing);
+        registrar.playToServer(OpenRuleBookExportRequestPayload.TYPE, OpenRuleBookExportRequestPayload.STREAM_CODEC,
+                ClimbingRulesTableNetworking::handleOpenExport);
+        registrar.playToClient(OpenRuleBookExportPayload.TYPE, OpenRuleBookExportPayload.STREAM_CODEC,
+                ClimbingRulesTableNetworking::handleExportPayload);
+        registrar.playToServer(OpenRulesTablePayload.TYPE, OpenRulesTablePayload.STREAM_CODEC,
+                ClimbingRulesTableNetworking::handleOpenRulesTable);
+        registrar.playToServer(ClearRuleBookPayload.TYPE, ClearRuleBookPayload.STREAM_CODEC,
+                ClimbingRulesTableNetworking::handleClearRuleBook);
         registrar.playToServer(RestoreWorldDefaultsPayload.TYPE, RestoreWorldDefaultsPayload.STREAM_CODEC,
                 ClimbingRulesTableNetworking::handleRestore);
         registrar.playToServer(OpenRulesEditorRequestPayload.TYPE, OpenRulesEditorRequestPayload.STREAM_CODEC,
@@ -61,15 +73,14 @@ public final class ClimbingRulesTableNetworking {
             if (!canStartCreation(player, table)) {
                 return;
             }
-            DyeColor cover = dyeColor(table).orElse(DyeColor.WHITE);
-            ClimbingRulesProfile profile = ClimbingRulesProfile.defaults(payload.profileName());
+            ClimbingRulesProfile profile = DefaultRuleProfileFactory.create(payload.profileName());
             ClimbingRuleBookDefinition definition = new ClimbingRuleBookDefinition(
                     ClimbingRuleBookDefinition.CURRENT_FORMAT_VERSION,
                     payload.profileName(),
-                    cover,
+                    DyeColor.WHITE,
                     profile,
-                    dev.maicra.pickclimber.rules.RuleBookActivationMode.PERMANENT,
-                    dev.maicra.pickclimber.rules.RuleBookScope.WORLD,
+                    RuleBookActivationMode.PERMANENT,
+                    RuleBookScope.WORLD,
                     0
             );
             openDraft(
@@ -102,13 +113,7 @@ public final class ClimbingRulesTableNetworking {
                 result(player, false, validationMessageKey(validation));
                 return;
             }
-            openDraft(
-                    player,
-                    payload.position(),
-                    RulesEditorSessionStore.Operation.IMPORT,
-                    Optional.empty(),
-                    validation.normalizedDefinition()
-            );
+            importIntoTableBook(player, table, payload.position(), validation.normalizedDefinition());
         });
     }
 
@@ -119,91 +124,78 @@ public final class ClimbingRulesTableNetworking {
             }
             WorldRulesSnapshot snapshot = ClimbingRulesService.snapshot(player.serverLevel().getServer());
             Optional<ClimbingRuleBookDefinition> current = snapshot.effectiveDefinition();
-            if (current.isEmpty()) {
-                result(player, false, "message.pickclimber.rules.world_defaults_no_import");
-                return;
-            }
-            DyeColor cover = dyeColor(table).orElse(DyeColor.WHITE);
-            ClimbingRuleBookDefinition source = current.get();
-            ClimbingRuleBookDefinition definition = new ClimbingRuleBookDefinition(
-                    source.formatVersion(),
-                    source.bookName(),
-                    cover,
-                    source.profile(),
-                    source.activationMode(),
-                    source.scope(),
-                    source.durationSeconds()
-            );
-            openDraft(
-                    player,
-                    payload.position(),
-                    RulesEditorSessionStore.Operation.IMPORT,
-                    Optional.empty(),
-                    definition
-            );
+            ClimbingRuleBookDefinition definition = current.orElseGet(() -> {
+                String name = Component.translatable("gui.pickclimber.rules.import_current_world").getString();
+                ClimbingRulesProfile defaults = DefaultRuleProfileFactory.create(name);
+                return ClimbingRuleBookDefinition.permanentWorld(name, defaults);
+            });
+            importIntoTableBook(player, table, payload.position(), definition);
         });
     }
 
 
-    private static void handleDuplicate(DuplicateRuleBookPayload payload, IPayloadContext context) {
+
+    private static void handleOpenExport(OpenRuleBookExportRequestPayload payload, IPayloadContext context) {
         withTable(context, payload.position(), (player, table) -> {
-            int copies = payload.copies();
-            if (copies < 1 || copies > 64) {
-                result(player, false, "message.pickclimber.rules.invalid_copy_count");
-                return;
-            }
-            ItemStack sourceStack = table.getItem(ClimbingRulesTableBlockEntity.RULE_BOOK_SLOT);
-            Optional<ClimbingRuleBookDefinition> source = ClimbingRuleBookData.readDefinitionValidated(sourceStack);
-            if (source.isEmpty()) {
+            ItemStack stack = table.getItem(ClimbingRulesTableBlockEntity.WORK_SLOT);
+            ClimbingRuleBookData.resolveDefinition(player.serverLevel().getServer(), stack)
+                    .ifPresentOrElse(definition ->
+                    ClimbingRuleBookCodec.encodeToNbt(definition).result().ifPresent(tag ->
+                            PacketDistributor.sendToPlayer(player, new OpenRuleBookExportPayload(tag))
+                    ),
+                    () -> result(player, false, "message.pickclimber.rules.valid_book_required")
+            );
+        });
+    }
+
+    private static void handleExportPayload(OpenRuleBookExportPayload payload, IPayloadContext context) {
+        if (!RuleBookNetworkLimits.accepts(payload.definitionTag())) {
+            return;
+        }
+        ClimbingRuleBookCodec.decodeFromNbt(payload.definitionTag()).result()
+                .ifPresent(ClimbingRulesClientUi::openExporter);
+    }
+    private static void handleOpenRulesTable(OpenRulesTablePayload payload, IPayloadContext context) {
+        tableAccess(context, payload.position(), false).ifPresent(access -> {
+            RulesEditorSessionStore.invalidate(access.player());
+            openTable(access.player(), access.table(), payload.position());
+        });
+    }
+
+    private static void handleOpenProcessing(OpenRuleBookProcessingPayload payload, IPayloadContext context) {
+        withTable(context, payload.position(), (player, table) -> {
+            ItemStack source = table.getItem(ClimbingRulesTableBlockEntity.WORK_SLOT);
+            if (ClimbingRuleBookData.resolveDefinition(player.serverLevel().getServer(), source).isEmpty()) {
                 result(player, false, "message.pickclimber.rules.valid_book_required");
                 return;
             }
-            ItemStack material = table.getItem(ClimbingRulesTableBlockEntity.MATERIAL_BOOK_SLOT);
-            if (!material.is(Items.BOOK) || material.getCount() < copies) {
-                result(player, false, "message.pickclimber.rules.duplicate_books_required");
-                return;
-            }
-
-            DyeColor cover = dyeColor(table).orElse(source.get().coverColor());
-            boolean recolor = cover != source.get().coverColor();
-            if (recolor) {
-                ItemStack dye = table.getItem(ClimbingRulesTableBlockEntity.DYE_SLOT);
-                if (!hasMatchingDye(table, cover) || dye.getCount() < copies) {
-                    result(player, false, "message.pickclimber.rules.duplicate_dye_required");
-                    return;
-                }
-            }
-
-            ClimbingRuleBookDefinition duplicate = withCover(source.get(), cover);
-            ItemStack output = ClimbingRuleBookData.create(duplicate);
-            if (output.isEmpty()) {
-                result(player, false, "message.pickclimber.rules.invalid_profile");
-                return;
-            }
-            output.setCount(copies);
-            material.shrink(copies);
-            if (recolor) {
-                table.getItem(ClimbingRulesTableBlockEntity.DYE_SLOT).shrink(copies);
-            }
-            table.setChanged();
-            if (!player.getInventory().add(output)) {
-                player.drop(output, false);
-            }
-            result(player, true, "message.pickclimber.rules.duplicated");
+            RulesEditorSessionStore.invalidate(player);
+            ContainerLevelAccess access = ContainerLevelAccess.create(player.level(), payload.position());
+            player.openMenu(
+                    new SimpleMenuProvider(
+                            (id, inventory, ignored) -> new ClimbingRuleBookProcessingMenu(
+                                    id,
+                                    inventory,
+                                    table,
+                                    access
+                            ),
+                            Component.translatable("container.pickclimber.climbing_rule_book_processing")
+                    ),
+                    buffer -> buffer.writeBlockPos(payload.position())
+            );
         });
     }
 
-    private static void handleEject(EjectRuleBookPayload payload, IPayloadContext context) {
+    private static void handleClearRuleBook(ClearRuleBookPayload payload, IPayloadContext context) {
         withTable(context, payload.position(), (player, table) -> {
-            ItemStack stack = table.removeItemNoUpdate(ClimbingRulesTableBlockEntity.RULE_BOOK_SLOT);
-            if (stack.isEmpty()) {
+            ItemStack stack = table.getItem(ClimbingRulesTableBlockEntity.WORK_SLOT);
+            if (!stack.is(ModItems.CLIMBING_RULE_BOOK.get())) {
                 return;
             }
-            RulesEditorSessionStore.invalidate(player);
-            if (!player.getInventory().add(stack)) {
-                player.drop(stack, false);
-            }
+            table.setItem(ClimbingRulesTableBlockEntity.WORK_SLOT, new ItemStack(Items.BOOK));
             table.setChanged();
+            RulesEditorSessionStore.invalidate(player);
+            result(player, true, "message.pickclimber.rules.book_cleared");
         });
     }
 
@@ -216,15 +208,15 @@ public final class ClimbingRulesTableNetworking {
 
     private static void handleOpenEditor(OpenRulesEditorRequestPayload payload, IPayloadContext context) {
         withTable(context, payload.position(), (player, table) -> {
-            ItemStack ruleBook = table.getItem(ClimbingRulesTableBlockEntity.RULE_BOOK_SLOT);
-            Optional<ClimbingRuleBookDefinition> source = ClimbingRuleBookData.readDefinitionValidated(ruleBook);
+            ItemStack ruleBook = table.getItem(ClimbingRulesTableBlockEntity.WORK_SLOT);
+            Optional<ClimbingRuleBookDefinition> source = ClimbingRuleBookData.resolveDefinition(
+                    player.serverLevel().getServer(), ruleBook
+            );
             if (source.isEmpty()) {
                 result(player, false, "message.pickclimber.rules.valid_book_required");
                 return;
             }
-            DyeColor draftCover = dyeColor(table).orElse(source.get().coverColor());
-            ClimbingRuleBookDefinition draft = withCover(source.get(), draftCover);
-            openDraft(player, payload.position(), RulesEditorSessionStore.Operation.EDIT, source, draft);
+            openDraft(player, payload.position(), RulesEditorSessionStore.Operation.EDIT, source, source.get());
         });
     }
 
@@ -273,7 +265,7 @@ public final class ClimbingRulesTableNetworking {
             saveEdit(player, table, payload.position(), session, target);
             return;
         }
-        saveCreation(player, table, payload.position(), session, target);
+        saveCreation(player, table, payload.position(), target);
     }
 
     private static void saveEdit(
@@ -283,34 +275,52 @@ public final class ClimbingRulesTableNetworking {
             RulesEditorSessionStore.Session session,
             ClimbingRuleBookDefinition target
     ) {
-        ItemStack ruleBook = table.getItem(ClimbingRulesTableBlockEntity.RULE_BOOK_SLOT);
-        Optional<ClimbingRuleBookDefinition> current = ClimbingRuleBookData.readDefinitionValidated(ruleBook);
+        ItemStack ruleBook = table.getItem(ClimbingRulesTableBlockEntity.WORK_SLOT);
+        Optional<ClimbingRuleBookDefinition> current = ClimbingRuleBookData.resolveDefinition(
+                player.serverLevel().getServer(), ruleBook
+        );
         if (!ruleBook.is(ModItems.CLIMBING_RULE_BOOK.get())
                 || current.isEmpty()
                 || !session.matchesSource(current.get())) {
             result(player, false, "message.pickclimber.rules.stale_book");
             if (current.isPresent()) {
-                openEditFromTable(player, table, position, current.get());
+                openEditFromTable(player, position, current.get());
             } else {
                 RulesEditorSessionStore.invalidate(player);
             }
             return;
         }
-
-        boolean recolor = target.coverColor() != current.get().coverColor();
-        if (recolor && !hasMatchingDye(table, target.coverColor())) {
-            result(player, false, "message.pickclimber.rules.matching_dye_required");
-            return;
-        }
-        if (!ClimbingRuleBookData.write(ruleBook, target)) {
+        target = withAuthorIfMissing(target, player);
+        String expectedDefinitionId = RuleDefinitionId.of(target.profile());
+        if (!ClimbingRuleBookData.write(player.serverLevel().getServer(), ruleBook, target)) {
             result(player, false, "message.pickclimber.rules.invalid_profile");
             return;
         }
-        if (recolor) {
-            table.getItem(ClimbingRulesTableBlockEntity.DYE_SLOT).shrink(1);
+
+        Optional<ClimbingRuleBookData.Reference> persistedReference = ClimbingRuleBookData.readReference(ruleBook);
+        Optional<ClimbingRuleBookDefinition> persistedDefinition = ClimbingRuleBookData.resolveDefinition(
+                player.serverLevel().getServer(),
+                ruleBook
+        );
+        boolean persisted = persistedReference
+                .map(reference -> reference.definitionId().equals(expectedDefinitionId))
+                .orElse(false)
+                && persistedDefinition.map(target::equals).orElse(false);
+        if (!persisted) {
+            result(player, false, "message.pickclimber.rules.invalid_profile");
+            return;
         }
+
+        table.setItem(ClimbingRulesTableBlockEntity.WORK_SLOT, ruleBook.copy());
         table.setChanged();
-        openEditFromTable(player, table, position, target);
+        player.serverLevel().sendBlockUpdated(
+                position,
+                table.getBlockState(),
+                table.getBlockState(),
+                net.minecraft.world.level.block.Block.UPDATE_CLIENTS
+        );
+        RulesEditorSessionStore.invalidate(player);
+        openTable(player, table, position);
         result(player, true, "message.pickclimber.rules.book_saved");
     }
 
@@ -318,45 +328,56 @@ public final class ClimbingRulesTableNetworking {
             ServerPlayer player,
             ClimbingRulesTableBlockEntity table,
             BlockPos position,
-            RulesEditorSessionStore.Session session,
             ClimbingRuleBookDefinition target
     ) {
-        if (!table.getItem(ClimbingRulesTableBlockEntity.RULE_BOOK_SLOT).isEmpty()) {
-            result(player, false, "message.pickclimber.rules.rule_book_slot_occupied");
-            return;
-        }
-        ItemStack material = table.getItem(ClimbingRulesTableBlockEntity.MATERIAL_BOOK_SLOT);
-        if (!material.is(Items.BOOK)) {
+        ItemStack baseBook = table.getItem(ClimbingRulesTableBlockEntity.WORK_SLOT);
+        if (!baseBook.is(Items.BOOK)) {
             result(player, false, "message.pickclimber.rules.book_required");
             return;
         }
-        boolean consumeDye = target.coverColor() != DyeColor.WHITE;
-        if (consumeDye && !hasMatchingDye(table, target.coverColor())) {
-            result(player, false, "message.pickclimber.rules.matching_dye_required");
-            return;
-        }
-
-        ItemStack ruleBook = ClimbingRuleBookData.create(target);
+        target = withAuthorIfMissing(target, player);
+        ItemStack ruleBook = ClimbingRuleBookData.create(player.serverLevel().getServer(), target);
         if (ruleBook.isEmpty()) {
             result(player, false, "message.pickclimber.rules.invalid_profile");
             return;
         }
-        material.shrink(1);
-        if (consumeDye) {
-            table.getItem(ClimbingRulesTableBlockEntity.DYE_SLOT).shrink(1);
-        }
-        table.setItem(ClimbingRulesTableBlockEntity.RULE_BOOK_SLOT, ruleBook);
+        table.setItem(ClimbingRulesTableBlockEntity.WORK_SLOT, ruleBook);
         table.setChanged();
-        openEditFromTable(player, table, position, target);
+        RulesEditorSessionStore.invalidate(player);
+        openTable(player, table, position);
         result(player, true, "message.pickclimber.rules.book_created");
     }
 
-    private static boolean canStartCreation(ServerPlayer player, ClimbingRulesTableBlockEntity table) {
-        if (!table.getItem(ClimbingRulesTableBlockEntity.RULE_BOOK_SLOT).isEmpty()) {
-            result(player, false, "message.pickclimber.rules.rule_book_slot_occupied");
-            return false;
+
+    private static void importIntoTableBook(
+            ServerPlayer player,
+            ClimbingRulesTableBlockEntity table,
+            BlockPos position,
+            ClimbingRuleBookDefinition definition
+    ) {
+        definition = withAuthorIfMissing(definition, player);
+        ItemStack ruleBook = ClimbingRuleBookData.create(player.serverLevel().getServer(), definition);
+        if (ruleBook.isEmpty()) {
+            result(player, false, "message.pickclimber.rules.invalid_profile");
+            return;
         }
-        if (!table.getItem(ClimbingRulesTableBlockEntity.MATERIAL_BOOK_SLOT).is(Items.BOOK)) {
+        table.setItem(ClimbingRulesTableBlockEntity.WORK_SLOT, ruleBook);
+        table.setChanged();
+        RulesEditorSessionStore.invalidate(player);
+        openTable(player, table, position);
+        result(player, true, "message.pickclimber.rules.book_imported");
+    }
+
+    private static void openTable(
+            ServerPlayer player,
+            ClimbingRulesTableBlockEntity table,
+            BlockPos position
+    ) {
+        player.openMenu(table, buffer -> buffer.writeBlockPos(position));
+    }
+
+    private static boolean canStartCreation(ServerPlayer player, ClimbingRulesTableBlockEntity table) {
+        if (!table.getItem(ClimbingRulesTableBlockEntity.WORK_SLOT).is(Items.BOOK)) {
             result(player, false, "message.pickclimber.rules.book_required");
             return false;
         }
@@ -365,17 +386,15 @@ public final class ClimbingRulesTableNetworking {
 
     private static void openEditFromTable(
             ServerPlayer player,
-            ClimbingRulesTableBlockEntity table,
             BlockPos position,
             ClimbingRuleBookDefinition source
     ) {
-        DyeColor draftCover = dyeColor(table).orElse(source.coverColor());
         openDraft(
                 player,
                 position,
                 RulesEditorSessionStore.Operation.EDIT,
                 Optional.of(source),
-                withCover(source, draftCover)
+                source
         );
     }
 
@@ -429,28 +448,14 @@ public final class ClimbingRulesTableNetworking {
         context.player().displayClientMessage(Component.translatable(payload.messageKey()).withStyle(color), true);
     }
 
-    private static Optional<DyeColor> dyeColor(ClimbingRulesTableBlockEntity table) {
-        ItemStack dye = table.getItem(ClimbingRulesTableBlockEntity.DYE_SLOT);
-        return dye.getItem() instanceof DyeItem dyeItem ? Optional.of(dyeItem.getDyeColor()) : Optional.empty();
-    }
-
-    private static boolean hasMatchingDye(ClimbingRulesTableBlockEntity table, DyeColor color) {
-        return dyeColor(table).filter(found -> found == color).isPresent();
-    }
-
-    private static ClimbingRuleBookDefinition withCover(
+    private static ClimbingRuleBookDefinition withAuthorIfMissing(
             ClimbingRuleBookDefinition definition,
-            DyeColor cover
+            ServerPlayer player
     ) {
-        return new ClimbingRuleBookDefinition(
-                definition.formatVersion(),
-                definition.bookName(),
-                cover,
-                definition.profile(),
-                definition.activationMode(),
-                definition.scope(),
-                definition.durationSeconds()
-        );
+        if (!definition.authorName().isBlank()) {
+            return definition;
+        }
+        return definition.withAuthor(player.getUUID().toString(), player.getGameProfile().getName());
     }
 
     private static String validationMessageKey(ClimbingRuleBookValidationResult validation) {

@@ -12,11 +12,13 @@
 - Mechanical profile format: `1`
 - Client config: `3`
 
-`1.2.0-dev.21` is the current materialized development cut. It includes full Rule Book authoring, Permanent/Temporary
+`1.2.0-dev.37` is the current materialized development cut after the Rule Definition architecture migration started during dev.22 QA. It includes full Rule Book authoring, Permanent/Temporary
 WORLD, Temporary PLAYER overlays, Climbing Rule Dispenser transport issuance, Rules/Book countdown HUD, Structural
-Geometry Safety, the read-only Viewer, Duplicate GUI, portable JSON hardening, strict legacy migration and the final
-Rule Book/Table/Terminal/Dispenser visual pass, plus optional JEI/EMI documentation integrations. `1.2.0-dev.20`
-passed the real Windows `clean build` and is the accepted stable/build-clean baseline underneath this pass. dev.21 requires its own build acceptance before promotion.
+Geometry Safety, the read-only Viewer, portable JSON hardening, strict legacy migration, final visual assets and optional
+JEI/EMI documentation integrations. dev.22 additionally completes the contextual one-slot Rules Table, separate Clone/Dye
+Processing menu, flat Pickaxe Wear semantics, filtered 10-column catalog with scrollbar, visible Dispenser configuration
+GUI and corrected player-look placement. `1.2.0-dev.20` remains the last user-confirmed Windows build-clean baseline;
+dev.33 requires a fresh `clean build`, FPS regression benchmark and multiplayer/runtime QA before promotion.
 
 ## 2. Authority model
 

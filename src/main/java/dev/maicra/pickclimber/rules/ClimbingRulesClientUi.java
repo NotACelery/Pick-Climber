@@ -7,8 +7,11 @@ public final class ClimbingRulesClientUi {
     };
     private static final RuleBookViewerOpener NO_OP_VIEWER = definition -> {
     };
+    private static final RuleBookExporterOpener NO_OP_EXPORTER = definition -> {
+    };
     private static RulesEditorOpener editorOpener = NO_OP;
     private static RuleBookViewerOpener viewerOpener = NO_OP_VIEWER;
+    private static RuleBookExporterOpener exporterOpener = NO_OP_EXPORTER;
 
     private ClimbingRulesClientUi() {
     }
@@ -25,6 +28,14 @@ public final class ClimbingRulesClientUi {
         viewerOpener.open(definition);
     }
 
+    public static void installExporter(RuleBookExporterOpener opener) {
+        exporterOpener = opener == null ? NO_OP_EXPORTER : opener;
+    }
+
+    public static void openExporter(ClimbingRuleBookDefinition definition) {
+        exporterOpener.open(definition);
+    }
+
     public static void openEditor(
             BlockPos position,
             int sessionToken,
@@ -35,6 +46,11 @@ public final class ClimbingRulesClientUi {
 
     @FunctionalInterface
     public interface RuleBookViewerOpener {
+        void open(ClimbingRuleBookDefinition definition);
+    }
+
+    @FunctionalInterface
+    public interface RuleBookExporterOpener {
         void open(ClimbingRuleBookDefinition definition);
     }
 

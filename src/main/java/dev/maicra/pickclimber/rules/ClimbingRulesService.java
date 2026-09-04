@@ -2,6 +2,7 @@ package dev.maicra.pickclimber.rules;
 
 import dev.maicra.pickclimber.climb.ClimbManager;
 import dev.maicra.pickclimber.rules.persistence.ClimbingRulesSavedData;
+import dev.maicra.pickclimber.rules.persistence.RuleDefinitionLibrarySavedData;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
@@ -40,6 +41,9 @@ public final class ClimbingRulesService {
         }
 
         ClimbingRuleBookDefinition normalized = validation.normalizedDefinition();
+        if (normalized.authorName().isBlank()) {
+            normalized = normalized.withAuthor(player.getUUID().toString(), player.getGameProfile().getName());
+        }
         if (normalized.activationMode() == RuleBookActivationMode.PERMANENT) {
             return applyPermanent(player.serverLevel().getServer(), normalized);
         }
@@ -116,13 +120,6 @@ public final class ClimbingRulesService {
         return PlayerRulesSessionStore.snapshot(player, data.policyRevision());
     }
 
-    public static long durabilityPolicyRevision(Level level) {
-        if (level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
-            return ClimbingRulesSavedData.get(serverLevel.getServer()).policyRevision();
-        }
-        return level.isClientSide() ? ClimbingRulesClientState.worldPolicyRevision() : 0L;
-    }
-
     public static ClimbingRulesRuntimeView runtimeView(Level level) {
         if (level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
             return ClimbingRulesSavedData.get(serverLevel.getServer()).runtimeView();
@@ -146,6 +143,7 @@ public final class ClimbingRulesService {
             return RuleBookApplicationResult.rejected("message.pickclimber.rules.no_effective_change");
         }
 
+        RuleDefinitionLibrarySavedData.get(server).register(definition.profile());
         data.applyPermanent(definition);
         synchronizeWorldAndCancelPlayerOverlays(server, true);
         return RuleBookApplicationResult.applied("message.pickclimber.rules.permanent_applied");
@@ -162,6 +160,7 @@ public final class ClimbingRulesService {
             if (!activeTemporary.get().profile().mechanicallyEquals(definition.profile())) {
                 return RuleBookApplicationResult.rejected("message.pickclimber.rules.temporary_conflict");
             }
+            RuleDefinitionLibrarySavedData.get(server).register(definition.profile());
             data.refreshTemporary(definition, expiresAt);
             synchronizeWorldAndCancelPlayerOverlays(server, true);
             return RuleBookApplicationResult.refreshed("message.pickclimber.rules.temporary_refreshed");
@@ -175,6 +174,7 @@ public final class ClimbingRulesService {
             return RuleBookApplicationResult.rejected("message.pickclimber.rules.no_effective_change");
         }
 
+        RuleDefinitionLibrarySavedData.get(server).register(definition.profile());
         data.startTemporary(definition, expiresAt);
         synchronizeWorldAndCancelPlayerOverlays(server, true);
         return RuleBookApplicationResult.applied("message.pickclimber.rules.temporary_applied");
@@ -192,6 +192,7 @@ public final class ClimbingRulesService {
             if (!active.get().definition().profile().mechanicallyEquals(definition.profile())) {
                 return RuleBookApplicationResult.rejected("message.pickclimber.rules.player_temporary_conflict");
             }
+            RuleDefinitionLibrarySavedData.get(server).register(definition.profile());
             PlayerRulesSessionStore.Session refreshed = PlayerRulesSessionStore.refresh(player, definition, expiresAt);
             PlayerRulesSynchronization.sendToPlayer(player, refreshed.snapshot());
             return RuleBookApplicationResult.refreshed("message.pickclimber.rules.player_temporary_refreshed");
@@ -206,6 +207,7 @@ public final class ClimbingRulesService {
             return RuleBookApplicationResult.rejected("message.pickclimber.rules.no_effective_change");
         }
 
+        RuleDefinitionLibrarySavedData.get(server).register(definition.profile());
         PlayerRulesSessionStore.Session started = PlayerRulesSessionStore.start(
                 player,
                 definition,

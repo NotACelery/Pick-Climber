@@ -45,7 +45,7 @@ public final class ClimbingRulesTerminalBlock extends Block {
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return defaultBlockState().setValue(FACING, context.getClickedFace());
+        return defaultBlockState().setValue(FACING, context.getNearestLookingDirection().getOpposite());
     }
 
     @Override
@@ -74,28 +74,26 @@ public final class ClimbingRulesTerminalBlock extends Block {
             BlockHitResult hit
     ) {
         Optional<TemporaryRuleBookData.TransportData> transport = TemporaryRuleBookData.readValidated(stack);
-        Optional<ClimbingRuleBookDefinition> currentBook = ClimbingRuleBookData.readCurrentDefinitionValidated(stack);
-        if (transport.isEmpty()
-                && currentBook.isEmpty()
-                && ClimbingRuleBookData.readDefinitionValidated(stack).isPresent()) {
-            if (!level.isClientSide()) {
-                player.displayClientMessage(
-                        Component.translatable("message.pickclimber.rules.legacy_requires_table"),
-                        true
-                );
-            }
-            return ItemInteractionResult.FAIL;
-        }
-        Optional<ClimbingRuleBookDefinition> definition = transport
-                .map(TemporaryRuleBookData.TransportData::definition)
-                .or(() -> currentBook);
-        if (definition.isEmpty()) {
+        boolean regularRuleBook = ClimbingRuleBookData.hasCurrentSchema(stack);
+        if (transport.isEmpty() && !regularRuleBook) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
         if (level.isClientSide()) {
             return ItemInteractionResult.SUCCESS;
         }
         if (!(player instanceof ServerPlayer serverPlayer)) {
+            return ItemInteractionResult.FAIL;
+        }
+        Optional<ClimbingRuleBookDefinition> definition = transport
+                .flatMap(data -> TemporaryRuleBookData.resolveDefinition(
+                        serverPlayer.serverLevel().getServer(),
+                        data
+                ))
+                .or(() -> ClimbingRuleBookData.resolveDefinition(serverPlayer.serverLevel().getServer(), stack));
+        if (definition.isEmpty()) {
+            serverPlayer.displayClientMessage(
+                    Component.translatable("message.pickclimber.rules.valid_book_required"), true
+            );
             return ItemInteractionResult.FAIL;
         }
         if (transport.isPresent()) {

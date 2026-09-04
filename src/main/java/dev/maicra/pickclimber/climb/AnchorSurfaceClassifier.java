@@ -1,8 +1,10 @@
 package dev.maicra.pickclimber.climb;
 
 import dev.maicra.pickclimber.PickClimber;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -16,6 +18,10 @@ public final class AnchorSurfaceClassifier {
     }
 
     public static AnchorSurface classify(BlockState state) {
+        String blockPath = BuiltInRegistries.BLOCK.getKey(state.getBlock()).getPath();
+        if (state.is(BlockTags.LEAVES) || blockPath.contains("leaves")) {
+            return AnchorSurface.UNCLIMBABLE;
+        }
         if (state.is(UNCLIMBABLE_BLOCKS)) {
             return AnchorSurface.UNCLIMBABLE;
         }

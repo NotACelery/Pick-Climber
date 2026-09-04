@@ -148,7 +148,7 @@ ClimbingRuleBookDefinition
 │   ├── unstableBlocks
 │   ├── unclimbableBlocks
 │   ├── unlistedPolicy
-│   ├── durabilityMultiplierPercent
+│   ├── pickaxeWear
 │   ├── playerMiningEnabled
 │   └── unmineableTerminals
 └── activation
@@ -679,7 +679,7 @@ EffectiveClimbingRulesService.resolve(player)
 Debe alimentar:
 
 - surface resolution;
-- durability multiplier;
+- flat Pickaxe Wear;
 - Player Mining;
 - Unmineable Terminals;
 - client sync/HUD view.

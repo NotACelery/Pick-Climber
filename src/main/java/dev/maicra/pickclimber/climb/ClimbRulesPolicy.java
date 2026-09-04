@@ -14,11 +14,12 @@ public interface ClimbRulesPolicy {
         return baseline;
     }
 
-    default int durabilityMultiplierPercent(Player player) {
-        return 100;
+    /**
+     * Returns the configured flat durability loss for standard climbing interactions.
+     * A negative value means no climbing rules override is active and vanilla Pick Climber tuning applies.
+     */
+    default int pickaxeWear(Player player) {
+        return -1;
     }
 
-    default long durabilityPolicyRevision(Player player) {
-        return 0L;
-    }
 }

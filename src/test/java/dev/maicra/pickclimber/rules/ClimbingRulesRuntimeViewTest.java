@@ -16,7 +16,7 @@ class ClimbingRulesRuntimeViewTest {
 
         assertFalse(view.active());
         assertEquals(UnlistedPolicy.USE_PICK_CLIMBER_DEFAULTS, view.unlistedPolicy());
-        assertEquals(100, view.durabilityMultiplierPercent());
+        assertEquals(15, view.pickaxeWear());
         assertTrue(view.playerMiningEnabled());
         assertFalse(view.unmineableTerminals());
     }
@@ -45,7 +45,7 @@ class ClimbingRulesRuntimeViewTest {
         assertEquals(SurfaceClassification.UNSTABLE, view.classificationOverride(unstable).orElseThrow());
         assertEquals(SurfaceClassification.UNCLIMBABLE, view.classificationOverride(blocked).orElseThrow());
         assertEquals(UnlistedPolicy.UNCLIMBABLE, view.unlistedPolicy());
-        assertEquals(50, view.durabilityMultiplierPercent());
+        assertEquals(50, view.pickaxeWear());
         assertFalse(view.playerMiningEnabled());
         assertTrue(view.unmineableTerminals());
     }

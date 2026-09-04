@@ -34,7 +34,9 @@ public final class ClimbingRuleBookCodec {
             ClimbingRulesProfileCodec.CODEC.fieldOf("profile").forGetter(ClimbingRuleBookDefinition::profile),
             ACTIVATION_CODEC.fieldOf("activation").forGetter(ClimbingRuleBookDefinition::activationMode),
             SCOPE_CODEC.fieldOf("scope").forGetter(ClimbingRuleBookDefinition::scope),
-            Codec.INT.optionalFieldOf("duration_seconds", 0).forGetter(ClimbingRuleBookDefinition::durationSeconds)
+            Codec.INT.optionalFieldOf("duration_seconds", 0).forGetter(ClimbingRuleBookDefinition::durationSeconds),
+            Codec.STRING.optionalFieldOf("author_uuid", "").forGetter(ClimbingRuleBookDefinition::authorUuid),
+            Codec.STRING.optionalFieldOf("author_name", "").forGetter(ClimbingRuleBookDefinition::authorName)
     ).apply(instance, ClimbingRuleBookDefinition::new));
 
     private ClimbingRuleBookCodec() {

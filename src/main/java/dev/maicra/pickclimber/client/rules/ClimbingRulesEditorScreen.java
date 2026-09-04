@@ -8,6 +8,7 @@ import dev.maicra.pickclimber.rules.RuleBookScope;
 import dev.maicra.pickclimber.rules.SurfaceClassification;
 import dev.maicra.pickclimber.rules.UnlistedPolicy;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -21,18 +22,21 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.function.IntConsumer;
 
 public final class ClimbingRulesEditorScreen extends Screen {
-    private static final int CELL = 20;
-    private static final int COLUMNS = 8;
+    private static final int CELL = 22;
+    private static final int COLUMNS = 10;
     private static final int GRID_WIDTH = COLUMNS * CELL;
-    private static final int GRID_TOP = 92;
-    private static final int SIDE_WIDTH = 164;
-    private static final int PANEL_GAP = 12;
-    private static final int MIN_WIDE_WIDTH = 370;
+    private static final int GRID_TOP = 98;
+    private static final int SIDE_WIDTH = 240;
+    private static final int PANEL_GAP = 18;
+    private static final int MIN_WIDE_WIDTH = 520;
+    private static final int MIN_WIDE_HEIGHT = 330;
     private static final int NARROW_SCROLL_STEP = 24;
     private static final int NARROW_VIEW_TOP = 20;
     private static final int NARROW_BOTTOM_MARGIN = 8;
+    private static final int SCROLLBAR_WIDTH = 6;
 
     private final Screen parent;
     private final BlockPos tablePosition;
@@ -41,23 +45,28 @@ public final class ClimbingRulesEditorScreen extends Screen {
     private final Set<ResourceLocation> unstable;
     private final Set<ResourceLocation> unclimbable;
     private final Set<ResourceLocation> selected = new LinkedHashSet<>();
+    private final Set<ResourceLocation> clearedToUnclimbable = new LinkedHashSet<>();
     private final List<BlockCatalogService.Entry> catalog;
     private final Set<ResourceLocation> missingIds;
 
     private EditBox searchBox;
     private EditBox profileName;
-    private EditBox durabilityField;
+    private Button allTabButton;
     private Button stableTabButton;
     private Button unstableTabButton;
     private Button unclimbableTabButton;
+    private Button stableAssignButton;
+    private Button unstableAssignButton;
+    private Button unclimbableAssignButton;
     private Button miningButton;
     private Button terminalsButton;
     private Button activationButton;
     private Button scopeButton;
+    private WearSlider wearSlider;
     private EditBox durationField;
-    private SurfaceClassification tab = SurfaceClassification.STABLE;
-    private UnlistedPolicy unlistedPolicy;
-    private int durabilityMultiplierPercent;
+    private ViewTab tab = ViewTab.ALL;
+    private SurfaceClassification assignmentMode;
+    private int pickaxeWear;
     private boolean playerMiningEnabled;
     private boolean unmineableTerminals;
     private final DyeColor coverColor;
@@ -78,6 +87,8 @@ public final class ClimbingRulesEditorScreen extends Screen {
     private int sideTop;
     private int narrowScrollOffset;
     private int narrowContentHeight;
+    private boolean scrollbarDragging;
+    private boolean narrowScrollbarDragging;
 
     public ClimbingRulesEditorScreen(
             Screen parent,
@@ -94,8 +105,7 @@ public final class ClimbingRulesEditorScreen extends Screen {
         unstable = new LinkedHashSet<>(profile.unstableBlocks());
         unclimbable = new LinkedHashSet<>(profile.unclimbableBlocks());
         draftProfileName = definition.bookName();
-        unlistedPolicy = profile.unlistedPolicy();
-        durabilityMultiplierPercent = profile.durabilityMultiplierPercent();
+        pickaxeWear = profile.pickaxeWear();
         playerMiningEnabled = profile.playerMiningEnabled();
         unmineableTerminals = profile.unmineableTerminals();
         coverColor = definition.coverColor();
@@ -109,15 +119,15 @@ public final class ClimbingRulesEditorScreen extends Screen {
     @Override
     protected void init() {
         calculateLayout();
-
         int contentOffset = wideLayout ? 0 : -narrowScrollOffset;
-        profileName = new EditBox(font, gridLeft, 22 + contentOffset, GRID_WIDTH, 18, Component.empty());
+
+        profileName = new EditBox(font, gridLeft, 26 + contentOffset, GRID_WIDTH, 18, Component.empty());
         profileName.setMaxLength(ClimbingRulesProfile.MAX_PROFILE_NAME_LENGTH);
         profileName.setValue(draftProfileName);
         profileName.setResponder(value -> draftProfileName = value);
         addRenderableWidget(profileName);
 
-        searchBox = new EditBox(font, gridLeft, 45 + contentOffset, GRID_WIDTH, 18, Component.empty());
+        searchBox = new EditBox(font, gridLeft, 50 + contentOffset, GRID_WIDTH, 18, Component.empty());
         searchBox.setHint(Component.translatable("gui.pickclimber.rules.search"));
         searchBox.setValue(searchQuery);
         searchBox.setResponder(value -> {
@@ -126,20 +136,34 @@ public final class ClimbingRulesEditorScreen extends Screen {
         });
         addRenderableWidget(searchBox);
 
-        int tabsTop = 67 + contentOffset;
-        stableTabButton = addRenderableWidget(
-                tabButton(SurfaceClassification.STABLE, gridLeft, tabsTop, "gui.pickclimber.rules.stable")
-        );
-        unstableTabButton = addRenderableWidget(tabButton(
-                SurfaceClassification.UNSTABLE,
-                gridLeft + 54,
+        int tabsTop = 74 + contentOffset;
+        int tabsLeft = gridLeft - 14;
+        allTabButton = addRenderableWidget(tabButton(
+                ViewTab.ALL,
+                tabsLeft,
                 tabsTop,
+                42,
+                "gui.pickclimber.rules.all"
+        ));
+        stableTabButton = addRenderableWidget(tabButton(
+                ViewTab.STABLE,
+                tabsLeft + 46,
+                tabsTop,
+                48,
+                "gui.pickclimber.rules.stable"
+        ));
+        unstableTabButton = addRenderableWidget(tabButton(
+                ViewTab.UNSTABLE,
+                tabsLeft + 98,
+                tabsTop,
+                56,
                 "gui.pickclimber.rules.unstable"
         ));
         unclimbableTabButton = addRenderableWidget(tabButton(
-                SurfaceClassification.UNCLIMBABLE,
-                gridLeft + 108,
+                ViewTab.UNCLIMBABLE,
+                tabsLeft + 158,
                 tabsTop,
+                70,
                 "gui.pickclimber.rules.unclimbable"
         ));
         refreshTabButtons();
@@ -163,6 +187,11 @@ public final class ClimbingRulesEditorScreen extends Screen {
         }
         super.render(gui, mouseX, mouseY, partialTick);
         renderGrid(gui, mouseX, mouseY);
+        renderScrollbar(gui);
+        renderPanelLabels(gui);
+        renderAssignmentButtonBorders(gui);
+        renderTabIndicator(gui);
+        renderNarrowScrollbar(gui);
         if (!wideLayout) {
             gui.disableScissor();
         }
@@ -172,6 +201,12 @@ public final class ClimbingRulesEditorScreen extends Screen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (button == 0 && clickNarrowScrollbar(mouseX, mouseY)) {
+            return true;
+        }
+        if (button == 0 && clickScrollbar(mouseX, mouseY)) {
+            return true;
+        }
         if (button == 0 && clickGrid(mouseX, mouseY)) {
             return true;
         }
@@ -179,12 +214,38 @@ public final class ClimbingRulesEditorScreen extends Screen {
     }
 
     @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (button == 0 && narrowScrollbarDragging) {
+            updateNarrowScrollFromMouse(mouseY);
+            return true;
+        }
+        if (button == 0 && scrollbarDragging) {
+            updateScrollFromMouse(mouseY);
+            return true;
+        }
+        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (button == 0 && narrowScrollbarDragging) {
+            narrowScrollbarDragging = false;
+            return true;
+        }
+        if (button == 0 && scrollbarDragging) {
+            scrollbarDragging = false;
+            return true;
+        }
+        return super.mouseReleased(mouseX, mouseY, button);
+    }
+
+    @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         boolean overGrid = mouseX >= gridLeft
-                && mouseX < gridLeft + GRID_WIDTH
+                && mouseX < gridLeft + GRID_WIDTH + SCROLLBAR_WIDTH + 4
                 && mouseY >= gridTop
                 && mouseY < gridTop + gridHeight();
-        if (overGrid) {
+        if (overGrid && scrollY != 0.0D) {
             int direction = scrollY > 0.0D ? -1 : 1;
             int previous = scrollRow;
             scrollRow = Math.max(0, Math.min(maxScrollRows(), scrollRow + direction));
@@ -212,15 +273,15 @@ public final class ClimbingRulesEditorScreen extends Screen {
     }
 
     private void calculateLayout() {
-        wideLayout = width >= MIN_WIDE_WIDTH && height >= 290;
+        wideLayout = width >= MIN_WIDE_WIDTH && height >= MIN_WIDE_HEIGHT;
         if (wideLayout) {
             narrowScrollOffset = 0;
             int totalWidth = GRID_WIDTH + PANEL_GAP + SIDE_WIDTH;
             gridLeft = Math.max(8, (width - totalWidth) / 2);
             gridTop = GRID_TOP;
-            visibleRows = Math.max(1, Math.min(6, (height - GRID_TOP - 78) / CELL));
+            visibleRows = Math.max(3, Math.min(8, (height - GRID_TOP - 88) / CELL));
             sideLeft = gridLeft + GRID_WIDTH + PANEL_GAP;
-            sideTop = 45;
+            sideTop = 60;
             actionTop = gridTop + gridHeight() + 6;
             narrowContentHeight = 0;
             return;
@@ -229,8 +290,8 @@ public final class ClimbingRulesEditorScreen extends Screen {
         gridLeft = Math.max(8, (width - GRID_WIDTH) / 2);
         visibleRows = 4;
         int baseActionTop = GRID_TOP + gridHeight() + 6;
-        int baseSideTop = baseActionTop + 72;
-        narrowContentHeight = baseSideTop + 216;
+        int baseSideTop = baseActionTop + 78;
+        narrowContentHeight = baseSideTop + 246;
         narrowScrollOffset = Math.max(0, Math.min(maxNarrowScrollOffset(), narrowScrollOffset));
         gridTop = GRID_TOP - narrowScrollOffset;
         actionTop = baseActionTop - narrowScrollOffset;
@@ -241,20 +302,26 @@ public final class ClimbingRulesEditorScreen extends Screen {
     private void addSelectionControls() {
         addRenderableWidget(Button.builder(Component.translatable("gui.pickclimber.rules.select_visible"), button ->
                 selectVisiblePage()
-        ).bounds(gridLeft, actionTop, 78, 20).build());
-        addRenderableWidget(Button.builder(Component.translatable("gui.pickclimber.rules.clear_selection"), button ->
-                selected.clear()
-        ).bounds(gridLeft + 82, actionTop, 78, 20).build());
+        ).bounds(gridLeft, actionTop, 98, 20).build());
+        addRenderableWidget(Button.builder(Component.translatable("gui.pickclimber.rules.clear_selection"), button -> {
+            selected.clear();
+            assignmentMode = null;
+            refreshAssignmentButtons();
+        }).bounds(gridLeft + 102, actionTop, 98, 20).build());
 
-        addRenderableWidget(Button.builder(Component.translatable("gui.pickclimber.rules.set_stable"), button ->
-                assignSelected(SurfaceClassification.STABLE)
-        ).bounds(gridLeft, actionTop + 24, 50, 20).build());
-        addRenderableWidget(Button.builder(Component.translatable("gui.pickclimber.rules.set_unstable"), button ->
-                assignSelected(SurfaceClassification.UNSTABLE)
-        ).bounds(gridLeft + 54, actionTop + 24, 50, 20).build());
-        addRenderableWidget(Button.builder(Component.translatable("gui.pickclimber.rules.set_unclimbable"), button ->
-                assignSelected(SurfaceClassification.UNCLIMBABLE)
-        ).bounds(gridLeft + 108, actionTop + 24, 52, 20).build());
+        stableAssignButton = addRenderableWidget(Button.builder(
+                Component.translatable("gui.pickclimber.rules.stable"),
+                button -> chooseAssignmentMode(SurfaceClassification.STABLE)
+        ).bounds(gridLeft, actionTop + 24, 56, 20).build());
+        unstableAssignButton = addRenderableWidget(Button.builder(
+                Component.translatable("gui.pickclimber.rules.unstable"),
+                button -> chooseAssignmentMode(SurfaceClassification.UNSTABLE)
+        ).bounds(gridLeft + 60, actionTop + 24, 60, 20).build());
+        unclimbableAssignButton = addRenderableWidget(Button.builder(
+                Component.translatable("gui.pickclimber.rules.unclimbable"),
+                button -> chooseAssignmentMode(SurfaceClassification.UNCLIMBABLE)
+        ).bounds(gridLeft + 124, actionTop + 24, 76, 20).build());
+        refreshAssignmentButtons();
 
         addRenderableWidget(Button.builder(Component.translatable("gui.pickclimber.rules.restore_selected"), button ->
                 restoreSelected()
@@ -262,41 +329,27 @@ public final class ClimbingRulesEditorScreen extends Screen {
     }
 
     private void addRulesControls() {
-        addRenderableWidget(Button.builder(unlistedMessage(), button -> {
-            unlistedPolicy = unlistedPolicy == UnlistedPolicy.USE_PICK_CLIMBER_DEFAULTS
-                    ? UnlistedPolicy.UNCLIMBABLE
-                    : UnlistedPolicy.USE_PICK_CLIMBER_DEFAULTS;
-            button.setMessage(unlistedMessage());
-        }).bounds(sideLeft, sideTop, SIDE_WIDTH, 20).build());
-
-        durabilityField = new EditBox(
-                font,
+        wearSlider = addRenderableWidget(new WearSlider(
                 sideLeft,
-                sideTop + 24,
-                76,
-                20,
-                Component.translatable("gui.pickclimber.rules.durability")
-        );
-        durabilityField.setMaxLength(3);
-        durabilityField.setFilter(value -> value.matches("\\d{0,3}"));
-        durabilityField.setValue(Integer.toString(durabilityMultiplierPercent));
-        durabilityField.setResponder(this::updateDurabilityValue);
-        addRenderableWidget(durabilityField);
-
-        addRenderableWidget(Button.builder(Component.translatable("gui.pickclimber.rules.reset_100"), button -> {
-            durabilityMultiplierPercent = ClimbingRulesProfile.DEFAULT_DURABILITY_MULTIPLIER_PERCENT;
-            durabilityField.setValue(Integer.toString(durabilityMultiplierPercent));
-        }).bounds(sideLeft + 80, sideTop + 24, 84, 20).build());
+                sideTop + 12,
+                140,
+                pickaxeWear,
+                value -> pickaxeWear = value
+        ));
+        addRenderableWidget(Button.builder(Component.translatable("gui.pickclimber.rules.reset_15"), button -> {
+            pickaxeWear = ClimbingRulesProfile.DEFAULT_PICKAXE_WEAR;
+            wearSlider.setWear(pickaxeWear);
+        }).bounds(sideLeft + 172, sideTop + 12, 68, 20).build());
 
         miningButton = addRenderableWidget(Button.builder(miningMessage(), button -> {
             playerMiningEnabled = !playerMiningEnabled;
             button.setMessage(miningMessage());
-        }).bounds(sideLeft, sideTop + 48, SIDE_WIDTH, 20).build());
+        }).bounds(sideLeft, sideTop + 40, SIDE_WIDTH, 20).build());
 
         terminalsButton = addRenderableWidget(Button.builder(terminalsMessage(), button -> {
             unmineableTerminals = !unmineableTerminals;
             button.setMessage(terminalsMessage());
-        }).bounds(sideLeft, sideTop + 72, SIDE_WIDTH, 20).build());
+        }).bounds(sideLeft, sideTop + 64, SIDE_WIDTH, 20).build());
 
         activationButton = addRenderableWidget(Button.builder(activationMessage(), button -> {
             activationMode = activationMode == RuleBookActivationMode.PERMANENT
@@ -309,57 +362,85 @@ public final class ClimbingRulesEditorScreen extends Screen {
                 durationSeconds = 60;
             }
             rebuildWidgets();
-        }).bounds(sideLeft, sideTop + 96, SIDE_WIDTH, 20).build());
+        }).bounds(sideLeft, sideTop + 88, SIDE_WIDTH, 20).build());
 
         scopeButton = addRenderableWidget(Button.builder(scopeMessage(), button -> {
             scope = scope == RuleBookScope.WORLD ? RuleBookScope.PLAYER : RuleBookScope.WORLD;
             button.setMessage(scopeMessage());
-        }).bounds(sideLeft, sideTop + 120, SIDE_WIDTH, 20).build());
+        }).bounds(sideLeft, sideTop + 112, SIDE_WIDTH, 20).build());
         scopeButton.visible = activationMode == RuleBookActivationMode.TEMPORARY;
 
         durationField = new EditBox(
                 font,
                 sideLeft,
-                sideTop + 144,
+                sideTop + 152,
                 SIDE_WIDTH,
                 20,
-                Component.translatable("gui.pickclimber.rules.duration")
+                Component.translatable("gui.pickclimber.rules.duration_seconds")
         );
         durationField.setMaxLength(7);
         durationField.setFilter(value -> value.matches("\\d{0,7}"));
         durationField.setValue(Integer.toString(durationSeconds));
         durationField.setResponder(this::updateDurationValue);
-        durationField.setHint(Component.translatable("gui.pickclimber.rules.duration_hint"));
         durationField.visible = activationMode == RuleBookActivationMode.TEMPORARY;
         addRenderableWidget(durationField);
 
-        int saveTop = sideTop + 168;
+        int saveTop = sideTop + 180;
         addRenderableWidget(Button.builder(Component.translatable("gui.pickclimber.rules.save_book"), button -> save())
-                .bounds(sideLeft, saveTop, wideLayout ? SIDE_WIDTH : 78, 20)
+                .bounds(sideLeft, saveTop, SIDE_WIDTH, 20)
                 .build());
-        addRenderableWidget(Button.builder(Component.translatable("gui.done"), button -> onClose())
-                .bounds(wideLayout ? sideLeft : sideLeft + 82, saveTop + 24, wideLayout ? SIDE_WIDTH : 78, 20)
+        addRenderableWidget(Button.builder(
+                Component.translatable("gui.pickclimber.rules.exit_without_saving"),
+                button -> onClose()
+        ).bounds(sideLeft, saveTop + 24, SIDE_WIDTH, 20)
                 .build());
     }
 
-    private Button tabButton(SurfaceClassification target, int x, int y, String key) {
+    private Button tabButton(ViewTab target, int x, int y, int buttonWidth, String key) {
         Button button = Button.builder(Component.translatable(key), clicked -> {
             tab = target;
+            selected.clear();
             refreshTabButtons();
-        }).bounds(x, y, 50, 20).build();
+            rebuildFilter();
+        }).bounds(x, y, buttonWidth, 20).build();
         button.active = target != tab;
         return button;
     }
 
     private void refreshTabButtons() {
+        if (allTabButton != null) {
+            allTabButton.active = tab != ViewTab.ALL;
+        }
         if (stableTabButton != null) {
-            stableTabButton.active = tab != SurfaceClassification.STABLE;
+            stableTabButton.active = tab != ViewTab.STABLE;
         }
         if (unstableTabButton != null) {
-            unstableTabButton.active = tab != SurfaceClassification.UNSTABLE;
+            unstableTabButton.active = tab != ViewTab.UNSTABLE;
         }
         if (unclimbableTabButton != null) {
-            unclimbableTabButton.active = tab != SurfaceClassification.UNCLIMBABLE;
+            unclimbableTabButton.active = tab != ViewTab.UNCLIMBABLE;
+        }
+    }
+
+    private void chooseAssignmentMode(SurfaceClassification mode) {
+        assignmentMode = mode;
+        if (!selected.isEmpty()) {
+            assignSelected(mode);
+            selected.clear();
+            rebuildFilter();
+        }
+        refreshAssignmentButtons();
+    }
+
+    private void refreshAssignmentButtons() {
+        if (stableAssignButton != null) {
+            stableAssignButton.active = assignmentMode != SurfaceClassification.STABLE;
+        }
+        if (unstableAssignButton != null) {
+            unstableAssignButton.active = assignmentMode != SurfaceClassification.UNSTABLE;
+        }
+        if (unclimbableAssignButton != null) {
+            unclimbableAssignButton.active = assignmentMode != SurfaceClassification.UNCLIMBABLE;
         }
     }
 
@@ -369,11 +450,10 @@ public final class ClimbingRulesEditorScreen extends Screen {
 
     private void rebuildFilter(boolean resetScroll) {
         String query = searchQuery.trim().toLowerCase(Locale.ROOT);
-        if (query.isEmpty()) {
-            filtered = catalog;
-        } else {
-            filtered = catalog.stream().filter(entry -> entry.matches(query)).toList();
-        }
+        filtered = catalog.stream()
+                .filter(entry -> query.isEmpty() || entry.matches(query))
+                .filter(entry -> tab == ViewTab.ALL || tab.matches(classification(entry.id())))
+                .toList();
         if (resetScroll) {
             scrollRow = 0;
         }
@@ -385,29 +465,157 @@ public final class ClimbingRulesEditorScreen extends Screen {
             int index = scrollRow * COLUMNS + cell;
             int x = gridLeft + cell % COLUMNS * CELL;
             int y = gridTop + cell / COLUMNS * CELL;
-            gui.fill(x, y, x + 18, y + 18, 0xCC202329);
+            gui.fill(x + 1, y + 1, x + 19, y + 19, 0xCC202329);
             if (index >= filtered.size()) {
                 continue;
             }
             BlockCatalogService.Entry entry = filtered.get(index);
             ResourceLocation id = entry.id();
+            SurfaceClassification classification = classification(id);
             if (selected.contains(id)) {
                 drawSelectionBorder(gui, x, y, 0xFFFFFFFF);
-            } else if (classification(id) == tab) {
-                drawSelectionBorder(gui, x, y, 0xFF65C77A);
+            } else if (classification != null) {
+                drawSelectionBorder(gui, x, y, classificationColor(classification));
             }
-            gui.renderItem(entry.stack(), x + 1, y + 1);
-            if (mouseX >= x && mouseX < x + 18 && mouseY >= y && mouseY < y + 18) {
+            gui.renderItem(entry.stack(), x + 2, y + 2);
+            if (mouseX >= x && mouseX < x + 20 && mouseY >= y && mouseY < y + 20) {
                 gui.renderTooltip(font, entry.stack(), mouseX, mouseY);
             }
         }
     }
 
+    private void renderScrollbar(GuiGraphics gui) {
+        if (maxScrollRows() <= 0) {
+            return;
+        }
+        int x = gridLeft + GRID_WIDTH + 3;
+        int trackHeight = gridHeight();
+        int thumbHeight = scrollbarThumbHeight(trackHeight);
+        int travel = trackHeight - thumbHeight;
+        int thumbTop = gridTop + (int) Math.round((double) scrollRow / maxScrollRows() * travel);
+        gui.fill(x, gridTop, x + SCROLLBAR_WIDTH, gridTop + trackHeight, 0xAA15171B);
+        gui.fill(x, thumbTop, x + SCROLLBAR_WIDTH, thumbTop + thumbHeight, 0xFF8A9099);
+    }
+
+    private void renderPanelLabels(GuiGraphics gui) {
+        gui.drawString(
+                font,
+                Component.translatable("gui.pickclimber.rules.pickaxe_wear_label"),
+                sideLeft,
+                sideTop,
+                0xAEB4BD,
+                false
+        );
+        gui.drawString(
+                font,
+                Component.literal(Integer.toString(pickaxeWear)),
+                sideLeft + 148,
+                sideTop + 18,
+                0xFFFFFF,
+                false
+        );
+        if (activationMode == RuleBookActivationMode.TEMPORARY) {
+            gui.drawString(
+                    font,
+                    Component.translatable("gui.pickclimber.rules.duration_seconds"),
+                    sideLeft,
+                    sideTop + 140,
+                    0xAEB4BD,
+                    false
+            );
+        }
+    }
+
+    private int classificationColor(SurfaceClassification classification) {
+        return switch (classification) {
+            case STABLE -> 0xFF55FF55;
+            case UNSTABLE -> 0xFF55FFFF;
+            case UNCLIMBABLE -> 0xFFFF5555;
+        };
+    }
+
+    private void renderTabIndicator(GuiGraphics gui) {
+        Button selectedTab = switch (tab) {
+            case ALL -> allTabButton;
+            case STABLE -> stableTabButton;
+            case UNSTABLE -> unstableTabButton;
+            case UNCLIMBABLE -> unclimbableTabButton;
+        };
+        if (selectedTab == null || !selectedTab.visible) {
+            return;
+        }
+        int y = selectedTab.getY() + selectedTab.getHeight() - 2;
+        gui.fill(selectedTab.getX() + 2, y, selectedTab.getX() + selectedTab.getWidth() - 2, y + 2, 0xFFAA55FF);
+    }
+
+    private void renderAssignmentButtonBorders(GuiGraphics gui) {
+        drawButtonBorder(gui, stableAssignButton, 0xFF55FF55);
+        drawButtonBorder(gui, unstableAssignButton, 0xFF55FFFF);
+        drawButtonBorder(gui, unclimbableAssignButton, 0xFFFF5555);
+    }
+
+    private void drawButtonBorder(GuiGraphics gui, Button button, int color) {
+        if (button == null || !button.visible) {
+            return;
+        }
+        int x = button.getX();
+        int y = button.getY();
+        int right = x + button.getWidth();
+        int bottom = y + button.getHeight();
+        gui.fill(x - 1, y - 1, right + 1, y, color);
+        gui.fill(x - 1, bottom, right + 1, bottom + 1, color);
+        gui.fill(x - 1, y, x, bottom, color);
+        gui.fill(right, y, right + 1, bottom, color);
+    }
+
+    private void renderNarrowScrollbar(GuiGraphics gui) {
+        if (wideLayout || maxNarrowScrollOffset() <= 0) {
+            return;
+        }
+        int x = width - 7;
+        int top = NARROW_VIEW_TOP + 4;
+        int bottom = height - NARROW_BOTTOM_MARGIN - 4;
+        int trackHeight = Math.max(1, bottom - top);
+        int viewport = Math.max(1, height - NARROW_VIEW_TOP - NARROW_BOTTOM_MARGIN);
+        int thumbHeight = Math.max(18, trackHeight * viewport / Math.max(viewport, narrowContentHeight));
+        int travel = Math.max(1, trackHeight - thumbHeight);
+        int thumbTop = top + (int) Math.round((double) narrowScrollOffset / maxNarrowScrollOffset() * travel);
+        gui.fill(x, top, x + 4, bottom, 0xAA15171B);
+        gui.fill(x, thumbTop, x + 4, thumbTop + thumbHeight, 0xFF8A9099);
+    }
+
+    private boolean clickNarrowScrollbar(double mouseX, double mouseY) {
+        if (wideLayout || maxNarrowScrollOffset() <= 0) {
+            return false;
+        }
+        int x = width - 7;
+        if (mouseX < x || mouseX >= x + 4
+                || mouseY < NARROW_VIEW_TOP || mouseY >= height - NARROW_BOTTOM_MARGIN) {
+            return false;
+        }
+        narrowScrollbarDragging = true;
+        updateNarrowScrollFromMouse(mouseY);
+        return true;
+    }
+
+    private void updateNarrowScrollFromMouse(double mouseY) {
+        int top = NARROW_VIEW_TOP + 4;
+        int bottom = height - NARROW_BOTTOM_MARGIN - 4;
+        int trackHeight = Math.max(1, bottom - top);
+        double normalized = (mouseY - top) / trackHeight;
+        normalized = Math.max(0.0D, Math.min(1.0D, normalized));
+        int updated = (int) Math.round(normalized * maxNarrowScrollOffset());
+        if (updated != narrowScrollOffset) {
+            narrowScrollOffset = updated;
+            rebuildWidgets();
+        }
+    }
+
     private void drawSelectionBorder(GuiGraphics gui, int x, int y, int color) {
-        gui.fill(x - 1, y - 1, x + 19, y, color);
-        gui.fill(x - 1, y + 18, x + 19, y + 19, color);
-        gui.fill(x - 1, y, x, y + 18, color);
-        gui.fill(x + 18, y, x + 19, y + 18, color);
+        gui.fill(x, y, x + 20, y + 1, color);
+        gui.fill(x, y + 19, x + 20, y + 20, color);
+        gui.fill(x, y + 1, x + 1, y + 19, color);
+        gui.fill(x + 19, y + 1, x + 20, y + 19, color);
     }
 
     private boolean clickGrid(double mouseX, double mouseY) {
@@ -422,10 +630,47 @@ public final class ClimbingRulesEditorScreen extends Screen {
             return false;
         }
         ResourceLocation id = filtered.get(index).id();
+        if (tab != ViewTab.ALL) {
+            clearClassification(id);
+            rebuildFilter(false);
+            return true;
+        }
+        if (assignmentMode != null) {
+            toggleClassification(id, assignmentMode);
+            return true;
+        }
         if (!selected.remove(id)) {
             selected.add(id);
         }
         return true;
+    }
+
+    private boolean clickScrollbar(double mouseX, double mouseY) {
+        if (maxScrollRows() <= 0) {
+            return false;
+        }
+        int x = gridLeft + GRID_WIDTH + 3;
+        if (mouseX < x || mouseX >= x + SCROLLBAR_WIDTH
+                || mouseY < gridTop || mouseY >= gridTop + gridHeight()) {
+            return false;
+        }
+        scrollbarDragging = true;
+        updateScrollFromMouse(mouseY);
+        return true;
+    }
+
+    private void updateScrollFromMouse(double mouseY) {
+        int trackHeight = gridHeight();
+        int thumbHeight = scrollbarThumbHeight(trackHeight);
+        int travel = Math.max(1, trackHeight - thumbHeight);
+        double normalized = (mouseY - gridTop - thumbHeight / 2.0D) / travel;
+        normalized = Math.max(0.0D, Math.min(1.0D, normalized));
+        scrollRow = (int) Math.round(normalized * maxScrollRows());
+    }
+
+    private int scrollbarThumbHeight(int trackHeight) {
+        int totalRows = Math.max(visibleRows, (filtered.size() + COLUMNS - 1) / COLUMNS);
+        return Math.max(14, trackHeight * visibleRows / totalRows);
     }
 
     private void renderStatus(GuiGraphics gui) {
@@ -438,28 +683,19 @@ public final class ClimbingRulesEditorScreen extends Screen {
                 missingIds.size()
         );
         if (!wideLayout) {
-            gui.drawString(font, selectedCount, 8, 8, 0xB7BDC6, false);
-            gui.drawString(
-                    font,
-                    missingCount,
-                    width - font.width(missingCount) - 8,
-                    8,
-                    missingColor(),
-                    false
-            );
             return;
         }
 
-        gui.drawString(font, selectedCount, sideLeft, 8, 0xB7BDC6, false);
+        gui.drawString(font, selectedCount, sideLeft, 24, 0xB7BDC6, false);
         gui.drawString(
                 font,
                 Component.translatable("gui.pickclimber.rules.cover", coverColor.getName()),
                 sideLeft,
-                20,
+                36,
                 0xB7BDC6,
                 false
         );
-        gui.drawString(font, missingCount, sideLeft, 32, missingColor(), false);
+        gui.drawString(font, missingCount, sideLeft, 48, missingColor(), false);
     }
 
     private int missingColor() {
@@ -470,29 +706,54 @@ public final class ClimbingRulesEditorScreen extends Screen {
         int first = scrollRow * COLUMNS;
         int end = Math.min(filtered.size(), first + COLUMNS * visibleRows);
         for (int index = first; index < end; index++) {
-            selected.add(filtered.get(index).id());
+            ResourceLocation id = filtered.get(index).id();
+            if (assignmentMode == null || tab != ViewTab.ALL) {
+                selected.add(id);
+            } else {
+                setClassification(id, assignmentMode);
+            }
         }
     }
 
     private void assignSelected(SurfaceClassification classification) {
         for (ResourceLocation id : selected) {
-            stable.remove(id);
-            unstable.remove(id);
-            unclimbable.remove(id);
-            switch (classification) {
-                case STABLE -> stable.add(id);
-                case UNSTABLE -> unstable.add(id);
-                case UNCLIMBABLE -> unclimbable.add(id);
-            }
+            setClassification(id, classification);
         }
     }
 
+    private void toggleClassification(ResourceLocation id, SurfaceClassification target) {
+        if (classification(id) == target) {
+            clearClassification(id);
+        } else {
+            setClassification(id, target);
+        }
+    }
+
+    private void setClassification(ResourceLocation id, SurfaceClassification target) {
+        removeClassification(id);
+        clearedToUnclimbable.remove(id);
+        switch (target) {
+            case STABLE -> stable.add(id);
+            case UNSTABLE -> unstable.add(id);
+            case UNCLIMBABLE -> unclimbable.add(id);
+        }
+    }
+
+    private void removeClassification(ResourceLocation id) {
+        stable.remove(id);
+        unstable.remove(id);
+        unclimbable.remove(id);
+    }
+
+    private void clearClassification(ResourceLocation id) {
+        removeClassification(id);
+        clearedToUnclimbable.add(id);
+    }
+
     private void restoreSelected() {
-        selected.forEach(id -> {
-            stable.remove(id);
-            unstable.remove(id);
-            unclimbable.remove(id);
-        });
+        selected.forEach(this::clearClassification);
+        selected.clear();
+        rebuildFilter();
     }
 
     private SurfaceClassification classification(ResourceLocation id) {
@@ -505,13 +766,6 @@ public final class ClimbingRulesEditorScreen extends Screen {
         return stable.contains(id) ? SurfaceClassification.STABLE : null;
     }
 
-    private Component unlistedMessage() {
-        return Component.translatable(
-                unlistedPolicy == UnlistedPolicy.UNCLIMBABLE
-                        ? "gui.pickclimber.rules.unlisted_unclimbable"
-                        : "gui.pickclimber.rules.unlisted_defaults"
-        );
-    }
 
     private Component miningMessage() {
         return Component.translatable(
@@ -555,32 +809,26 @@ public final class ClimbingRulesEditorScreen extends Screen {
         }
     }
 
-    private void updateDurabilityValue(String value) {
-        if (value.isEmpty()) {
-            return;
-        }
-        try {
-            int parsed = Integer.parseInt(value);
-            if (parsed >= 0 && parsed <= ClimbingRulesProfile.MAX_DURABILITY_MULTIPLIER_PERCENT) {
-                durabilityMultiplierPercent = parsed;
-            }
-        } catch (NumberFormatException ignored) {
-        }
-    }
-
     private void save() {
-        updateDurabilityValue(durabilityField.getValue());
         if (durationField != null) {
             updateDurationValue(durationField.getValue());
+        }
+        java.util.Set<ResourceLocation> completedUnclimbable = new java.util.HashSet<>(unclimbable);
+        completedUnclimbable.addAll(clearedToUnclimbable);
+        for (BlockCatalogService.Entry entry : catalog) {
+            ResourceLocation id = entry.id();
+            if (!stable.contains(id) && !unstable.contains(id)) {
+                completedUnclimbable.add(id);
+            }
         }
         ClimbingRulesProfile profile = new ClimbingRulesProfile(
                 ClimbingRulesProfile.CURRENT_FORMAT_VERSION,
                 draftProfileName,
                 stable,
                 unstable,
-                unclimbable,
-                unlistedPolicy,
-                durabilityMultiplierPercent,
+                completedUnclimbable,
+                UnlistedPolicy.UNCLIMBABLE,
+                pickaxeWear,
                 playerMiningEnabled,
                 unmineableTerminals
         );
@@ -622,5 +870,51 @@ public final class ClimbingRulesEditorScreen extends Screen {
         ids.addAll(profile.unclimbableBlocks());
         ids.removeIf(id -> BuiltInRegistries.BLOCK.getOptional(id).isPresent());
         return Set.copyOf(ids);
+    }
+
+    private enum ViewTab {
+        ALL,
+        STABLE,
+        UNSTABLE,
+        UNCLIMBABLE;
+
+        private boolean matches(SurfaceClassification classification) {
+            return switch (this) {
+                case ALL -> true;
+                case STABLE -> classification == SurfaceClassification.STABLE;
+                case UNSTABLE -> classification == SurfaceClassification.UNSTABLE;
+                case UNCLIMBABLE -> classification == SurfaceClassification.UNCLIMBABLE;
+            };
+        }
+    }
+
+    private static final class WearSlider extends AbstractSliderButton {
+        private final IntConsumer onChanged;
+
+        private WearSlider(int x, int y, int width, int initialWear, IntConsumer onChanged) {
+            super(x, y, width, 20, Component.empty(), clamp(initialWear) / 100.0D);
+            this.onChanged = onChanged;
+            updateMessage();
+        }
+
+        @Override
+        protected void updateMessage() {
+            setMessage(Component.empty());
+        }
+
+        @Override
+        protected void applyValue() {
+            onChanged.accept((int) Math.round(value * 100.0D));
+        }
+
+        private void setWear(int wear) {
+            value = clamp(wear) / 100.0D;
+            applyValue();
+            updateMessage();
+        }
+
+        private static int clamp(int value) {
+            return Math.max(0, Math.min(100, value));
+        }
     }
 }

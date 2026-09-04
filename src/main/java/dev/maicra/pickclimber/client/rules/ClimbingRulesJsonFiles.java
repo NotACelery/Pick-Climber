@@ -53,6 +53,24 @@ public final class ClimbingRulesJsonFiles {
         }
     }
 
+
+    public static List<ImportEntry> listImportEntries() {
+        return listFiles().stream().map(fileName -> {
+            FileResult<ClimbingRuleBookDefinition> imported = importRuleBook(fileName);
+            String title = imported.success() ? imported.value().bookName() : fileName;
+            return new ImportEntry(fileName, title);
+        }).toList();
+    }
+
+    public static boolean ensureDirectory() {
+        try {
+            Files.createDirectories(directory());
+            return true;
+        } catch (IOException exception) {
+            return false;
+        }
+    }
+
     public static FileResult<ClimbingRuleBookDefinition> importRuleBook(String fileName) {
         return importRuleBook(directory(), fileName);
     }
@@ -85,7 +103,7 @@ public final class ClimbingRulesJsonFiles {
 
         Optional<ClimbingRuleBookDefinition> decoded = ClimbingRuleBookCodec.decodeFromJson(json).result();
         if (decoded.isPresent()) {
-            return validateImported(withBookName(decoded.get(), importedName));
+            return validateImported(decoded.get());
         }
 
         Optional<ClimbingRulesProfile> legacy = ClimbingRulesProfileCodec.decodeFromJson(json).result();
@@ -106,7 +124,7 @@ public final class ClimbingRulesJsonFiles {
             ClimbingRuleBookDefinition definition,
             boolean overwrite
     ) {
-        return exportRuleBook(directory(), definition, overwrite);
+        return exportRuleBook(definition, definition.bookName(), overwrite);
     }
 
     static FileResult<Path> exportRuleBook(
@@ -114,12 +132,29 @@ public final class ClimbingRulesJsonFiles {
             ClimbingRuleBookDefinition definition,
             boolean overwrite
     ) {
+        return exportRuleBook(directory, definition, definition.bookName(), overwrite);
+    }
+
+    public static FileResult<Path> exportRuleBook(
+            ClimbingRuleBookDefinition definition,
+            String requestedFileName,
+            boolean overwrite
+    ) {
+        return exportRuleBook(directory(), definition, requestedFileName, overwrite);
+    }
+
+    static FileResult<Path> exportRuleBook(
+            Path directory,
+            ClimbingRuleBookDefinition definition,
+            String requestedFileName,
+            boolean overwrite
+    ) {
         ClimbingRuleBookValidationResult validation = ClimbingRuleBookValidator.validateAndNormalize(definition);
         if (!validation.valid()) {
             return FileResult.error(validationErrorKey(validation));
         }
         ClimbingRuleBookDefinition normalized = validation.normalizedDefinition();
-        String safeName = RuleBookNamePolicy.portableFileStem(normalized.bookName()).orElse("");
+        String safeName = RuleBookNamePolicy.normalizeImportedFileStem(requestedFileName);
         if (safeName.isEmpty()) {
             return FileResult.error("message.pickclimber.rules.json_invalid_filename");
         }
@@ -143,6 +178,19 @@ public final class ClimbingRulesJsonFiles {
             return FileResult.success(target);
         } catch (IOException exception) {
             return FileResult.error("message.pickclimber.rules.json_export_failed");
+        }
+    }
+
+    public static FileResult<Boolean> deleteRuleBook(String fileName) {
+        Optional<Path> resolved = resolveExistingFile(directory(), fileName);
+        if (resolved.isEmpty()) {
+            return FileResult.error("message.pickclimber.rules.json_not_found");
+        }
+        try {
+            Files.delete(resolved.get());
+            return FileResult.success(Boolean.TRUE);
+        } catch (IOException exception) {
+            return FileResult.error("message.pickclimber.rules.json_delete_failed");
         }
     }
 
@@ -208,7 +256,9 @@ public final class ClimbingRulesJsonFiles {
                 withProfileName(definition, bookName).profile(),
                 definition.activationMode(),
                 definition.scope(),
-                definition.durationSeconds()
+                definition.durationSeconds(),
+                definition.authorUuid(),
+                definition.authorName()
         );
     }
 
@@ -224,7 +274,7 @@ public final class ClimbingRulesJsonFiles {
                 profile.unstableBlocks(),
                 profile.unclimbableBlocks(),
                 profile.unlistedPolicy(),
-                profile.durabilityMultiplierPercent(),
+                profile.pickaxeWear(),
                 profile.playerMiningEnabled(),
                 profile.unmineableTerminals()
         );
@@ -235,7 +285,9 @@ public final class ClimbingRulesJsonFiles {
                 renamedProfile,
                 definition.activationMode(),
                 definition.scope(),
-                definition.durationSeconds()
+                definition.durationSeconds(),
+                definition.authorUuid(),
+                definition.authorName()
         );
     }
 
@@ -256,6 +308,9 @@ public final class ClimbingRulesJsonFiles {
         } catch (RuntimeException exception) {
             return Optional.empty();
         }
+    }
+
+    public record ImportEntry(String fileName, String title) {
     }
 
     public record FileResult<T>(T value, String errorKey) {

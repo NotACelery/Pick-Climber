@@ -3,7 +3,6 @@ package dev.maicra.pickclimber.rules.menu;
 import dev.maicra.pickclimber.ModBlocks;
 import dev.maicra.pickclimber.ModItems;
 import dev.maicra.pickclimber.ModMenus;
-import dev.maicra.pickclimber.rules.RuleBookActivationMode;
 import dev.maicra.pickclimber.rules.block.ClimbingRuleDispenserBlockEntity;
 import dev.maicra.pickclimber.rules.item.ClimbingRuleBookData;
 import net.minecraft.core.BlockPos;
@@ -77,7 +76,7 @@ public final class ClimbingRuleDispenserMenu extends AbstractContainerMenu {
         checkContainerSize(container, ClimbingRuleDispenserBlockEntity.SLOT_COUNT);
         addDataSlots(data);
         container.startOpen(inventory.player);
-        addMasterSlot(container);
+        addSourceSlot(container);
         addPlayerInventory(inventory);
     }
 
@@ -113,7 +112,7 @@ public final class ClimbingRuleDispenserMenu extends AbstractContainerMenu {
             if (!moveItemStackTo(stack, PLAYER_INVENTORY_START, HOTBAR_END, true)) {
                 return ItemStack.EMPTY;
             }
-        } else if (isTemporaryMaster(stack)) {
+        } else if (isRuleBookSource(stack)) {
             if (!moveItemStackTo(stack, 0, 1, false)) {
                 return ItemStack.EMPTY;
             }
@@ -133,11 +132,11 @@ public final class ClimbingRuleDispenserMenu extends AbstractContainerMenu {
         return copy;
     }
 
-    private void addMasterSlot(Container container) {
-        addSlot(new Slot(container, ClimbingRuleDispenserBlockEntity.MASTER_SLOT, 26, 36) {
+    private void addSourceSlot(Container container) {
+        addSlot(new Slot(container, ClimbingRuleDispenserBlockEntity.SOURCE_SLOT, 27, 47) {
             @Override
             public boolean mayPlace(ItemStack stack) {
-                return isTemporaryMaster(stack);
+                return isRuleBookSource(stack);
             }
 
             @Override
@@ -150,18 +149,16 @@ public final class ClimbingRuleDispenserMenu extends AbstractContainerMenu {
     private void addPlayerInventory(Inventory inventory) {
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 9; column++) {
-                addSlot(new Slot(inventory, column + row * 9 + 9, 26 + column * 18, 92 + row * 18));
+                addSlot(new Slot(inventory, column + row * 9 + 9, 36 + column * 18, 122 + row * 18));
             }
         }
         for (int column = 0; column < 9; column++) {
-            addSlot(new Slot(inventory, column, 26 + column * 18, 150));
+            addSlot(new Slot(inventory, column, 36 + column * 18, 180));
         }
     }
 
-    private static boolean isTemporaryMaster(ItemStack stack) {
+    private static boolean isRuleBookSource(ItemStack stack) {
         return stack.is(ModItems.CLIMBING_RULE_BOOK.get())
-                && ClimbingRuleBookData.readCurrentDefinitionValidated(stack)
-                .map(definition -> definition.activationMode() == RuleBookActivationMode.TEMPORARY)
-                .orElse(false);
+                && ClimbingRuleBookData.hasCurrentSchema(stack);
     }
 }

@@ -63,6 +63,27 @@ class ClimbingRulesJsonFilesTest {
     }
 
     @Test
+    void exportCanUseCustomFilenameWithoutChangingInternalBookTitle() throws Exception {
+        ClimbingRuleBookDefinition source = temporaryDefinition("Championship Rules", DyeColor.GREEN, 50);
+
+        var exported = ClimbingRulesJsonFiles.exportRuleBook(
+                temporaryDirectory,
+                source,
+                "event-round-4.json",
+                false
+        );
+
+        assertTrue(exported.success());
+        assertEquals("event-round-4.rules.json", exported.value().getFileName().toString());
+        var imported = ClimbingRulesJsonFiles.importRuleBook(
+                temporaryDirectory,
+                exported.value().getFileName().toString()
+        );
+        assertTrue(imported.success());
+        assertEquals("Championship Rules", imported.value().bookName());
+    }
+
+    @Test
     void exportRequiresExplicitOverwriteForExistingBookName() {
         ClimbingRuleBookDefinition source = temporaryDefinition("Existing", DyeColor.WHITE, 60);
 

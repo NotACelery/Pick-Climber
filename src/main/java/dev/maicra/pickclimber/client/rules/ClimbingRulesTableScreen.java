@@ -6,31 +6,26 @@ import dev.maicra.pickclimber.rules.item.ClimbingRuleBookData;
 import dev.maicra.pickclimber.rules.menu.ClimbingRulesTableMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
-import java.nio.file.Path;
 
 public final class ClimbingRulesTableScreen extends AbstractContainerScreen<ClimbingRulesTableMenu> {
-    private static final int PANEL_WIDTH = 232;
-    private static final int PANEL_HEIGHT = 226;
+    private static final int PANEL_WIDTH = 260;
+    private static final int PANEL_HEIGHT = 240;
+    private static final int BUTTON_WIDTH = 100;
+    private static final int WIDE_BUTTON_WIDTH = 204;
 
-    private EditBox profileName;
     private Button createButton;
     private Button importButton;
-    private Button importCurrentButton;
     private Button editButton;
-    private Button duplicateButton;
+    private Button processingButton;
     private Button exportButton;
-    private Button ejectButton;
+    private Button clearButton;
     private Button restoreButton;
-    private boolean exportOverwriteConfirmation;
-    private String draftProfileName;
 
     public ClimbingRulesTableScreen(
             ClimbingRulesTableMenu menu,
@@ -40,62 +35,54 @@ public final class ClimbingRulesTableScreen extends AbstractContainerScreen<Clim
         super(menu, inventory, title);
         imageWidth = PANEL_WIDTH;
         imageHeight = PANEL_HEIGHT;
-        inventoryLabelY = 133;
+        inventoryLabelY = 147;
     }
 
     @Override
     protected void init() {
         super.init();
-        int left = leftPos + 50;
-        int buttonWidth = 174;
-        if (draftProfileName == null) {
-            draftProfileName = Component.translatable("gui.pickclimber.rules.new_profile").getString();
-        }
-        profileName = new EditBox(font, left, topPos + 34, buttonWidth, 18, Component.empty());
-        profileName.setMaxLength(64);
-        profileName.setValue(draftProfileName);
-        profileName.setResponder(value -> draftProfileName = value);
-        addRenderableWidget(profileName);
+        int left = leftPos + 28;
+        int right = left + BUTTON_WIDTH + 4;
+        int rowOne = topPos + 70;
+        int rowTwo = topPos + 94;
 
         createButton = addRenderableWidget(Button.builder(
                 Component.translatable("gui.pickclimber.rules.create_book"),
-                button -> ClimbingRulesClientRequests.createRuleBook(menu.blockPos(), draftProfileName)
-        ).bounds(left, topPos + 56, 85, 20).build());
+                button -> ClimbingRulesClientRequests.createRuleBook(
+                        menu.blockPos(),
+                        Component.translatable("gui.pickclimber.rules.new_profile").getString()
+                )
+        ).bounds(left, rowOne, BUTTON_WIDTH, 20).build());
 
         importButton = addRenderableWidget(Button.builder(
                 Component.translatable("gui.pickclimber.rules.import_json"),
                 button -> minecraft.setScreen(new ClimbingRulesImportScreen(this, menu.blockPos()))
-        ).bounds(left + 89, topPos + 56, 85, 20).build());
-
-        importCurrentButton = addRenderableWidget(Button.builder(
-                Component.translatable("gui.pickclimber.rules.import_current"),
-                button -> ClimbingRulesClientRequests.importCurrentRules(menu.blockPos())
-        ).bounds(left, topPos + 80, buttonWidth, 20).build());
+        ).bounds(right, rowOne, BUTTON_WIDTH, 20).build());
 
         editButton = addRenderableWidget(Button.builder(
                 Component.translatable("gui.pickclimber.rules.edit_book"),
                 button -> ClimbingRulesClientRequests.openEditor(menu.blockPos())
-        ).bounds(left, topPos + 34, 85, 20).build());
+        ).bounds(left, rowOne, BUTTON_WIDTH, 20).build());
 
-        duplicateButton = addRenderableWidget(Button.builder(
-                Component.translatable("gui.pickclimber.rules.duplicate_book"),
-                button -> minecraft.setScreen(new ClimbingRuleBookDuplicateScreen(this))
-        ).bounds(left + 89, topPos + 34, 85, 20).build());
+        processingButton = addRenderableWidget(Button.builder(
+                Component.translatable("gui.pickclimber.rules.process_book"),
+                button -> ClimbingRulesClientRequests.openProcessing(menu.blockPos())
+        ).bounds(right, rowOne, BUTTON_WIDTH, 20).build());
 
         exportButton = addRenderableWidget(Button.builder(
                 Component.translatable("gui.pickclimber.rules.export_json"),
                 button -> handleExport()
-        ).bounds(left, topPos + 58, 85, 20).build());
+        ).bounds(left, rowTwo, BUTTON_WIDTH, 20).build());
 
-        ejectButton = addRenderableWidget(Button.builder(
-                Component.translatable("gui.pickclimber.rules.eject"),
-                button -> ClimbingRulesClientRequests.eject(menu.blockPos())
-        ).bounds(left + 89, topPos + 58, 85, 20).build());
+        clearButton = addRenderableWidget(Button.builder(
+                Component.translatable("gui.pickclimber.rules.clear_book"),
+                button -> ClimbingRulesClientRequests.clearRuleBook(menu.blockPos())
+        ).bounds(right, rowTwo, BUTTON_WIDTH, 20).build());
 
         restoreButton = addRenderableWidget(Button.builder(
                 Component.translatable("gui.pickclimber.rules.restore_defaults"),
                 button -> openRestoreConfirmation()
-        ).bounds(left, topPos + 82, buttonWidth, 20).build());
+        ).bounds(left, topPos + 118, WIDE_BUTTON_WIDTH, 20).build());
         updateControls();
     }
 
@@ -118,61 +105,40 @@ public final class ClimbingRulesTableScreen extends AbstractContainerScreen<Clim
         gui.fill(leftPos, topPos, leftPos + imageWidth, topPos + imageHeight, 0xF0202227);
         gui.fill(leftPos, topPos, leftPos + imageWidth, topPos + 1, 0xFFB0B4BC);
         gui.fill(leftPos, topPos + imageHeight - 1, leftPos + imageWidth, topPos + imageHeight, 0xFF555A62);
-        drawTableSlots(gui);
-        drawDyePlaceholder(gui);
+        drawInventorySlot(gui, leftPos + 122, topPos + 42);
         drawPlayerInventorySlots(gui);
     }
 
     @Override
     protected void renderLabels(GuiGraphics gui, int mouseX, int mouseY) {
         gui.drawString(font, title, 8, 8, 0xFFFFFF, false);
-        gui.drawString(
+        gui.drawCenteredString(
                 font,
-                Component.translatable("gui.pickclimber.rules.insert_hint"),
-                8,
-                20,
-                0xAEB4BD,
-                false
+                Component.translatable("gui.pickclimber.rules.work_slot_hint"),
+                imageWidth / 2,
+                22,
+                0xAEB4BD
         );
     }
 
     private void updateControls() {
-        var ruleBookStack = menu.ruleBook();
-        boolean hasRuleBook = ruleBookStack.is(ModItems.CLIMBING_RULE_BOOK.get());
-        boolean hasMaterialBook = menu.materialBook().is(Items.BOOK);
+        var stack = menu.workItem();
+        boolean vanillaBook = stack.is(Items.BOOK);
+        boolean ruleBook = stack.is(ModItems.CLIMBING_RULE_BOOK.get());
+        boolean validRuleBook = ClimbingRuleBookData.hasCurrentSchema(stack);
 
-        profileName.visible = !hasRuleBook;
-        createButton.visible = !hasRuleBook;
-        createButton.active = hasMaterialBook;
-        importButton.visible = !hasRuleBook;
-        importButton.active = hasMaterialBook;
-        importCurrentButton.visible = !hasRuleBook;
-        importCurrentButton.active = hasMaterialBook && ClimbingRulesClientState.worldActiveDefinition().isPresent();
-        editButton.visible = hasRuleBook;
-        duplicateButton.visible = hasRuleBook;
-        exportButton.visible = hasRuleBook;
-        ejectButton.visible = hasRuleBook;
+        createButton.visible = vanillaBook;
+        importButton.visible = vanillaBook;
+        editButton.visible = validRuleBook;
+        processingButton.visible = validRuleBook;
+        exportButton.visible = validRuleBook;
+        clearButton.visible = ruleBook;
 
         restoreButton.active = ClimbingRulesClientState.worldRuntimeView().active();
     }
 
     private void handleExport() {
-        var definition = ClimbingRuleBookData.readDefinitionValidated(menu.insertedItem());
-        if (definition.isEmpty()) {
-            return;
-        }
-        ClimbingRulesJsonFiles.FileResult<Path> exported = ClimbingRulesJsonFiles.exportRuleBook(
-                definition.get(),
-                exportOverwriteConfirmation
-        );
-        if (!exported.success() && "message.pickclimber.rules.json_exists".equals(exported.errorKey())) {
-            exportOverwriteConfirmation = true;
-            exportButton.setMessage(Component.translatable("gui.pickclimber.rules.confirm_overwrite"));
-            return;
-        }
-        exportOverwriteConfirmation = false;
-        exportButton.setMessage(Component.translatable("gui.pickclimber.rules.export_json"));
-        showMessage(exported.success() ? "message.pickclimber.rules.json_exported" : exported.errorKey());
+        ClimbingRulesClientRequests.exportRuleBook(menu.blockPos());
     }
 
     private void openRestoreConfirmation() {
@@ -195,32 +161,17 @@ public final class ClimbingRulesTableScreen extends AbstractContainerScreen<Clim
         Component state = rules.active()
                 ? Component.translatable("gui.pickclimber.rules.world_profile", rules.profileName())
                 : Component.translatable("gui.pickclimber.rules.world_defaults");
-        gui.drawString(font, state, leftPos + 8, topPos + 130, rules.active() ? 0x7FE6A3 : 0xB8BDC5, false);
-    }
-
-    private void drawTableSlots(GuiGraphics gui) {
-        drawInventorySlot(gui, leftPos + 24, topPos + 36);
-        drawInventorySlot(gui, leftPos + 24, topPos + 58);
-        drawInventorySlot(gui, leftPos + 24, topPos + 80);
-    }
-
-    private void drawDyePlaceholder(GuiGraphics gui) {
-        if (!menu.dye().isEmpty()) {
-            return;
-        }
-        gui.setColor(1.0F, 1.0F, 1.0F, 0.28F);
-        gui.renderItem(new ItemStack(Items.WHITE_DYE), leftPos + 24, topPos + 80);
-        gui.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+        gui.drawString(font, state, leftPos + 8, topPos + 144, rules.active() ? 0x7FE6A3 : 0xB8BDC5, false);
     }
 
     private void drawPlayerInventorySlots(GuiGraphics gui) {
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 9; column++) {
-                drawInventorySlot(gui, leftPos + 35 + column * 18, topPos + 145 + row * 18);
+                drawInventorySlot(gui, leftPos + 49 + column * 18, topPos + 159 + row * 18);
             }
         }
         for (int column = 0; column < 9; column++) {
-            drawInventorySlot(gui, leftPos + 35 + column * 18, topPos + 203);
+            drawInventorySlot(gui, leftPos + 49 + column * 18, topPos + 217);
         }
     }
 

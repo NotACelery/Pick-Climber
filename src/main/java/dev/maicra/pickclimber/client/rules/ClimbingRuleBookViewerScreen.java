@@ -164,7 +164,7 @@ public final class ClimbingRuleBookViewerScreen extends Screen {
                         ? "gui.pickclimber.rules.unlisted_unclimbable"
                         : "gui.pickclimber.rules.unlisted_defaults"));
         drawOverviewLine(gui, left, top + line * (offset + 1), "gui.pickclimber.rules.viewer_durability",
-                Component.literal(profile.durabilityMultiplierPercent() + "%"));
+                Component.literal(Integer.toString(profile.pickaxeWear())));
         drawOverviewLine(gui, left, top + line * (offset + 2), "gui.pickclimber.rules.viewer_player_mining",
                 Component.translatable(profile.playerMiningEnabled()
                         ? "gui.pickclimber.rules.player_mining_enabled"

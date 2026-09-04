@@ -12,6 +12,7 @@ public final class ClimbingRulesNetworking {
     public static void register(PayloadRegistrar registrar) {
         ClimbingRulesTableNetworking.register(registrar);
         ClimbingRuleDispenserNetworking.register(registrar);
+        ClimbingRuleBookViewerNetworking.register(registrar);
         registrar.playToClient(
                 WorldRulesStatePayload.TYPE,
                 WorldRulesStatePayload.STREAM_CODEC,

@@ -1,6 +1,10 @@
 package dev.maicra.pickclimber.client;
 
 import dev.maicra.pickclimber.climb.AnchorIndicatorStatus;
+import dev.maicra.pickclimber.client.rules.ClimbingRulesExportScreen;
+import dev.maicra.pickclimber.rules.ClimbingRulesClientState;
+import dev.maicra.pickclimber.rules.ClimbingRuleBookDefinition;
+import dev.maicra.pickclimber.rules.DefaultRuleProfileFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BooleanSupplier;
@@ -271,29 +275,46 @@ public final class PickClimberOptionsScreen extends Screen {
 
     private void addFooterControls(boolean interactionsEnabled) {
         int availableWidth = Math.max(1, width - SIDE_MARGIN * 2);
-        boolean stacked = availableWidth < MIN_FOOTER_BUTTON_WIDTH * 2 + GAP;
-        int footerHeight = stacked ? CONTROL_HEIGHT * 2 + GAP : CONTROL_HEIGHT;
+        boolean stacked = availableWidth < MIN_FOOTER_BUTTON_WIDTH * 3 + GAP * 2;
+        int footerRows = stacked ? 3 : 1;
+        int footerHeight = footerRows * CONTROL_HEIGHT + (footerRows - 1) * GAP;
         int footerTop = height - FOOTER_BOTTOM_MARGIN - footerHeight;
         controlsBottom = Math.max(CONTROLS_TOP + CONTROL_HEIGHT, footerTop - GAP * 2);
 
+        int footerWidth = Math.min(MAX_COLUMN_WIDTH * 2 + GAP, availableWidth);
+        int startX = (width - footerWidth) / 2;
         Button resetDefaults;
+        Button exportWorld;
         Button done;
         if (stacked) {
-            int buttonWidth = Math.min(MAX_COLUMN_WIDTH * 2 + GAP, availableWidth);
-            int startX = (width - buttonWidth) / 2;
-            resetDefaults = resetDefaultsButton(startX, footerTop, buttonWidth);
-            done = doneButton(startX, footerTop + CONTROL_HEIGHT + GAP, buttonWidth);
+            resetDefaults = resetDefaultsButton(startX, footerTop, footerWidth);
+            exportWorld = exportWorldRulesButton(startX, footerTop + CONTROL_HEIGHT + GAP, footerWidth);
+            done = doneButton(startX, footerTop + (CONTROL_HEIGHT + GAP) * 2, footerWidth);
         } else {
-            int footerWidth = Math.min(MAX_COLUMN_WIDTH * 2 + GAP, availableWidth);
-            int buttonWidth = (footerWidth - GAP) / 2;
-            int startX = (width - footerWidth) / 2;
+            int buttonWidth = (footerWidth - GAP * 2) / 3;
             resetDefaults = resetDefaultsButton(startX, footerTop, buttonWidth);
-            done = doneButton(startX + buttonWidth + GAP, footerTop, buttonWidth);
+            exportWorld = exportWorldRulesButton(startX + buttonWidth + GAP, footerTop, buttonWidth);
+            done = doneButton(startX + (buttonWidth + GAP) * 2, footerTop, buttonWidth);
         }
 
         resetDefaults.active = interactionsEnabled;
+        exportWorld.active = true;
         addRenderableWidget(resetDefaults);
+        addRenderableWidget(exportWorld);
         addRenderableWidget(done);
+    }
+
+    private Button exportWorldRulesButton(int x, int y, int width) {
+        return Button.builder(Component.translatable("options.pickclimber.export_world_rules"), button -> {
+            ClimbingRuleBookDefinition definition = ClimbingRulesClientState.worldActiveDefinition()
+                    .orElseGet(() -> {
+                        String name = "Pick Climber Defaults";
+                        return ClimbingRuleBookDefinition.permanentWorld(
+                                name, DefaultRuleProfileFactory.create(name)
+                        ).withAuthor("", "Pick Climber");
+                    });
+            minecraft.setScreen(new ClimbingRulesExportScreen(this, definition));
+        }).bounds(x, y, width, CONTROL_HEIGHT).build();
     }
 
     private void layoutOptions() {

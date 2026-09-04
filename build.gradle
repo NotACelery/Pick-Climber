@@ -220,12 +220,8 @@ tasks.register('verifyArchitectureBoundaries') {
                 violations << "${sourceFile} bypasses the surface rules seam"
             }
             if (sourceFile.name != 'ToolWearService.java'
-                    && source.contains('ClimbRulesBridge.durabilityMultiplierPercent(')) {
+                    && source.contains('ClimbRulesBridge.pickaxeWear(')) {
                 violations << "${sourceFile} bypasses the wear rules seam"
-            }
-            if (sourceFile.name != 'ToolWearService.java'
-                    && source.contains('ClimbRulesBridge.durabilityPolicyRevision(')) {
-                violations << "${sourceFile} bypasses the wear revision seam"
             }
         }
 
