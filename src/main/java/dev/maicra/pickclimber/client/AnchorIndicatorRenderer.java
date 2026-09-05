@@ -1,11 +1,12 @@
 package dev.maicra.pickclimber.client;
 
-import dev.maicra.pickclimber.climb.AnchorIndicatorStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+
+import dev.maicra.pickclimber.climb.AnchorIndicatorStatus;
 
 final class AnchorIndicatorRenderer {
     private AnchorIndicatorRenderer() {

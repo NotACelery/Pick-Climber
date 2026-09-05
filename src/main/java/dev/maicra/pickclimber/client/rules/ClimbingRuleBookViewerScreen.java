@@ -1,10 +1,9 @@
 package dev.maicra.pickclimber.client.rules;
 
-import dev.maicra.pickclimber.rules.ClimbingRuleBookDefinition;
-import dev.maicra.pickclimber.rules.ClimbingRulesProfile;
-import dev.maicra.pickclimber.rules.RuleBookActivationMode;
-import dev.maicra.pickclimber.rules.RuleBookScope;
-import dev.maicra.pickclimber.rules.UnlistedPolicy;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -12,9 +11,11 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
+import dev.maicra.pickclimber.rules.ClimbingRuleBookDefinition;
+import dev.maicra.pickclimber.rules.ClimbingRulesProfile;
+import dev.maicra.pickclimber.rules.RuleBookActivationMode;
+import dev.maicra.pickclimber.rules.RuleBookScope;
+import dev.maicra.pickclimber.rules.UnlistedPolicy;
 
 public final class ClimbingRuleBookViewerScreen extends Screen {
     private static final int CELL = 20;
@@ -98,6 +99,11 @@ public final class ClimbingRuleBookViewerScreen extends Screen {
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    public boolean isPauseScreen() {
+        return false;
     }
 
     @Override

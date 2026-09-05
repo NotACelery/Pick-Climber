@@ -1,18 +1,21 @@
 package dev.maicra.pickclimber.client.rules;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import com.google.gson.JsonElement;
+
+import net.minecraft.world.item.DyeColor;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
 import dev.maicra.pickclimber.rules.ClimbingRuleBookCodec;
 import dev.maicra.pickclimber.rules.ClimbingRuleBookDefinition;
 import dev.maicra.pickclimber.rules.ClimbingRulesProfile;
 import dev.maicra.pickclimber.rules.ClimbingRulesProfileCodec;
 import dev.maicra.pickclimber.rules.RuleBookActivationMode;
 import dev.maicra.pickclimber.rules.RuleBookScope;
-import net.minecraft.world.item.DyeColor;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

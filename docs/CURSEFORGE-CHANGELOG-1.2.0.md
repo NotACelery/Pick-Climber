@@ -1,53 +1,33 @@
-# Pick Climber 1.2.0 — Mapmaker Rules
+# Pick Climber 1.2.0 — Mapmaker Climbing Rules
 
-Pick Climber 1.2.0 adds a server-authoritative mapmaking layer while keeping normal 1.1.0 climbing behavior unchanged
-when no world profile is active.
+Pick Climber 1.2.0 adds a complete Creative/mapmaker rules workflow while keeping normal climbing unchanged when no custom rules are active.
 
-## New: Climbing Rules Terminal
+## Climbing Rule Books
 
-A Creative-only control station lets map authors/operators create and manage **Climbing Rules Cards**.
+Create portable Rule Books with custom Stable, Unstable and Unclimbable surfaces, flat pickaxe wear, Player Mining, Unmineable Terminals, activation mode, duration, title and dye color. Books can be inspected in a read-only viewer and imported/exported as JSON.
 
-With a Card you can:
+Custom authoring is fail-closed: blocks left unassigned are saved as Unclimbable.
 
-- classify blocks as Stable, Unstable or Unclimbable;
-- choose how unlisted blocks behave;
-- set Pick Climber durability usage from 0% to 500%;
-- enable/disable normal player mining;
-- apply the profile persistently to the world;
-- restore normal Pick Climber defaults;
-- import/export portable JSON profiles.
+## Climbing Rules Table
 
-## Visual editor
+A dedicated Creative-only authoring station can create/edit books, import current/default world rules, clone/dye books and manage JSON files. Its final model has a non-full hitbox and correct axe mining behavior.
 
-The new responsive block editor includes search, scrolling, multi-selection, bulk classification and missing-mod ID
-preservation for modpack profiles.
+## Climbing Rules Terminal
 
-## Portable and persistent
+Apply Rule Books during gameplay. Supports Permanent WORLD, Temporary WORLD and Temporary PLAYER rules, server-side no-op/conflict validation and immediate anchor revalidation when rules change.
 
-Applied rules are copied into the world and survive restarts independently of the original Card or JSON file. Cards can
-also travel between worlds/players.
+## Climbing Rule Dispenser
 
-JSON profiles are stored locally under:
+Automate Temporary PLAYER book distribution with redstone, a configurable 1-60 second lifetime and optional Start counter on pickup behavior. Ground copies expire with their timer. Players may hold different temporary rule definitions simultaneously, while duplicate active copies of the same mechanical definition are rejected. Each owned temporary book has its own HUD countdown.
 
-```text
-config/pickclimber/rules/
-```
+## Performance and multiplayer
 
-Importing a JSON opens it for review first and never automatically changes world rules.
+Rule Books are reference-first: large rule definitions live once in world/server SavedData instead of being copied into every item stack. Rule application, ownership, timers and persistence are server-authoritative.
 
-## Multiplayer safety
+## Quality of life
 
-Sensitive mapmaking actions are validated by the server. The default mapmaker permission is Creative + permission level
-2. Card revisions and editor sessions prevent stale/concurrent edits from silently overwriting newer changes.
-
-## Compatibility
-
-World profiles change only the intended map-rule layer. Strong Grip, Sturdy Latch, reach, collisions, tool eligibility,
-cooldown and existing climbing physics remain intact.
-
-Player Mining restrictions target manual player block breaking only; machines, explosions, commands and automation are
-intentionally outside that rule.
-
-## Languages
-
-Full UI coverage remains available for English US/UK, Spanish Chile/Spain/Argentina/Mexico and Portuguese Brazil/Portugal.
+- K options and Rule Book viewer no longer pause singleplayer physics.
+- Rules Table uses an axe; Terminal and Dispenser use pickaxes.
+- JSON supports portable names, overwrite/delete confirmation and missing mod IDs.
+- Optional JEI/EMI documentation integration without hard dependencies.
+- Localization parity across English, Spanish and Portuguese variants.

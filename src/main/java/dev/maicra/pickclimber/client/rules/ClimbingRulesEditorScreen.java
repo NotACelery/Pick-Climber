@@ -1,12 +1,11 @@
 package dev.maicra.pickclimber.client.rules;
 
-import dev.maicra.pickclimber.rules.ClimbingRuleBookCodec;
-import dev.maicra.pickclimber.rules.ClimbingRuleBookDefinition;
-import dev.maicra.pickclimber.rules.ClimbingRulesProfile;
-import dev.maicra.pickclimber.rules.RuleBookActivationMode;
-import dev.maicra.pickclimber.rules.RuleBookScope;
-import dev.maicra.pickclimber.rules.SurfaceClassification;
-import dev.maicra.pickclimber.rules.UnlistedPolicy;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.function.IntConsumer;
+
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
@@ -18,11 +17,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
 
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import java.util.function.IntConsumer;
+import dev.maicra.pickclimber.rules.ClimbingRuleBookCodec;
+import dev.maicra.pickclimber.rules.ClimbingRuleBookDefinition;
+import dev.maicra.pickclimber.rules.ClimbingRulesProfile;
+import dev.maicra.pickclimber.rules.RuleBookActivationMode;
+import dev.maicra.pickclimber.rules.RuleBookScope;
+import dev.maicra.pickclimber.rules.SurfaceClassification;
+import dev.maicra.pickclimber.rules.UnlistedPolicy;
 
 public final class ClimbingRulesEditorScreen extends Screen {
     private static final int CELL = 22;
@@ -765,7 +766,6 @@ public final class ClimbingRulesEditorScreen extends Screen {
         }
         return stable.contains(id) ? SurfaceClassification.STABLE : null;
     }
-
 
     private Component miningMessage() {
         return Component.translatable(

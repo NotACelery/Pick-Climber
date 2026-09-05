@@ -1,13 +1,5 @@
 package dev.maicra.pickclimber.event;
 
-import dev.maicra.pickclimber.PickClimber;
-import dev.maicra.pickclimber.climb.AnchorInteractionService;
-import dev.maicra.pickclimber.climb.AnchorUseDecision;
-import dev.maicra.pickclimber.climb.ClimbManager;
-import dev.maicra.pickclimber.climb.ClimbPresentationGate;
-import dev.maicra.pickclimber.climb.ClimbRuntimeGate;
-import dev.maicra.pickclimber.climb.PlayerClimbPresentationPreferences;
-import dev.maicra.pickclimber.climb.PlayerClimbRuntimePreferences;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -21,6 +13,15 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+
+import dev.maicra.pickclimber.PickClimber;
+import dev.maicra.pickclimber.climb.AnchorInteractionService;
+import dev.maicra.pickclimber.climb.AnchorUseDecision;
+import dev.maicra.pickclimber.climb.ClimbManager;
+import dev.maicra.pickclimber.climb.ClimbPresentationGate;
+import dev.maicra.pickclimber.climb.ClimbRuntimeGate;
+import dev.maicra.pickclimber.climb.PlayerClimbPresentationPreferences;
+import dev.maicra.pickclimber.climb.PlayerClimbRuntimePreferences;
 
 @EventBusSubscriber(modid = PickClimber.MOD_ID)
 public final class CommonEvents {

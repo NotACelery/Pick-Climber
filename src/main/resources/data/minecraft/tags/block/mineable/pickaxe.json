@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "pickclimber:climbing_rules_terminal",
+    "pickclimber:climbing_rule_dispenser"
+  ]
+}

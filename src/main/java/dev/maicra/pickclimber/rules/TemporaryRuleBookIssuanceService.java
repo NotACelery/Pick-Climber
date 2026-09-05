@@ -1,10 +1,13 @@
 package dev.maicra.pickclimber.rules;
 
-import dev.maicra.pickclimber.rules.block.ClimbingRuleDispenserBlock;
-import dev.maicra.pickclimber.rules.block.ClimbingRuleDispenserBlockEntity;
-import dev.maicra.pickclimber.rules.item.ClimbingRuleBookData;
-import dev.maicra.pickclimber.rules.item.TemporaryRuleBookData;
-import dev.maicra.pickclimber.rules.persistence.RuleDefinitionLibrarySavedData;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -14,11 +17,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import dev.maicra.pickclimber.rules.block.ClimbingRuleDispenserBlock;
+import dev.maicra.pickclimber.rules.block.ClimbingRuleDispenserBlockEntity;
+import dev.maicra.pickclimber.rules.item.ClimbingRuleBookData;
+import dev.maicra.pickclimber.rules.item.TemporaryRuleBookData;
+import dev.maicra.pickclimber.rules.persistence.RuleDefinitionLibrarySavedData;
 
 public final class TemporaryRuleBookIssuanceService {
     public static final UUID UNCLAIMED_OWNER = new UUID(0L, 0L);
@@ -49,6 +52,9 @@ public final class TemporaryRuleBookIssuanceService {
         String definitionId = register(level.getServer(), definition);
         if (definitionId.isEmpty()) {
             return RuleBookIssuanceResult.rejected("message.pickclimber.rules.invalid_profile");
+        }
+        if (ownsActiveDefinition(player, definitionId, gameTime)) {
+            return RuleBookIssuanceResult.rejected("message.pickclimber.rules.dispenser_pending_copy");
         }
 
         boolean startOnPickup = dispenser.startCounterOnPickup();
@@ -88,11 +94,7 @@ public final class TemporaryRuleBookIssuanceService {
         return RuleBookIssuanceResult.issued("message.pickclimber.rules.dispenser_issued");
     }
 
-    /**
-     * Redstone path: dispense an unclaimed copy. The first eligible player to pick it up becomes its owner.
-     * The dispenser setting decides whether the configured lifetime starts immediately on dispense or only
-     * when the first player picks the copy up.
-     */
+    // Redstone copies are unclaimed until pickup; the dispenser decides when their lifetime starts.
     public static RuleBookIssuanceResult dispense(ServerLevel level, ClimbingRuleDispenserBlockEntity dispenser) {
         long gameTime = level.getServer().overworld().getGameTime();
         cleanupExpired(gameTime);
@@ -153,6 +155,9 @@ public final class TemporaryRuleBookIssuanceService {
         cleanupExpired(gameTime);
         ClaimableIssuance claimable = CLAIMABLE_BY_TOKEN.get(data.issuanceToken());
         if (claimable == null || claimable.claimDeadline() <= gameTime) {
+            return false;
+        }
+        if (ownsActiveDefinition(player, data.definitionId(), gameTime)) {
             return false;
         }
 
@@ -284,6 +289,7 @@ public final class TemporaryRuleBookIssuanceService {
     }
 
     private static void sanitizeInventory(ServerPlayer player, long gameTime) {
+        Set<String> seenDefinitions = new HashSet<>();
         for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
             ItemStack stack = player.getInventory().getItem(slot);
             Optional<TemporaryRuleBookData.TransportData> dataOptional = TemporaryRuleBookData.readValidated(stack);
@@ -304,8 +310,32 @@ public final class TemporaryRuleBookIssuanceService {
             if (data.expiresAtGameTime() <= gameTime || !isActive(data.owner(), data.issuanceToken(), gameTime)) {
                 release(data.issuanceToken(), true, player.serverLevel().getServer());
                 player.getInventory().setItem(slot, ItemStack.EMPTY);
+                continue;
+            }
+            if (!seenDefinitions.add(data.definitionId())) {
+                release(data.issuanceToken(), true, player.serverLevel().getServer());
+                player.getInventory().setItem(slot, ItemStack.EMPTY);
             }
         }
+    }
+
+    private static boolean ownsActiveDefinition(ServerPlayer player, String definitionId, long gameTime) {
+        for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
+            Optional<TemporaryRuleBookData.TransportData> candidate = TemporaryRuleBookData.readValidated(
+                    player.getInventory().getItem(slot)
+            );
+            if (candidate.isEmpty()) {
+                continue;
+            }
+            TemporaryRuleBookData.TransportData data = candidate.get();
+            if (data.owner().equals(player.getUUID())
+                    && data.definitionId().equals(definitionId)
+                    && data.expiresAtGameTime() > gameTime
+                    && isActive(data.owner(), data.issuanceToken(), gameTime)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static void cleanupExpired(long gameTime) {

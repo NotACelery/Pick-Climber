@@ -1,8 +1,7 @@
 package dev.maicra.pickclimber.rules.block;
 
 import com.mojang.serialization.MapCodec;
-import dev.maicra.pickclimber.rules.MapmakerPermissions;
-import dev.maicra.pickclimber.rules.network.RulesEditorSessionStore;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -11,6 +10,7 @@ import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
@@ -22,15 +22,18 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+
 import org.jetbrains.annotations.Nullable;
+
+import dev.maicra.pickclimber.rules.MapmakerPermissions;
+import dev.maicra.pickclimber.rules.network.RulesEditorSessionStore;
 
 public final class ClimbingRulesTableBlock extends BaseEntityBlock {
     public static final MapCodec<ClimbingRulesTableBlock> CODEC = simpleCodec(ClimbingRulesTableBlock::new);
@@ -41,7 +44,6 @@ public final class ClimbingRulesTableBlock extends BaseEntityBlock {
     private static final VoxelShape EAST_SHAPE = rotateShape(NORTH_SHAPE);
     private static final VoxelShape SOUTH_SHAPE = rotateShape(EAST_SHAPE);
     private static final VoxelShape WEST_SHAPE = rotateShape(SOUTH_SHAPE);
-
 
     public ClimbingRulesTableBlock(BlockBehaviour.Properties properties) {
         super(properties);

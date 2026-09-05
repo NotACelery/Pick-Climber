@@ -1,7 +1,8 @@
 package dev.maicra.pickclimber.rules;
 
-import dev.maicra.pickclimber.climb.AnchorSurface;
-import dev.maicra.pickclimber.climb.AnchorSurfaceClassifier;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -12,8 +13,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import dev.maicra.pickclimber.climb.AnchorSurface;
+import dev.maicra.pickclimber.climb.AnchorSurfaceClassifier;
 
 public final class DefaultRuleProfileFactory {
     private DefaultRuleProfileFactory() {

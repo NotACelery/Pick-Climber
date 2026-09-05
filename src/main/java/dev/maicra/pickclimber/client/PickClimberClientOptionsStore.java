@@ -1,10 +1,5 @@
 package dev.maicra.pickclimber.client;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -13,7 +8,15 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Locale;
 import java.util.function.UnaryOperator;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.mojang.logging.LogUtils;
+
 import net.neoforged.fml.loading.FMLPaths;
+
 import org.slf4j.Logger;
 
 public final class PickClimberClientOptionsStore {

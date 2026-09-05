@@ -1,11 +1,11 @@
 package dev.maicra.pickclimber.rules;
 
-import net.minecraft.resources.ResourceLocation;
-
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Comparator;
+
+import net.minecraft.resources.ResourceLocation;
 
 public final class RuleDefinitionId {
     private RuleDefinitionId() {

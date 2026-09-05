@@ -1,15 +1,17 @@
 package dev.maicra.pickclimber.network;
 
-import dev.maicra.pickclimber.PickClimber;
-import dev.maicra.pickclimber.climb.ServerClimbState;
+import java.util.UUID;
+
 import io.netty.buffer.ByteBuf;
+
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.UUID;
+import dev.maicra.pickclimber.PickClimber;
+import dev.maicra.pickclimber.climb.ServerClimbState;
 
 public record AnchorSyncPayload(
         boolean attached,

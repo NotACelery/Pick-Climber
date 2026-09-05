@@ -1,12 +1,13 @@
 package dev.maicra.pickclimber;
 
-import dev.maicra.pickclimber.climb.ClimbRulesBridge;
-import dev.maicra.pickclimber.network.ModNetworking;
-import dev.maicra.pickclimber.rules.ClimbingRulesIntegration;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+
+import dev.maicra.pickclimber.climb.ClimbRulesBridge;
+import dev.maicra.pickclimber.network.ModNetworking;
+import dev.maicra.pickclimber.rules.ClimbingRulesIntegration;
 
 @Mod(PickClimber.MOD_ID)
 public final class PickClimber {

@@ -1,13 +1,15 @@
 package dev.maicra.pickclimber.client;
 
+import java.util.UUID;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.neoforged.neoforge.network.PacketDistributor;
+
 import dev.maicra.pickclimber.climb.ClimbManager;
 import dev.maicra.pickclimber.climb.PlayerClimbPresentationPreferences;
 import dev.maicra.pickclimber.climb.PlayerClimbRuntimePreferences;
 import dev.maicra.pickclimber.network.RuntimePreferencePayload;
-import java.util.UUID;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 final class ClientRuntimePreferenceController {
     private static UUID activePlayerId;

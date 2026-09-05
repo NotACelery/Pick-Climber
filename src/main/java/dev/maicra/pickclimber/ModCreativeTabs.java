@@ -1,8 +1,5 @@
 package dev.maicra.pickclimber;
 
-import dev.maicra.pickclimber.climb.ModEnchantments;
-import dev.maicra.pickclimber.rules.DefaultRuleProfileFactory;
-import dev.maicra.pickclimber.rules.item.ClimbingRuleBookData;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -13,6 +10,10 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
+
+import dev.maicra.pickclimber.climb.ModEnchantments;
+import dev.maicra.pickclimber.rules.DefaultRuleProfileFactory;
+import dev.maicra.pickclimber.rules.item.ClimbingRuleBookData;
 
 public final class ModCreativeTabs {
     public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(

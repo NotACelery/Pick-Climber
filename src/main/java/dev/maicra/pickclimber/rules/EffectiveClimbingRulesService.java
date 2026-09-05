@@ -1,8 +1,9 @@
 package dev.maicra.pickclimber.rules;
 
-import dev.maicra.pickclimber.rules.persistence.ClimbingRulesSavedData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+
+import dev.maicra.pickclimber.rules.persistence.ClimbingRulesSavedData;
 
 public final class EffectiveClimbingRulesService {
     private EffectiveClimbingRulesService() {

@@ -1,6 +1,5 @@
 package dev.maicra.pickclimber.client;
 
-import dev.maicra.pickclimber.PickClimber;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.neoforged.api.distmarker.Dist;
@@ -8,6 +7,8 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RegisterItemDecorationsEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+
+import dev.maicra.pickclimber.PickClimber;
 
 @EventBusSubscriber(modid = PickClimber.MOD_ID, value = Dist.CLIENT)
 public final class ClientModEvents {

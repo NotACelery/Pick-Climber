@@ -1,5 +1,14 @@
 package dev.maicra.pickclimber.network;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+
 import dev.maicra.pickclimber.climb.ClientAnchorSync;
 import dev.maicra.pickclimber.climb.ClientClimbSynchronizer;
 import dev.maicra.pickclimber.climb.ClimbManager;
@@ -14,14 +23,6 @@ import dev.maicra.pickclimber.rules.network.ClimbingRulesNetworking;
 import dev.maicra.pickclimber.rules.network.NeoForgeClimbingRulesSyncSink;
 import dev.maicra.pickclimber.rules.network.NeoForgePlayerRulesSyncSink;
 import dev.maicra.pickclimber.rules.network.NeoForgeTemporaryRuleBookSyncSink;
-import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
-import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 public final class ModNetworking {
     private ModNetworking() {

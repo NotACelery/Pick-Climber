@@ -3,6 +3,7 @@ package dev.maicra.pickclimber.climb;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+
 import net.minecraft.world.entity.player.Player;
 
 public final class PlayerClimbRuntimePreferences {

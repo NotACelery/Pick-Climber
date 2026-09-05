@@ -1,8 +1,8 @@
 package dev.maicra.pickclimber.rules;
 
-import net.minecraft.world.item.DyeColor;
-
 import java.util.Objects;
+
+import net.minecraft.world.item.DyeColor;
 
 public record ClimbingRuleBookDefinition(
         int formatVersion,

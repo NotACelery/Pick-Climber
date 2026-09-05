@@ -1,5 +1,9 @@
 package dev.maicra.pickclimber.integration.emi;
 
+import java.util.List;
+
+import net.minecraft.resources.ResourceLocation;
+
 import dev.emi.emi.api.recipe.EmiRecipe;
 import dev.emi.emi.api.recipe.EmiRecipeCategory;
 import dev.emi.emi.api.render.EmiTexture;
@@ -7,9 +11,6 @@ import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.widget.WidgetHolder;
 import dev.maicra.pickclimber.integration.recipeviewer.RuleViewerRelation;
-import net.minecraft.resources.ResourceLocation;
-
-import java.util.List;
 
 public final class RulesDocumentationEmiRecipe implements EmiRecipe {
     private static final int WIDTH = 124;

@@ -1,6 +1,5 @@
 package dev.maicra.pickclimber.climb;
 
-import dev.maicra.pickclimber.PickClimber;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
@@ -8,6 +7,8 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+
+import dev.maicra.pickclimber.PickClimber;
 
 public final class AnchorSurfaceClassifier {
     public static final TagKey<Block> STABLE_ANCHOR_BLOCKS = tag("stable_anchor_blocks");

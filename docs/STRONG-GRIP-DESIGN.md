@@ -1,5 +1,8 @@
 # Strong Grip, Sturdy Latch y movimiento de techo
 
+> Historical design reference for the already-established 1.1.x Strong Grip / Sturdy Latch mechanics. The current implementation is authoritative when this document differs from source.
+
+
 > **Estado actual (1.0.3):** anclaje estático, balanceo, poses elevadas locales y sincronización visual multijugador de la pose de techo están implementados. La validación de regresión con dos clientes y pulidos visuales adicionales siguen pendientes.
 >
 > Este documento conserva el comportamiento obligatorio y distingue lo implementado de las fases pendientes.

@@ -1,14 +1,15 @@
 package dev.maicra.pickclimber.client;
 
-import dev.maicra.pickclimber.climb.ClimbManager;
-import dev.maicra.pickclimber.climb.ClimbRuntimeGate;
-import dev.maicra.pickclimber.network.DetachRequestPayload;
-import dev.maicra.pickclimber.network.SlideInputPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.network.PacketDistributor;
+
+import dev.maicra.pickclimber.climb.ClimbManager;
+import dev.maicra.pickclimber.climb.ClimbRuntimeGate;
+import dev.maicra.pickclimber.network.DetachRequestPayload;
+import dev.maicra.pickclimber.network.SlideInputPayload;
 
 final class ClientClimbInputController {
     private static boolean hadPlayerLastTick;

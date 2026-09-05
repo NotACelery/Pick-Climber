@@ -1,13 +1,14 @@
 package dev.maicra.pickclimber;
 
-import dev.maicra.pickclimber.rules.menu.ClimbingRuleBookProcessingMenu;
-import dev.maicra.pickclimber.rules.menu.ClimbingRulesTableMenu;
-import dev.maicra.pickclimber.rules.menu.ClimbingRuleDispenserMenu;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
+
+import dev.maicra.pickclimber.rules.menu.ClimbingRuleBookProcessingMenu;
+import dev.maicra.pickclimber.rules.menu.ClimbingRuleDispenserMenu;
+import dev.maicra.pickclimber.rules.menu.ClimbingRulesTableMenu;
 
 public final class ModMenus {
     public static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(
@@ -20,7 +21,6 @@ public final class ModMenus {
                     "climbing_rules_table",
                     () -> IMenuTypeExtension.create(ClimbingRulesTableMenu::new)
             );
-
 
     public static final DeferredHolder<MenuType<?>, MenuType<ClimbingRuleBookProcessingMenu>>
             CLIMBING_RULE_BOOK_PROCESSING = MENUS.register(

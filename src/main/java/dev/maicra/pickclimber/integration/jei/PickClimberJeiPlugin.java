@@ -1,16 +1,18 @@
 package dev.maicra.pickclimber.integration.jei;
 
+import java.util.List;
+
+import net.minecraft.resources.ResourceLocation;
+
 import dev.maicra.pickclimber.ModItems;
 import dev.maicra.pickclimber.PickClimber;
 import dev.maicra.pickclimber.integration.recipeviewer.RuleViewerRelation;
+
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
-import net.minecraft.resources.ResourceLocation;
-
-import java.util.List;
 
 @JeiPlugin
 public final class PickClimberJeiPlugin implements IModPlugin {

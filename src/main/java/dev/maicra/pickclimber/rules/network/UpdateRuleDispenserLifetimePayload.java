@@ -1,10 +1,11 @@
 package dev.maicra.pickclimber.rules.network;
 
-import dev.maicra.pickclimber.PickClimber;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+
+import dev.maicra.pickclimber.PickClimber;
 
 public record UpdateRuleDispenserLifetimePayload(
         BlockPos position,

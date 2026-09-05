@@ -1,10 +1,5 @@
 package dev.maicra.pickclimber.rules.menu;
 
-import dev.maicra.pickclimber.ModBlocks;
-import dev.maicra.pickclimber.ModItems;
-import dev.maicra.pickclimber.ModMenus;
-import dev.maicra.pickclimber.rules.block.ClimbingRuleDispenserBlockEntity;
-import dev.maicra.pickclimber.rules.item.ClimbingRuleBookData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.Container;
@@ -17,6 +12,12 @@ import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+
+import dev.maicra.pickclimber.ModBlocks;
+import dev.maicra.pickclimber.ModItems;
+import dev.maicra.pickclimber.ModMenus;
+import dev.maicra.pickclimber.rules.block.ClimbingRuleDispenserBlockEntity;
+import dev.maicra.pickclimber.rules.item.ClimbingRuleBookData;
 
 public final class ClimbingRuleDispenserMenu extends AbstractContainerMenu {
     private static final int PLAYER_INVENTORY_START = 1;

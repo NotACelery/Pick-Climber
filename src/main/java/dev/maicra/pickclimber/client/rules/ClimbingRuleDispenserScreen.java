@@ -1,13 +1,14 @@
 package dev.maicra.pickclimber.client.rules;
 
-import dev.maicra.pickclimber.rules.block.ClimbingRuleDispenserBlockEntity;
-import dev.maicra.pickclimber.rules.menu.ClimbingRuleDispenserMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
+
+import dev.maicra.pickclimber.rules.block.ClimbingRuleDispenserBlockEntity;
+import dev.maicra.pickclimber.rules.menu.ClimbingRuleDispenserMenu;
 
 public final class ClimbingRuleDispenserScreen extends AbstractContainerScreen<ClimbingRuleDispenserMenu> {
     private static final int PANEL_WIDTH = 236;
@@ -73,7 +74,6 @@ public final class ClimbingRuleDispenserScreen extends AbstractContainerScreen<C
         }
         return super.mouseReleased(mouseX, mouseY, button);
     }
-
 
     @Override
     protected void containerTick() {

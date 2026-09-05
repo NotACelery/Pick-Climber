@@ -1,10 +1,11 @@
 package dev.maicra.pickclimber.client.rules;
 
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemStack;
+
 import dev.maicra.pickclimber.ModItems;
 import dev.maicra.pickclimber.rules.item.ClimbingRuleBookData;
 import dev.maicra.pickclimber.rules.item.TemporaryRuleBookData;
-import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.item.ItemStack;
 
 public final class RuleBookItemColors {
     private static final int OPAQUE_ALPHA = 0xFF000000;

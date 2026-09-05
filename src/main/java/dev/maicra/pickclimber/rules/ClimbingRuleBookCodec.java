@@ -1,16 +1,17 @@
 package dev.maicra.pickclimber.rules;
 
+import java.util.Arrays;
+
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.DyeColor;
-
-import java.util.Arrays;
 
 public final class ClimbingRuleBookCodec {
     private static final Codec<DyeColor> DYE_COLOR_CODEC = Codec.STRING.comapFlatMap(

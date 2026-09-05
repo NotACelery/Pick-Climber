@@ -1,12 +1,13 @@
 package dev.maicra.pickclimber;
 
-import dev.maicra.pickclimber.rules.block.ClimbingRulesTableBlock;
-import dev.maicra.pickclimber.rules.block.ClimbingRulesTerminalBlock;
-import dev.maicra.pickclimber.rules.block.ClimbingRuleDispenserBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
+
+import dev.maicra.pickclimber.rules.block.ClimbingRuleDispenserBlock;
+import dev.maicra.pickclimber.rules.block.ClimbingRulesTableBlock;
+import dev.maicra.pickclimber.rules.block.ClimbingRulesTerminalBlock;
 
 public final class ModBlocks {
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(PickClimber.MOD_ID);

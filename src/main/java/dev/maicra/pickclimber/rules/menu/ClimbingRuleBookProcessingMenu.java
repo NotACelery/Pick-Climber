@@ -1,5 +1,24 @@
 package dev.maicra.pickclimber.rules.menu;
 
+import java.util.Optional;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.inventory.ResultContainer;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.DyeItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+
 import dev.maicra.pickclimber.ModBlocks;
 import dev.maicra.pickclimber.ModItems;
 import dev.maicra.pickclimber.ModMenus;
@@ -7,24 +26,6 @@ import dev.maicra.pickclimber.rules.ClimbingRuleBookDefinition;
 import dev.maicra.pickclimber.rules.ClimbingRuleBookProcessing;
 import dev.maicra.pickclimber.rules.block.ClimbingRulesTableBlockEntity;
 import dev.maicra.pickclimber.rules.item.ClimbingRuleBookData;
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.world.Container;
-import net.minecraft.world.SimpleContainer;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ContainerLevelAccess;
-import net.minecraft.world.inventory.ClickType;
-import net.minecraft.world.inventory.ResultContainer;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.DyeItem;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-
-import java.util.Optional;
 
 public final class ClimbingRuleBookProcessingMenu extends AbstractContainerMenu {
     private static final int SOURCE_SLOT = 0;
@@ -104,7 +105,6 @@ public final class ClimbingRuleBookProcessingMenu extends AbstractContainerMenu 
         returnToPlayer(player, inputs.removeItemNoUpdate(MATERIAL_SLOT));
         result.clearContent();
     }
-
 
     @Override
     public void clicked(int slotId, int button, ClickType clickType, Player player) {

@@ -1,15 +1,16 @@
 package dev.maicra.pickclimber.rules.network;
 
-import dev.maicra.pickclimber.rules.ClimbingRuleBookDefinition;
-import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.DyeColor;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.DyeColor;
+
+import dev.maicra.pickclimber.rules.ClimbingRuleBookDefinition;
 
 public final class RulesEditorSessionStore {
     private static final Map<UUID, Session> SESSIONS = new HashMap<>();

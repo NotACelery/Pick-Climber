@@ -1,11 +1,11 @@
 package dev.maicra.pickclimber.climb;
 
+import java.util.UUID;
+
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
-
-import java.util.UUID;
 
 final class ToolWearService {
     private ToolWearService() {

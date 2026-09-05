@@ -1,7 +1,8 @@
 package dev.maicra.pickclimber.client;
 
-import dev.maicra.pickclimber.PickClimber;
-import dev.maicra.pickclimber.climb.ClimbManager;
+import java.util.IdentityHashMap;
+import java.util.Map;
+
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
@@ -13,8 +14,8 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderPlayerEvent;
 
-import java.util.IdentityHashMap;
-import java.util.Map;
+import dev.maicra.pickclimber.PickClimber;
+import dev.maicra.pickclimber.climb.ClimbManager;
 
 @EventBusSubscriber(modid = PickClimber.MOD_ID, value = Dist.CLIENT)
 public final class CeilingPlayerPoseRenderer {

@@ -1,8 +1,8 @@
 package dev.maicra.pickclimber.climb;
 
-import net.minecraft.world.phys.Vec3;
-
 import java.util.UUID;
+
+import net.minecraft.world.phys.Vec3;
 
 record BrakingRuntimeState(
         Vec3 committedDirection,

@@ -1,6 +1,5 @@
 package dev.maicra.pickclimber.client;
 
-import dev.maicra.pickclimber.climb.ClimbManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -9,6 +8,8 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.IItemDecorator;
+
+import dev.maicra.pickclimber.climb.ClimbManager;
 
 public final class PickClimberItemDecorator implements IItemDecorator {
     public static final PickClimberItemDecorator INSTANCE = new PickClimberItemDecorator();

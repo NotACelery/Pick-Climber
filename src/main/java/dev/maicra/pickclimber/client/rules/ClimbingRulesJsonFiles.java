@@ -1,9 +1,19 @@
 package dev.maicra.pickclimber.client.rules;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+
+import net.neoforged.fml.loading.FMLPaths;
+
 import dev.maicra.pickclimber.rules.ClimbingRuleBookCodec;
 import dev.maicra.pickclimber.rules.ClimbingRuleBookDefinition;
 import dev.maicra.pickclimber.rules.ClimbingRuleBookValidationResult;
@@ -13,14 +23,6 @@ import dev.maicra.pickclimber.rules.ClimbingRulesProfileCodec;
 import dev.maicra.pickclimber.rules.ClimbingRulesValidationResult;
 import dev.maicra.pickclimber.rules.ClimbingRulesValidator;
 import dev.maicra.pickclimber.rules.RuleBookNamePolicy;
-import net.neoforged.fml.loading.FMLPaths;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Optional;
 
 public final class ClimbingRulesJsonFiles {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -52,7 +54,6 @@ public final class ClimbingRulesJsonFiles {
             return List.of();
         }
     }
-
 
     public static List<ImportEntry> listImportEntries() {
         return listFiles().stream().map(fileName -> {

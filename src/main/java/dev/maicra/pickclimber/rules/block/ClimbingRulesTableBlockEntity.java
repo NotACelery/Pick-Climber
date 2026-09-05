@@ -1,9 +1,5 @@
 package dev.maicra.pickclimber.rules.block;
 
-import dev.maicra.pickclimber.ModBlockEntities;
-import dev.maicra.pickclimber.ModItems;
-import dev.maicra.pickclimber.rules.item.ClimbingRuleBookData;
-import dev.maicra.pickclimber.rules.menu.ClimbingRulesTableMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
@@ -17,6 +13,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+
+import dev.maicra.pickclimber.ModBlockEntities;
+import dev.maicra.pickclimber.ModItems;
+import dev.maicra.pickclimber.rules.item.ClimbingRuleBookData;
+import dev.maicra.pickclimber.rules.menu.ClimbingRulesTableMenu;
 
 public final class ClimbingRulesTableBlockEntity extends BaseContainerBlockEntity {
     public static final int WORK_SLOT = 0;

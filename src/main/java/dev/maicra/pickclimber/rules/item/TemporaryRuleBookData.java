@@ -1,11 +1,8 @@
 package dev.maicra.pickclimber.rules.item;
 
-import dev.maicra.pickclimber.ModItems;
-import dev.maicra.pickclimber.rules.ClimbingRuleBookDefinition;
-import dev.maicra.pickclimber.rules.RuleBookActivationMode;
-import dev.maicra.pickclimber.rules.RuleBookScope;
-import dev.maicra.pickclimber.rules.RuleDefinitionId;
-import dev.maicra.pickclimber.rules.persistence.RuleDefinitionLibrarySavedData;
+import java.util.Optional;
+import java.util.UUID;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -15,8 +12,13 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 
-import java.util.Optional;
-import java.util.UUID;
+import dev.maicra.pickclimber.ModItems;
+import dev.maicra.pickclimber.rules.ClimbingRuleBookDefinition;
+import dev.maicra.pickclimber.rules.RuleBookActivationMode;
+import dev.maicra.pickclimber.rules.RuleBookScope;
+import dev.maicra.pickclimber.rules.RuleDefinitionId;
+import dev.maicra.pickclimber.rules.TemporaryRuleBookIssuanceService;
+import dev.maicra.pickclimber.rules.persistence.RuleDefinitionLibrarySavedData;
 
 public final class TemporaryRuleBookData {
     private static final String ROOT_KEY = "pickclimber_temporary_rule_book";
@@ -151,7 +153,7 @@ public final class TemporaryRuleBookData {
 
     public static boolean isExpired(TransportData data, long gameTime) {
         if (data.startCounterOnPickup()
-                && dev.maicra.pickclimber.rules.TemporaryRuleBookIssuanceService.UNCLAIMED_OWNER
+                && TemporaryRuleBookIssuanceService.UNCLAIMED_OWNER
                 .equals(data.owner())) {
             return false;
         }

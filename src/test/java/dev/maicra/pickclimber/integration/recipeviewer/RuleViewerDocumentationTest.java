@@ -1,10 +1,12 @@
 package dev.maicra.pickclimber.integration.recipeviewer;
 
+import net.minecraft.world.item.DyeColor;
+
+import org.junit.jupiter.api.Test;
+
 import dev.maicra.pickclimber.rules.ClimbingRuleBookDefinition;
 import dev.maicra.pickclimber.rules.RuleBookActivationMode;
 import dev.maicra.pickclimber.rules.RuleBookScope;
-import net.minecraft.world.item.DyeColor;
-import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

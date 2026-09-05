@@ -1,30 +1,33 @@
 package dev.maicra.pickclimber.rules.item;
 
+import java.util.Locale;
+import java.util.Optional;
+
 import com.mojang.logging.LogUtils;
-import dev.maicra.pickclimber.ModItems;
-import dev.maicra.pickclimber.rules.ClimbingRuleBookCodec;
-import dev.maicra.pickclimber.rules.ClimbingRuleBookDefinition;
-import dev.maicra.pickclimber.rules.ClimbingRuleBookValidationResult;
-import dev.maicra.pickclimber.rules.ClimbingRuleBookValidator;
-import dev.maicra.pickclimber.rules.ClimbingRulesProfile;
-import dev.maicra.pickclimber.rules.DefaultRuleProfileFactory;
-import dev.maicra.pickclimber.rules.ClimbingRulesProfileCodec;
-import dev.maicra.pickclimber.rules.ClimbingRulesValidationResult;
-import dev.maicra.pickclimber.rules.ClimbingRulesValidator;
-import dev.maicra.pickclimber.rules.RuleBookActivationMode;
-import dev.maicra.pickclimber.rules.RuleBookScope;
-import dev.maicra.pickclimber.rules.RuleDefinitionId;
-import dev.maicra.pickclimber.rules.persistence.RuleDefinitionLibrarySavedData;
+
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
+
 import org.slf4j.Logger;
 
-import java.util.Locale;
-import java.util.Optional;
+import dev.maicra.pickclimber.ModItems;
+import dev.maicra.pickclimber.rules.ClimbingRuleBookCodec;
+import dev.maicra.pickclimber.rules.ClimbingRuleBookDefinition;
+import dev.maicra.pickclimber.rules.ClimbingRuleBookValidationResult;
+import dev.maicra.pickclimber.rules.ClimbingRuleBookValidator;
+import dev.maicra.pickclimber.rules.ClimbingRulesProfile;
+import dev.maicra.pickclimber.rules.ClimbingRulesProfileCodec;
+import dev.maicra.pickclimber.rules.ClimbingRulesValidationResult;
+import dev.maicra.pickclimber.rules.ClimbingRulesValidator;
+import dev.maicra.pickclimber.rules.DefaultRuleProfileFactory;
+import dev.maicra.pickclimber.rules.RuleBookActivationMode;
+import dev.maicra.pickclimber.rules.RuleBookScope;
+import dev.maicra.pickclimber.rules.RuleDefinitionId;
+import dev.maicra.pickclimber.rules.persistence.RuleDefinitionLibrarySavedData;
 
 public final class ClimbingRuleBookData {
     private static final Logger LOGGER = LogUtils.getLogger();

@@ -1,6 +1,16 @@
 package dev.maicra.pickclimber.rules.persistence;
 
+import java.util.Optional;
+
 import com.mojang.logging.LogUtils;
+
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.level.saveddata.SavedData;
+
+import org.slf4j.Logger;
+
 import dev.maicra.pickclimber.rules.ClimbingRuleBookCodec;
 import dev.maicra.pickclimber.rules.ClimbingRuleBookDefinition;
 import dev.maicra.pickclimber.rules.ClimbingRuleBookValidationResult;
@@ -13,13 +23,6 @@ import dev.maicra.pickclimber.rules.ClimbingRulesValidator;
 import dev.maicra.pickclimber.rules.RuleBookActivationMode;
 import dev.maicra.pickclimber.rules.RuleBookScope;
 import dev.maicra.pickclimber.rules.WorldRulesSnapshot;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.level.saveddata.SavedData;
-import org.slf4j.Logger;
-
-import java.util.Optional;
 
 public final class ClimbingRulesSavedData extends SavedData {
     private static final Logger LOGGER = LogUtils.getLogger();

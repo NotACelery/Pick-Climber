@@ -1,11 +1,14 @@
 package dev.maicra.pickclimber.rules;
 
-import dev.maicra.pickclimber.rules.network.RuleBookNetworkLimits;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.codec.ByteBufCodecs;
+
 import org.junit.jupiter.api.Test;
+
+import dev.maicra.pickclimber.rules.network.RuleBookNetworkLimits;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;

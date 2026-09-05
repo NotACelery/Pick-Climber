@@ -1,10 +1,12 @@
 package dev.maicra.pickclimber.rules.network;
 
-import dev.maicra.pickclimber.PickClimber;
 import io.netty.buffer.ByteBuf;
+
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+
+import dev.maicra.pickclimber.PickClimber;
 
 public record OpenRuleBookViewerPayload(CompoundTag definitionTag) implements CustomPacketPayload {
     public static final Type<OpenRuleBookViewerPayload> TYPE = new Type<>(PickClimber.id("open_rule_book_viewer"));

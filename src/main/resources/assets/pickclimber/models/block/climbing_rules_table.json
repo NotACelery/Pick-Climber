@@ -2,7 +2,6 @@
   "textures": {
     "0": "pickclimber:block/climbing_rules_table_bookshelf",
     "1": "pickclimber:block/climbing_rules_table_oakplank",
-    "2": "pickclimber:block/climbing_rules_table_book_open",
     "3": "pickclimber:block/climbing_rules_table_palette",
     "particle": "pickclimber:block/climbing_rules_table_bookshelf"
   },

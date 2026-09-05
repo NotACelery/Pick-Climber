@@ -1,6 +1,8 @@
 package dev.maicra.pickclimber.rules.item;
 
-import dev.maicra.pickclimber.rules.TemporaryRuleBookIssuanceService;
+import java.util.List;
+import java.util.Optional;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -11,8 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 
-import java.util.List;
-import java.util.Optional;
+import dev.maicra.pickclimber.rules.TemporaryRuleBookIssuanceService;
 
 public final class TemporaryRuleBookItem extends Item {
     public TemporaryRuleBookItem(Properties properties) {

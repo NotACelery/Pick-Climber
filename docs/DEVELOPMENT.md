@@ -1,294 +1,156 @@
-# Pick Climber — Development Reference 1.2.0
+# Pick Climber — Development Reference 1.2.0-dev.53
 
-## 1. Baseline
+## Baseline
 
-- Minecraft: `1.21.1`
-- NeoForge: `21.1.235`
-- Java: `21`
-- Stable source baseline: `1.1.0`
-- 1.1.0 commit: `857a0e5544d83be1bb0d8240a2e7deaeda8dc69b`
-- Network protocol: `15`
-- Rule Book portable format: `2`
-- Mechanical profile format: `1`
-- Client config: `3`
+- Minecraft `1.21.1`
+- NeoForge `21.1.235`
+- Java `21`
+- network protocol `15`
+- Rule Book format `2`
+- mechanical profile format `1`
+- current source `1.2.0-dev.53`
 
-`1.2.0-dev.41` is the current materialized development cut after the Rule Definition architecture migration started during dev.22 QA. It includes full Rule Book authoring, Permanent/Temporary
-WORLD, Temporary PLAYER overlays, Climbing Rule Dispenser transport issuance, Rules/Book countdown HUD, Structural
-Geometry Safety, the read-only Viewer, portable JSON hardening, strict legacy migration, final visual assets and optional
-JEI/EMI documentation integrations. dev.22 additionally completes the contextual one-slot Rules Table, separate Clone/Dye
-Processing menu, flat Pickaxe Wear semantics, filtered 10-column catalog with scrollbar, visible Dispenser configuration
-GUI and corrected player-look placement. `1.2.0-dev.20` remains the last user-confirmed Windows build-clean baseline;
-dev.33 requires a fresh `clean build`, FPS regression benchmark and multiplayer/runtime QA before promotion.
+The last explicitly confirmed in-game baseline in this development sequence is dev.50. dev.51-dev.53 require the normal external clean-build/runtime promotion pass.
 
-## 2. Authority model
+## Architecture boundaries
 
-The server owns all gameplay-affecting climbing rules.
+The climb package remains independent from the Rule-system implementation and NeoForge packet transport. The intended seams are:
 
-Permanent WORLD and an optional Temporary WORLD overlay live in world SavedData. Temporary PLAYER overlays live in
-server-side per-player session state. Neither the client, a physical Rule Book nor an external JSON file is runtime
-authority after Apply. Temporary Rule Books are transport tokens only and remain server-validated through issuance state.
+- `AnchorEvaluator` — side-effect-free anchor evaluation;
+- `AnchorSurfaceResolver` — only surface-policy entry point;
+- `AnchorLifecycle` — attach/detach transitions;
+- `ToolWearService` — only `hurtAndBreak` owner;
+- `AnchorCooldownService` — cooldown ownership;
+- `ClimbSynchronization` — transport-neutral synchronization;
+- `ClimbRulesBridge` — narrow bridge from climbing mechanics to effective rules.
 
-Client responsibilities are presentation, input collection, local JSON file access and editing a draft that must be
-validated again by the server before persistence.
+Rules must not duplicate wall/ceiling physics.
 
-## 3. Existing climb boundaries
+## Mechanical profile
 
-The 1.1.0 decomposition remains mandatory:
+`ClimbingRulesProfile` stores ResourceLocations rather than registry objects so missing mod IDs can survive import/export.
 
-- `AnchorEvaluator`: side-effect-free anchor evaluation;
-- `AnchorSurfaceResolver`: only surface-policy entry point;
-- `AnchorLifecycle`: authoritative attach/detach transitions;
-- `ToolWearService`: only Pick Climber wear boundary;
-- `AnchorCooldownService`: cooldown boundary;
-- focused wall/ceiling/motion classes;
-- `ClimbSynchronization`: transport-independent synchronization sink;
-- thin `CommonEvents` / `ClientEvents` adapters.
+Fields:
 
-The `climb` package may consume `ClimbRulesBridge`, but it must not depend on the rules implementation, SavedData or
-NeoForge packet transport.
+- `stableBlocks`
+- `unstableBlocks`
+- `unclimbableBlocks`
+- `unlistedPolicy`
+- `pickaxeWear` (`0-100`)
+- `playerMiningEnabled`
+- `unmineableTerminals`
 
-## 4. World rules domain
+The active editor is fail-closed: authorable blocks left without Stable/Unstable become Unclimbable at save. `USE_PICK_CLIMBER_DEFAULTS` remains in the codec for compatibility/default profiles; custom authoring persists `UNCLIMBABLE` policy.
 
-Core types:
+Pickaxe Wear is a flat durability loss for standard wall/braking/boost interactions. Ceiling-specific costs remain owned by their existing reasons. The retired fractional durability-multiplier runtime has been removed; only legacy codec migration remains.
 
-```text
-ClimbingRulesProfile
-ClimbingRulesValidator
-ClimbingRulesRuntimeView
-UnlistedPolicy
-SurfaceClassification
-ClimbingRulesService
-```
+## Rule Book identity and persistence
 
-`ClimbingRulesProfile` stores ResourceLocations, not registry objects. This is required to preserve missing mod IDs.
+`ClimbingRuleBookDefinition` format 2 holds title/cover/activation/scope/duration/author plus a profile.
 
-Explicit classification precedence:
+Heavy profiles are content-addressed by `RuleDefinitionId` (SHA-256 of mechanical content) and stored in `RuleDefinitionLibrarySavedData`. Normal Rule Books carry a lightweight reference. Editing mechanical rules registers a new immutable definition ID and repoints only the edited book.
+
+World rule runtime does not depend on the physical item after application.
+
+## Runtime authority
+
+Server authority resolves:
 
 ```text
-UNCLIMBABLE > UNSTABLE > STABLE > unlisted policy
+Temporary PLAYER -> WORLD -> defaults
 ```
 
-A profile with duplicate IDs across explicit categories is invalid.
+WORLD persistence uses `ClimbingRulesSavedData`. PLAYER temporary sessions use `PlayerRulesSessionStore` and are not permanent SavedData.
 
-When `UnlistedPolicy.USE_PICK_CLIMBER_DEFAULTS` is selected, baseline classification remains delegated to the existing
-`AnchorSurfaceClassifier` through `AnchorSurfaceResolver`.
+Applying a WORLD mutation clears PLAYER overlays and revalidates active anchors. Expiring temporary rules also triggers synchronization/revalidation.
 
-## 5. Persistent state
+## Mapmaker permissions
 
-`ClimbingRulesSavedData` is attached to the server Overworld as world-global data.
-
-It owns:
-
-- optional active profile;
-- policy revision used to invalidate stale wear carry state.
-
-Apply and Restore operate on the profile as one logical unit and immediately refresh the runtime view plus client sync.
-
-No active profile must be structurally equivalent to 1.1.0 defaults.
-
-## 6. Runtime bridge
-
-`ClimbRulesBridge` is the dependency-inversion seam exposed to the climbing package.
-
-Runtime queries include:
-
-- surface resolution;
-- durability multiplier percent;
-- durability policy revision.
-
-The default bridge implementation must always preserve baseline behavior:
+Rules Table administrative actions require:
 
 ```text
-surface -> baseline classifier
-durability -> 100%
-mining -> enabled
+creative mode + permission level >= 2 + within 8 blocks
 ```
 
-## 7. Durability
+The Terminal is a gameplay consumer and validates the book/application server-side. `Unmineable Terminals` can lock terminal mining for normal players while mapmakers retain the bypass.
 
-All logical wear reasons still reach `ToolWearService`.
+## Temporary Rule Book issuance
 
-The multiplier is represented as integer percent `0..500` inside the runtime profile.
+The Rule Dispenser stores one source Rule Book, lifetime `1-60` seconds and `startCounterOnPickup`.
 
-Fractional carry is stored per physical tool in `DataComponents.CUSTOM_DATA`. Carry data is namespaced under the
-existing Pick Climber tool data root and includes the policy revision so fractions from an older world profile cannot
-resurface after rules are changed and later restored.
-
-Effective damage continues through `ItemStack.hurtAndBreak`.
-
-## 8. Player Mining
-
-`PlayerMiningPolicyEvents` is the integration adapter for the world rule.
-
-When mining is disabled it protects both:
-
-- the normal left-click start path;
-- final `BlockEvent.BreakEvent` as a server-side backstop.
-
-It deliberately does not hook generic block destruction by machines, explosions, commands or automation.
-
-Administrative bypass is centralized in `MapmakerPermissions`:
-
-```text
-Creative && permission level >= 2
-```
-
-## 9. Card
-
-`ClimbingRulesCardData` owns Card serialization and revisioning.
+Temporary transport data contains owner UUID, issuance UUID, absolute expiry, source dimension/position, definition ID and display metadata.
 
 Rules:
 
-- stack size 1;
-- profile uses the shared canonical codec;
-- every successful write increments Card revision;
-- malformed/invalid Rule Books are rejected safely;
-- missing block IDs survive reads/writes.
+- redstone copies begin unclaimed;
+- first eligible pickup binds ownership;
+- unchecked start-on-pickup uses an absolute expiry from dispense time;
+- checked start-on-pickup starts the configured lifetime on first pickup;
+- after ownership, dropping never pauses the timer;
+- ground entities are discarded at expiry;
+- death removes owned temporary books;
+- multiple different definition IDs are allowed;
+- a player cannot own two active copies of the same definition ID;
+- server inventory sanitation removes invalid/expired/wrong-owner/duplicate copies.
 
-A Card is never queried by climbing runtime directly.
+The client renders timers from the actual Temporary Rule Books in inventory, sorted by expiry. The existing server-synchronized nearest expiry remains a fallback during synchronization.
 
-## 10. Climbing Rules Terminal
+## Table / Terminal / Dispenser blocks
 
-Registry identity:
+- Table: axe mineable, `noOcclusion`, custom orientation-aware voxel shape, ambient occlusion disabled for the non-solid furniture model.
+- Terminal: pickaxe mineable, six-direction facing.
+- Dispenser: pickaxe mineable, facing-based redstone output behavior.
 
-```text
-pickclimber:climbing_rules_terminal
-```
+Protected rule infrastructure has no survival recipe/loot exposure.
 
-The earlier development-only `jukebox` identity is retired and must not reappear in source/resources.
+## Client UI
 
-The Terminal is a Creative-only administration station with one persistent Paper/Card slot.
+Screens own presentation/input only. Packet transport goes through `ClimbingRulesClientRequests`; Rule-system screens must not call `PacketDistributor` directly.
 
-Server-sensitive operations validate:
+The K options screen and Rule Book viewer return `isPauseScreen() == false`.
 
-- player is a `ServerPlayer`;
-- mapmaker permission;
-- maximum Terminal distance;
-- expected open menu where applicable;
-- BlockEntity identity;
-- current Card;
-- profile validation;
-- editor session/revision where applicable.
+The Rule Book editor uses ALL/Stable/Unstable/Unclimbable tabs. A white selected/unassigned cell in ALL is converted to Unclimbable on Save. The server repeats fail-closed completion as a second safety layer.
 
-## 11. Editor sessions and stale protection
+## JSON/filesystem
 
-Opening an editor creates a server session containing:
+Local directory: `config/pickclimber/rules/`.
 
-```text
-player UUID
-dimension
-Terminal BlockPos
-Card revision
-validated profile snapshot
-```
+Security/portability behavior includes bounded size, path confinement, portable filename normalization, overwrite confirmation and validation before persistence. Current exports are `*.rules.json`; legacy profile-only JSON can be migrated on import.
 
-Saving requires the session location and current Card snapshot/revision to still match. This protects against concurrent
-editors and manual Card replacement, including same-revision replacement.
+See `RULE-BOOK-JSON.md`.
 
-Sessions are invalidated on:
+## Optional integrations
 
-- eject;
-- invalid Card;
-- logout;
-- respawn;
-- dimension change;
-- detected location/session mismatch.
+JEI imports are isolated to `integration/jei`; EMI imports to `integration/emi`. Both dependencies remain `compileOnly`. Loader metadata must not require either mod.
 
-On a stale Card, the server rejects the write and pushes the latest valid Card state back to the editor.
+## Code standards
 
-## 12. Client transport boundary
+`.editorconfig` is authoritative:
 
-Rules screens do not own NeoForge packet calls.
+- UTF-8;
+- LF for Java/Gradle/JSON/Markdown shell sources as configured;
+- spaces, 4-space Java/Gradle indentation;
+- 2-space JSON indentation;
+- no tabs or trailing whitespace;
+- Java lines <= 120 characters;
+- no direct `System.out`, `printStackTrace`, TODO/FIXME/HACK markers in committed runtime source;
+- comments only where they explain a non-obvious invariant or compatibility constraint.
 
-`ClimbingRulesClientRequests` is the client transport adapter. `PacketDistributor` is allowed there and inside the
-rules/network package, not in screen classes.
+Development snapshots exclude generated `.gradle-dist/`, `.gradle/`, `build/` and run directories.
 
-The editor draft remains client-local until Save. The server decodes, validates and normalizes the submitted profile
-before writing the Card.
+## Automated gates
 
-## 13. JSON
+`gradle check` owns the canonical verification tasks:
 
-`ClimbingRulesProfileCodec` is shared by:
+- `verifySourceQuality`
+- `verifyArchitectureBoundaries`
+- `verifyLocalizationParity`
+- `verifyRulesIntegrity`
+- `verifyOptionalIntegrations`
+- JUnit tests through ModDevGradle
 
-- SavedData adapter;
-- Card adapter;
-- network profile payloads;
-- JSON files.
+`tools/audit-source.py` is a lightweight offline preflight for formatting, JSON, localization parity, stale artifacts and documentation version drift. It does not replace a real Gradle build.
 
-Rules JSON is client-local at:
+## Pre-release rule
 
-```text
-config/pickclimber/rules/
-```
-
-`format_version` is independent from mod/config/network versions.
-
-Filename sanitation rejects traversal and invalid/reserved names. Import never auto-applies to world state.
-
-## 14. Responsive UI
-
-`ClimbingRulesTerminalScreen` uses a compact fixed container footprint sized to preserve the player inventory at high GUI
-scale.
-
-`ClimbingRulesEditorScreen` has two modes:
-
-- wide: grid + side rules panel;
-- narrow: stacked controls with page scrolling.
-
-The block grid has its own scroll independent from narrow-page scrolling. Narrow content is clipped using
-`GuiGraphics.enableScissor` / `disableScissor` rather than scaling text down.
-
-## 15. Localization
-
-Supported locales remain:
-
-```text
-en_us en_gb es_cl es_es es_ar es_mx pt_br pt_pt
-```
-
-`en_us` is the canonical key set. `verifyLocalizationParity` rejects missing or extra keys in supported locales.
-
-## 16. Automated gates
-
-`gradle check` includes:
-
-### verifySourceQuality
-
-Rejects Java tabs, trailing whitespace, lines over 120 columns, direct debug output, temporary markers and invalid
-JSON/MCMeta.
-
-### verifyArchitectureBoundaries
-
-Protects evaluator purity, resolver ownership, wear ownership, `climb -> network`, `climb -> rules implementation`,
-bridge seam ownership and adapter size budgets.
-
-### verifyLocalizationParity
-
-Requires exact key parity across all eight locales.
-
-### verifyRulesIntegrity
-
-Protects 1.2-specific rules:
-
-- every rules translation key referenced by Java exists in `en_us`;
-- rules screens cannot own direct packet transport;
-- rules implementation outside `rules/network` cannot own `PacketDistributor`;
-- persistence cannot depend on client classes;
-- the retired Jukebox source/resource identity cannot return;
-- protocol `15` remains frozen for 1.2.0.
-
-Do not weaken a verifier to make a build pass.
-
-## 17. Build/release gate
-
-Before changing the current 1.2 development version to `1.2.0`:
-
-1. run Java 21 clean build;
-2. repair compile/API errors without collapsing boundaries;
-3. pass all automated gates and tests;
-4. run dedicated server smoke;
-5. run client smoke;
-6. complete the final `TESTING-1.2.0` matrix after it is rewritten for Rule Books/Table/Terminal/Dispenser;
-7. build the exact final `1.2.0` source;
-8. smoke the exact final JAR;
-9. tag that source `1.2.0`.
+Do not promote a dev snapshot to release candidate from static inspection alone. Final acceptance requires the external `clean build` plus the runtime matrix in `TESTING-1.2.0.md`.

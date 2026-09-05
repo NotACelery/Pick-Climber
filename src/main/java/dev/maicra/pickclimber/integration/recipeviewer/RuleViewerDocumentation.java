@@ -1,14 +1,15 @@
 package dev.maicra.pickclimber.integration.recipeviewer;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+
 import dev.maicra.pickclimber.ModItems;
 import dev.maicra.pickclimber.PickClimber;
 import dev.maicra.pickclimber.rules.ClimbingRuleBookDefinition;
 import dev.maicra.pickclimber.rules.ClimbingRulesProfile;
 import dev.maicra.pickclimber.rules.item.ClimbingRuleBookData;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 
 public final class RuleViewerDocumentation {
     public static final ResourceLocation CATEGORY_ID = ResourceLocation.fromNamespaceAndPath(

@@ -1,9 +1,5 @@
 package dev.maicra.pickclimber.client.rules;
 
-import dev.maicra.pickclimber.ModItems;
-import dev.maicra.pickclimber.ModMenus;
-import dev.maicra.pickclimber.PickClimber;
-import dev.maicra.pickclimber.rules.ClimbingRulesClientUi;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.neoforged.api.distmarker.Dist;
@@ -11,6 +7,11 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+
+import dev.maicra.pickclimber.ModItems;
+import dev.maicra.pickclimber.ModMenus;
+import dev.maicra.pickclimber.PickClimber;
+import dev.maicra.pickclimber.rules.ClimbingRulesClientUi;
 
 @EventBusSubscriber(modid = PickClimber.MOD_ID, value = Dist.CLIENT)
 public final class ClientRulesRegistration {

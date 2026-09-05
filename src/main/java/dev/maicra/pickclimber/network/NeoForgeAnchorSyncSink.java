@@ -1,14 +1,15 @@
 package dev.maicra.pickclimber.network;
 
-import dev.maicra.pickclimber.climb.AnchorSyncSink;
-import dev.maicra.pickclimber.climb.ServerClimbState;
+import java.util.UUID;
+
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-import java.util.UUID;
+import dev.maicra.pickclimber.climb.AnchorSyncSink;
+import dev.maicra.pickclimber.climb.ServerClimbState;
 
 final class NeoForgeAnchorSyncSink implements AnchorSyncSink {
     static final NeoForgeAnchorSyncSink INSTANCE = new NeoForgeAnchorSyncSink();

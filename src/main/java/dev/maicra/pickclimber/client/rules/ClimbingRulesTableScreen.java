@@ -1,9 +1,5 @@
 package dev.maicra.pickclimber.client.rules;
 
-import dev.maicra.pickclimber.ModItems;
-import dev.maicra.pickclimber.rules.ClimbingRulesClientState;
-import dev.maicra.pickclimber.rules.item.ClimbingRuleBookData;
-import dev.maicra.pickclimber.rules.menu.ClimbingRulesTableMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ConfirmScreen;
@@ -12,6 +8,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Items;
 
+import dev.maicra.pickclimber.ModItems;
+import dev.maicra.pickclimber.rules.ClimbingRulesClientState;
+import dev.maicra.pickclimber.rules.item.ClimbingRuleBookData;
+import dev.maicra.pickclimber.rules.menu.ClimbingRulesTableMenu;
 
 public final class ClimbingRulesTableScreen extends AbstractContainerScreen<ClimbingRulesTableMenu> {
     private static final int PANEL_WIDTH = 260;

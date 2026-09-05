@@ -1,58 +1,54 @@
 # Pick Climber 1.2.0 — Release Procedure
 
-Do not execute this release procedure until the 1.2.0 feature scope is complete and the final development/RC source
-passes the full QA matrix.
+## 1. Freeze
 
-## Pre-release
+- Close every P0 item in `WAITLIST.md`.
+- Stop adding features; only release-blocking fixes after freeze.
+- Confirm `gradle.properties` targets the intended RC/release version.
 
-1. Confirm branch/source is the accepted final 1.2.0 development/RC tree.
-2. Confirm no retired Rules Jukebox/Card source/resource identity remains.
-3. Confirm the final Rule Book/Table/Terminal/Dispenser testing matrix is complete.
-4. Change only:
+## 2. Source audit
 
-```text
-mod_version=1.2.0
-```
-
-5. Run a clean Java 21 build.
-6. Confirm all Gradle verification tasks and tests pass.
-
-## Exact artifact
-
-Expected file:
+Run:
 
 ```text
-build/libs/pickclimber-1.21.1-1.2.0.jar
+python tools/audit-source.py
 ```
 
-Do not substitute an earlier dev JAR.
+Confirm no obsolete dev artifacts, generated build/cache directories or stale documentation are included in the source snapshot.
 
-## Smoke
+## 3. Build
 
-Using the exact final JAR:
-
-- start client;
-- load a world with no active profile and verify baseline anchor/HUD;
-- author/edit one Rule Book in the Rules Table, apply it through the Terminal, then Restore Defaults;
-- restart world and verify persistence;
-- start dedicated server;
-- join with a client and verify synchronized rules;
-- verify a non-admin cannot administer the Rules Table while normal players can use the Terminal.
-
-## Git identity
-
-After exact-JAR smoke:
-
-1. commit final documentation/metadata;
-2. verify working tree clean;
-3. tag the exact source:
+Java 21:
 
 ```text
-1.2.0
+build.bat
 ```
 
-The tag/commit is the canonical source identity for the published JAR.
+or:
 
-## Publish
+```text
+./build.sh
+```
 
-Publish the exact smoke-tested JAR with `docs/CURSEFORGE-CHANGELOG-1.2.0.md` as the release notes source.
+Require `clean build` SUCCESS, including all custom `check` gates and JUnit tests. Record the exact generated JAR.
+
+## 4. Runtime QA
+
+Execute `TESTING-1.2.0.md` on the exact JAR. Include singleplayer, dedicated server/two-player, JSON filesystem and optional JEI/EMI cases.
+
+## 5. Documentation
+
+- `README.md` matches released behavior.
+- `BUILD-STATUS.md` records the exact successful build/QA baseline.
+- `WAITLIST.md` has no release-blocking item open.
+- `CURSEFORGE-CHANGELOG-1.2.0.md` is finalized.
+- Remove `-dev.N` from the release version only after acceptance.
+
+## 6. Git / publication
+
+- Commit the exact accepted tree.
+- Tag the 1.2.0 release.
+- Upload the JAR for Minecraft 1.21.1 / NeoForge.
+- Publish the final changelog and supported language/integration notes.
+
+Do not publish `.gradle-dist`, `.gradle`, `build`, run directories or local IDE caches.

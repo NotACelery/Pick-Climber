@@ -1,10 +1,10 @@
 package dev.maicra.pickclimber.climb;
 
-import net.minecraft.server.level.ServerPlayer;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
+import net.minecraft.server.level.ServerPlayer;
 
 final class JumpTracker {
     private static final Map<UUID, Long> LAST_REAL_JUMP = new HashMap<>();

@@ -1,11 +1,12 @@
 package dev.maicra.pickclimber.climb;
 
-import dev.maicra.pickclimber.PickClimber;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+
+import dev.maicra.pickclimber.PickClimber;
 
 public final class ClimbingToolClassifier {
     public static final TagKey<Item> CLIMBING_TOOLS = tag("climbing_tools");

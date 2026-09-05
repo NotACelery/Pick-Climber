@@ -1,12 +1,14 @@
 package dev.maicra.pickclimber.rules.network;
 
-import dev.maicra.pickclimber.PickClimber;
 import io.netty.buffer.ByteBuf;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+
+import dev.maicra.pickclimber.PickClimber;
 
 public record ImportRuleBookPayload(BlockPos position, CompoundTag profileTag) implements CustomPacketPayload {
     public static final Type<ImportRuleBookPayload> TYPE = new Type<>(PickClimber.id("import_rule_book"));

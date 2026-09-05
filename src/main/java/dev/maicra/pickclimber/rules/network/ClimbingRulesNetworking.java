@@ -1,9 +1,10 @@
 package dev.maicra.pickclimber.rules.network;
 
-import dev.maicra.pickclimber.rules.ClimbingRulesClientState;
-import dev.maicra.pickclimber.rules.TemporaryRuleBookClientState;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+
+import dev.maicra.pickclimber.rules.ClimbingRulesClientState;
+import dev.maicra.pickclimber.rules.TemporaryRuleBookClientState;
 
 public final class ClimbingRulesNetworking {
     private ClimbingRulesNetworking() {

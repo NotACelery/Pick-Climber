@@ -1,9 +1,10 @@
 package dev.maicra.pickclimber.client;
 
-import dev.maicra.pickclimber.climb.AnchorIndicatorStatus;
-import dev.maicra.pickclimber.climb.ClimbPresentationPolicy;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
+
+import dev.maicra.pickclimber.climb.AnchorIndicatorStatus;
+import dev.maicra.pickclimber.climb.ClimbPresentationPolicy;
 
 final class ClientOptionsPresentationPolicy implements ClimbPresentationPolicy {
     static final ClientOptionsPresentationPolicy INSTANCE = new ClientOptionsPresentationPolicy();

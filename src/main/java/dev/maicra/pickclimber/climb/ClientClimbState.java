@@ -1,10 +1,10 @@
 package dev.maicra.pickclimber.climb;
 
+import java.util.UUID;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.Vec3;
-
-import java.util.UUID;
 
 public record ClientClimbState(
         Vec3 targetPosition,

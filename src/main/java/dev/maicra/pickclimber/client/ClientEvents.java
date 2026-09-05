@@ -1,8 +1,5 @@
 package dev.maicra.pickclimber.client;
 
-import dev.maicra.pickclimber.PickClimber;
-import dev.maicra.pickclimber.rules.ClimbingRulesClientState;
-import dev.maicra.pickclimber.rules.TemporaryRuleBookClientState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.api.distmarker.Dist;
@@ -12,6 +9,10 @@ import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
+
+import dev.maicra.pickclimber.PickClimber;
+import dev.maicra.pickclimber.rules.ClimbingRulesClientState;
+import dev.maicra.pickclimber.rules.TemporaryRuleBookClientState;
 
 @EventBusSubscriber(modid = PickClimber.MOD_ID, value = Dist.CLIENT)
 public final class ClientEvents {

@@ -1,7 +1,9 @@
 package dev.maicra.pickclimber.network;
 
-import dev.maicra.pickclimber.PickClimber;
+import java.util.UUID;
+
 import io.netty.buffer.ByteBuf;
+
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -9,7 +11,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 
-import java.util.UUID;
+import dev.maicra.pickclimber.PickClimber;
 
 public record RemoteAnchorPosePayload(
         UUID playerId,

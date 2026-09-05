@@ -1,11 +1,12 @@
 package dev.maicra.pickclimber;
 
-import dev.maicra.pickclimber.rules.item.ClimbingRuleBookItem;
-import dev.maicra.pickclimber.rules.item.TemporaryRuleBookItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
+
+import dev.maicra.pickclimber.rules.item.ClimbingRuleBookItem;
+import dev.maicra.pickclimber.rules.item.TemporaryRuleBookItem;
 
 public final class ModItems {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(PickClimber.MOD_ID);

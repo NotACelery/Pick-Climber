@@ -1,10 +1,11 @@
 package dev.maicra.pickclimber.rules;
 
+import java.util.Set;
+
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
-import org.junit.jupiter.api.Test;
 
-import java.util.Set;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;

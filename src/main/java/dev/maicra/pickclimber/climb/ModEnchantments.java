@@ -1,12 +1,13 @@
 package dev.maicra.pickclimber.climb;
 
-import dev.maicra.pickclimber.PickClimber;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
+
+import dev.maicra.pickclimber.PickClimber;
 
 public final class ModEnchantments {
     public static final ResourceKey<Enchantment> PICK_CLIMBER = ResourceKey.create(

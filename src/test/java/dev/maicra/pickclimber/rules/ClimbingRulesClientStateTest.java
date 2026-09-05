@@ -1,6 +1,7 @@
 package dev.maicra.pickclimber.rules;
 
 import net.minecraft.world.item.DyeColor;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 

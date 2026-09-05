@@ -149,7 +149,7 @@
   "gui.pickclimber.rules.timer_rules": "Rules %s",
   "gui.pickclimber.rules.timer_book": "Book %s",
   "tooltip.pickclimber.temporary_rule_book.owner_bound": "Bound to its issued player",
-  "message.pickclimber.rules.dispenser_pending_copy": "You already have a pending Temporary Rule Book.",
+  "message.pickclimber.rules.dispenser_pending_copy": "You already have a Temporary Rule Book with these rules.",
   "message.pickclimber.rules.dispenser_spawn_failed": "The Temporary Rule Book could not be issued.",
   "message.pickclimber.rules.dispenser_issued": "Temporary Rule Book issued.",
   "message.pickclimber.rules.temporary_book_invalid_owner": "This Temporary Rule Book is not valid for you.",

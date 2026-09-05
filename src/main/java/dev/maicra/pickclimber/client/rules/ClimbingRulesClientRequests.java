@@ -1,23 +1,24 @@
 package dev.maicra.pickclimber.client.rules;
 
-import dev.maicra.pickclimber.rules.network.ClearRuleBookPayload;
-import dev.maicra.pickclimber.rules.network.CreateRuleBookPayload;
-import dev.maicra.pickclimber.rules.network.DispenseRuleBookTestPayload;
-import dev.maicra.pickclimber.rules.network.ImportCurrentRulesPayload;
-import dev.maicra.pickclimber.rules.network.ImportRuleBookPayload;
-import dev.maicra.pickclimber.rules.network.OpenRuleBookProcessingPayload;
-import dev.maicra.pickclimber.rules.network.OpenRuleBookExportRequestPayload;
-import dev.maicra.pickclimber.rules.network.OpenRulesTablePayload;
-import dev.maicra.pickclimber.rules.network.OpenRulesEditorRequestPayload;
-import dev.maicra.pickclimber.rules.network.RestoreWorldDefaultsPayload;
-import dev.maicra.pickclimber.rules.network.RuleBookNetworkLimits;
-import dev.maicra.pickclimber.rules.network.UpdateRuleBookPayload;
-import dev.maicra.pickclimber.rules.network.UpdateRuleDispenserLifetimePayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.network.PacketDistributor;
+
+import dev.maicra.pickclimber.rules.network.ClearRuleBookPayload;
+import dev.maicra.pickclimber.rules.network.CreateRuleBookPayload;
+import dev.maicra.pickclimber.rules.network.DispenseRuleBookTestPayload;
+import dev.maicra.pickclimber.rules.network.ImportCurrentRulesPayload;
+import dev.maicra.pickclimber.rules.network.ImportRuleBookPayload;
+import dev.maicra.pickclimber.rules.network.OpenRuleBookExportRequestPayload;
+import dev.maicra.pickclimber.rules.network.OpenRuleBookProcessingPayload;
+import dev.maicra.pickclimber.rules.network.OpenRulesEditorRequestPayload;
+import dev.maicra.pickclimber.rules.network.OpenRulesTablePayload;
+import dev.maicra.pickclimber.rules.network.RestoreWorldDefaultsPayload;
+import dev.maicra.pickclimber.rules.network.RuleBookNetworkLimits;
+import dev.maicra.pickclimber.rules.network.UpdateRuleBookPayload;
+import dev.maicra.pickclimber.rules.network.UpdateRuleDispenserLifetimePayload;
 
 public final class ClimbingRulesClientRequests {
     private ClimbingRulesClientRequests() {

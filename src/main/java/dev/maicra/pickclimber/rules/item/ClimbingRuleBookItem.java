@@ -1,8 +1,7 @@
 package dev.maicra.pickclimber.rules.item;
 
-import dev.maicra.pickclimber.rules.network.ClimbingRuleBookViewerNetworking;
-import dev.maicra.pickclimber.rules.RuleBookActivationMode;
-import dev.maicra.pickclimber.rules.RuleBookScope;
+import java.util.List;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
@@ -13,7 +12,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 
-import java.util.List;
+import dev.maicra.pickclimber.rules.RuleBookActivationMode;
+import dev.maicra.pickclimber.rules.RuleBookScope;
+import dev.maicra.pickclimber.rules.network.ClimbingRuleBookViewerNetworking;
 
 public final class ClimbingRuleBookItem extends Item {
     public ClimbingRuleBookItem(Properties properties) {

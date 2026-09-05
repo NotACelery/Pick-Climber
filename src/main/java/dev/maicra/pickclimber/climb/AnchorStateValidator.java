@@ -1,11 +1,13 @@
 package dev.maicra.pickclimber.climb;
 
 import com.mojang.logging.LogUtils;
+
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
+
 import org.slf4j.Logger;
 
 final class AnchorStateValidator {

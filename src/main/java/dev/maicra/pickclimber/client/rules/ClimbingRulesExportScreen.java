@@ -1,6 +1,7 @@
 package dev.maicra.pickclimber.client.rules;
 
-import dev.maicra.pickclimber.rules.ClimbingRuleBookDefinition;
+import java.nio.file.Path;
+
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -8,7 +9,7 @@ import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
-import java.nio.file.Path;
+import dev.maicra.pickclimber.rules.ClimbingRuleBookDefinition;
 
 public final class ClimbingRulesExportScreen extends Screen {
     private final Screen parent;

@@ -1,9 +1,7 @@
 package dev.maicra.pickclimber.rules.block;
 
 import com.mojang.serialization.MapCodec;
-import dev.maicra.pickclimber.rules.MapmakerPermissions;
-import dev.maicra.pickclimber.rules.RuleBookIssuanceResult;
-import dev.maicra.pickclimber.rules.TemporaryRuleBookIssuanceService;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -27,7 +25,12 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
+
 import org.jetbrains.annotations.Nullable;
+
+import dev.maicra.pickclimber.rules.MapmakerPermissions;
+import dev.maicra.pickclimber.rules.RuleBookIssuanceResult;
+import dev.maicra.pickclimber.rules.TemporaryRuleBookIssuanceService;
 
 public final class ClimbingRuleDispenserBlock extends BaseEntityBlock {
     public static final MapCodec<ClimbingRuleDispenserBlock> CODEC = simpleCodec(ClimbingRuleDispenserBlock::new);

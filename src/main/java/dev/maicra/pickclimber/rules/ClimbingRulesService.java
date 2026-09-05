@@ -1,15 +1,16 @@
 package dev.maicra.pickclimber.rules;
 
-import dev.maicra.pickclimber.climb.ClimbManager;
-import dev.maicra.pickclimber.rules.persistence.ClimbingRulesSavedData;
-import dev.maicra.pickclimber.rules.persistence.RuleDefinitionLibrarySavedData;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import dev.maicra.pickclimber.climb.ClimbManager;
+import dev.maicra.pickclimber.rules.persistence.ClimbingRulesSavedData;
+import dev.maicra.pickclimber.rules.persistence.RuleDefinitionLibrarySavedData;
 
 public final class ClimbingRulesService {
     private ClimbingRulesService() {

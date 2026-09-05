@@ -1,10 +1,10 @@
 package dev.maicra.pickclimber.rules;
 
-import net.minecraft.resources.ResourceLocation;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import net.minecraft.resources.ResourceLocation;
 
 public final class ClimbingRulesRuntimeView {
     private static final ClimbingRulesRuntimeView DEFAULTS = new ClimbingRulesRuntimeView(

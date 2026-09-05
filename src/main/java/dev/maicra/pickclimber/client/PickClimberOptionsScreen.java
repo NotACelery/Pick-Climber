@@ -1,21 +1,23 @@
 package dev.maicra.pickclimber.client;
 
-import dev.maicra.pickclimber.climb.AnchorIndicatorStatus;
-import dev.maicra.pickclimber.client.rules.ClimbingRulesExportScreen;
-import dev.maicra.pickclimber.rules.ClimbingRulesClientState;
-import dev.maicra.pickclimber.rules.ClimbingRuleBookDefinition;
-import dev.maicra.pickclimber.rules.DefaultRuleProfileFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 import java.util.function.Supplier;
+
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+
+import dev.maicra.pickclimber.client.rules.ClimbingRulesExportScreen;
+import dev.maicra.pickclimber.climb.AnchorIndicatorStatus;
+import dev.maicra.pickclimber.rules.ClimbingRuleBookDefinition;
+import dev.maicra.pickclimber.rules.ClimbingRulesClientState;
+import dev.maicra.pickclimber.rules.DefaultRuleProfileFactory;
 
 public final class PickClimberOptionsScreen extends Screen {
     private static final int CONTROL_HEIGHT = 20;
@@ -208,6 +210,11 @@ public final class PickClimberOptionsScreen extends Screen {
             }
         }
         return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+    }
+
+    @Override
+    public boolean isPauseScreen() {
+        return false;
     }
 
     @Override

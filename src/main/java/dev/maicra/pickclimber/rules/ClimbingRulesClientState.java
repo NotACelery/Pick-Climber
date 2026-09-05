@@ -1,10 +1,12 @@
 package dev.maicra.pickclimber.rules;
 
-import com.mojang.logging.LogUtils;
-import net.minecraft.nbt.CompoundTag;
-import org.slf4j.Logger;
-
 import java.util.Optional;
+
+import com.mojang.logging.LogUtils;
+
+import net.minecraft.nbt.CompoundTag;
+
+import org.slf4j.Logger;
 
 public final class ClimbingRulesClientState {
     private static final Logger LOGGER = LogUtils.getLogger();

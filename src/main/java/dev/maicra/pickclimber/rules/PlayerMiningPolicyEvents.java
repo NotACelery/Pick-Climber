@@ -1,8 +1,5 @@
 package dev.maicra.pickclimber.rules;
 
-import dev.maicra.pickclimber.ModBlocks;
-import dev.maicra.pickclimber.PickClimber;
-import dev.maicra.pickclimber.climb.ClimbManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
@@ -10,6 +7,10 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
+
+import dev.maicra.pickclimber.ModBlocks;
+import dev.maicra.pickclimber.PickClimber;
+import dev.maicra.pickclimber.climb.ClimbManager;
 
 @EventBusSubscriber(modid = PickClimber.MOD_ID)
 public final class PlayerMiningPolicyEvents {

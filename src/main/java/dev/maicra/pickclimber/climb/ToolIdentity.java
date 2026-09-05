@@ -1,12 +1,12 @@
 package dev.maicra.pickclimber.climb;
 
+import java.util.Optional;
+import java.util.UUID;
+
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
-
-import java.util.Optional;
-import java.util.UUID;
 
 public final class ToolIdentity {
     private static final String ROOT_KEY = "pickclimber";

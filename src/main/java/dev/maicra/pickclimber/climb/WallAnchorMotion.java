@@ -1,12 +1,12 @@
 package dev.maicra.pickclimber.climb;
 
+import java.util.UUID;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-
-import java.util.UUID;
 
 final class WallAnchorMotion {
     private WallAnchorMotion() {

@@ -1,9 +1,9 @@
 package dev.maicra.pickclimber.rules;
 
-import net.minecraft.resources.ResourceLocation;
-
 import java.util.Objects;
 import java.util.Set;
+
+import net.minecraft.resources.ResourceLocation;
 
 public record ClimbingRulesProfile(
         int formatVersion,

@@ -1,11 +1,11 @@
 package dev.maicra.pickclimber.rules;
 
-import net.minecraft.resources.ResourceLocation;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import net.minecraft.resources.ResourceLocation;
 
 public final class ClimbingRulesValidator {
     private ClimbingRulesValidator() {

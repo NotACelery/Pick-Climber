@@ -1,14 +1,16 @@
 package dev.maicra.pickclimber.rules.network;
 
-import dev.maicra.pickclimber.PickClimber;
-import dev.maicra.pickclimber.rules.ClimbingRuleBookCodec;
-import dev.maicra.pickclimber.rules.WorldRulesSnapshot;
 import io.netty.buffer.ByteBuf;
+
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
+
+import dev.maicra.pickclimber.PickClimber;
+import dev.maicra.pickclimber.rules.ClimbingRuleBookCodec;
+import dev.maicra.pickclimber.rules.WorldRulesSnapshot;
 
 public record WorldRulesStatePayload(
         boolean active,

@@ -149,7 +149,7 @@
   "gui.pickclimber.rules.timer_rules": "Regras %s",
   "gui.pickclimber.rules.timer_book": "Livro %s",
   "tooltip.pickclimber.temporary_rule_book.owner_bound": "Vinculado ao jogador para quem foi emitido",
-  "message.pickclimber.rules.dispenser_pending_copy": "Você já tem um Livro temporário de regras pendente.",
+  "message.pickclimber.rules.dispenser_pending_copy": "Você já tem um Temporary Rule Book com estas regras.",
   "message.pickclimber.rules.dispenser_spawn_failed": "Não foi possível emitir o Livro temporário de regras.",
   "message.pickclimber.rules.dispenser_issued": "Livro temporário de regras emitido.",
   "message.pickclimber.rules.temporary_book_invalid_owner": "Este Livro temporário de regras não é válido para você.",

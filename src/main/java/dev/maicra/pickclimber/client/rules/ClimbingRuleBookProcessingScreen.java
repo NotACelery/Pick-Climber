@@ -1,16 +1,17 @@
 package dev.maicra.pickclimber.client.rules;
 
-import dev.maicra.pickclimber.ModItems;
-import dev.maicra.pickclimber.rules.menu.ClimbingRuleBookProcessingMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+
+import dev.maicra.pickclimber.ModItems;
+import dev.maicra.pickclimber.rules.menu.ClimbingRuleBookProcessingMenu;
 
 public final class ClimbingRuleBookProcessingScreen
         extends AbstractContainerScreen<ClimbingRuleBookProcessingMenu> {
@@ -28,7 +29,6 @@ public final class ClimbingRuleBookProcessingScreen
         imageHeight = PANEL_HEIGHT;
         inventoryLabelY = 98;
     }
-
 
     @Override
     protected void init() {

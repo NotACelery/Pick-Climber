@@ -1,9 +1,7 @@
 package dev.maicra.pickclimber.client.rules;
 
-import dev.maicra.pickclimber.rules.ClimbingRuleBookCodec;
-import dev.maicra.pickclimber.rules.ClimbingRuleBookDefinition;
-import dev.maicra.pickclimber.rules.ClimbingRulesProfile;
-import dev.maicra.pickclimber.rules.DefaultRuleProfileFactory;
+import java.util.List;
+
 import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -12,7 +10,10 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 
-import java.util.List;
+import dev.maicra.pickclimber.rules.ClimbingRuleBookCodec;
+import dev.maicra.pickclimber.rules.ClimbingRuleBookDefinition;
+import dev.maicra.pickclimber.rules.ClimbingRulesProfile;
+import dev.maicra.pickclimber.rules.DefaultRuleProfileFactory;
 
 public final class ClimbingRulesImportScreen extends Screen {
     private static final int ROW_HEIGHT = 24;

@@ -1,10 +1,11 @@
 package dev.maicra.pickclimber.rules.network;
 
-import dev.maicra.pickclimber.rules.ClimbingRulesSyncSink;
-import dev.maicra.pickclimber.rules.WorldRulesSnapshot;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;
+
+import dev.maicra.pickclimber.rules.ClimbingRulesSyncSink;
+import dev.maicra.pickclimber.rules.WorldRulesSnapshot;
 
 public final class NeoForgeClimbingRulesSyncSink implements ClimbingRulesSyncSink {
     public static final NeoForgeClimbingRulesSyncSink INSTANCE = new NeoForgeClimbingRulesSyncSink();

@@ -1,13 +1,14 @@
 package dev.maicra.pickclimber.rules;
 
-import dev.maicra.pickclimber.climb.AnchorSurface;
-import dev.maicra.pickclimber.climb.ClimbRulesPolicy;
-import dev.maicra.pickclimber.climb.StructuralAnchorSafety;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
+
+import dev.maicra.pickclimber.climb.AnchorSurface;
+import dev.maicra.pickclimber.climb.ClimbRulesPolicy;
+import dev.maicra.pickclimber.climb.StructuralAnchorSafety;
 
 public final class ClimbingRulesIntegration implements ClimbRulesPolicy {
     public static final ClimbingRulesIntegration INSTANCE = new ClimbingRulesIntegration();
@@ -45,7 +46,6 @@ public final class ClimbingRulesIntegration implements ClimbRulesPolicy {
         ClimbingRulesRuntimeView rules = EffectiveClimbingRulesService.resolve(player);
         return rules.active() ? rules.pickaxeWear() : -1;
     }
-
 
     private static AnchorSurface map(SurfaceClassification classification) {
         return switch (classification) {

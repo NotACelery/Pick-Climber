@@ -1,6 +1,9 @@
 package dev.maicra.pickclimber.climb;
 
+import java.util.UUID;
+
 import com.mojang.logging.LogUtils;
+
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -10,9 +13,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import org.slf4j.Logger;
 
-import java.util.UUID;
+import org.slf4j.Logger;
 
 final class AnchorLifecycle {
     private static final Logger LOGGER = LogUtils.getLogger();

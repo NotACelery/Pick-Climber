@@ -1,24 +1,10 @@
 package dev.maicra.pickclimber.rules.network;
 
-import dev.maicra.pickclimber.rules.UnlistedPolicy;
-import dev.maicra.pickclimber.ModItems;
-import dev.maicra.pickclimber.rules.ClimbingRuleBookCodec;
-import dev.maicra.pickclimber.rules.ClimbingRuleBookDefinition;
-import dev.maicra.pickclimber.rules.ClimbingRuleBookValidationResult;
-import dev.maicra.pickclimber.rules.ClimbingRuleBookValidator;
-import dev.maicra.pickclimber.rules.ClimbingRulesClientUi;
-import dev.maicra.pickclimber.rules.ClimbingRulesProfile;
-import dev.maicra.pickclimber.rules.ClimbingRulesService;
-import dev.maicra.pickclimber.rules.DefaultRuleProfileFactory;
-import dev.maicra.pickclimber.rules.MapmakerPermissions;
-import dev.maicra.pickclimber.rules.RuleBookActivationMode;
-import dev.maicra.pickclimber.rules.RuleBookScope;
-import dev.maicra.pickclimber.rules.RuleDefinitionId;
-import dev.maicra.pickclimber.rules.WorldRulesSnapshot;
-import dev.maicra.pickclimber.rules.block.ClimbingRulesTableBlockEntity;
-import dev.maicra.pickclimber.rules.item.ClimbingRuleBookData;
-import dev.maicra.pickclimber.rules.menu.ClimbingRuleBookProcessingMenu;
-import dev.maicra.pickclimber.rules.menu.ClimbingRulesTableMenu;
+import java.util.LinkedHashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.BiConsumer;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -33,10 +19,25 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.BiConsumer;
+import dev.maicra.pickclimber.ModItems;
+import dev.maicra.pickclimber.rules.ClimbingRuleBookCodec;
+import dev.maicra.pickclimber.rules.ClimbingRuleBookDefinition;
+import dev.maicra.pickclimber.rules.ClimbingRuleBookValidationResult;
+import dev.maicra.pickclimber.rules.ClimbingRuleBookValidator;
+import dev.maicra.pickclimber.rules.ClimbingRulesClientUi;
+import dev.maicra.pickclimber.rules.ClimbingRulesProfile;
+import dev.maicra.pickclimber.rules.ClimbingRulesService;
+import dev.maicra.pickclimber.rules.DefaultRuleProfileFactory;
+import dev.maicra.pickclimber.rules.MapmakerPermissions;
+import dev.maicra.pickclimber.rules.RuleBookActivationMode;
+import dev.maicra.pickclimber.rules.RuleBookScope;
+import dev.maicra.pickclimber.rules.RuleDefinitionId;
+import dev.maicra.pickclimber.rules.UnlistedPolicy;
+import dev.maicra.pickclimber.rules.WorldRulesSnapshot;
+import dev.maicra.pickclimber.rules.block.ClimbingRulesTableBlockEntity;
+import dev.maicra.pickclimber.rules.item.ClimbingRuleBookData;
+import dev.maicra.pickclimber.rules.menu.ClimbingRuleBookProcessingMenu;
+import dev.maicra.pickclimber.rules.menu.ClimbingRulesTableMenu;
 
 public final class ClimbingRulesTableNetworking {
     private ClimbingRulesTableNetworking() {
@@ -135,8 +136,6 @@ public final class ClimbingRulesTableNetworking {
             importIntoTableBook(player, table, payload.position(), definition);
         });
     }
-
-
 
     private static void handleOpenExport(OpenRuleBookExportRequestPayload payload, IPayloadContext context) {
         withTable(context, payload.position(), (player, table) -> {
@@ -358,7 +357,6 @@ public final class ClimbingRulesTableNetworking {
         openTable(player, table, position);
         result(player, true, "message.pickclimber.rules.book_created");
     }
-
 
     private static void importIntoTableBook(
             ServerPlayer player,

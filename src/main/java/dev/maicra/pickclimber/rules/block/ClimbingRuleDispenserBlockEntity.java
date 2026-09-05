@@ -1,9 +1,5 @@
 package dev.maicra.pickclimber.rules.block;
 
-import dev.maicra.pickclimber.ModBlockEntities;
-import dev.maicra.pickclimber.ModItems;
-import dev.maicra.pickclimber.rules.item.ClimbingRuleBookData;
-import dev.maicra.pickclimber.rules.menu.ClimbingRuleDispenserMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
@@ -17,6 +13,11 @@ import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+
+import dev.maicra.pickclimber.ModBlockEntities;
+import dev.maicra.pickclimber.ModItems;
+import dev.maicra.pickclimber.rules.item.ClimbingRuleBookData;
+import dev.maicra.pickclimber.rules.menu.ClimbingRuleDispenserMenu;
 
 public final class ClimbingRuleDispenserBlockEntity extends BaseContainerBlockEntity implements ContainerData {
     public static final int SOURCE_SLOT = 0;
@@ -67,7 +68,6 @@ public final class ClimbingRuleDispenserBlockEntity extends BaseContainerBlockEn
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
         }
     }
-
 
     @Override
     public void onLoad() {

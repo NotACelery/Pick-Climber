@@ -1,12 +1,9 @@
 package dev.maicra.pickclimber.rules.block;
 
+import java.util.Optional;
+
 import com.mojang.serialization.MapCodec;
-import dev.maicra.pickclimber.rules.ClimbingRuleBookDefinition;
-import dev.maicra.pickclimber.rules.ClimbingRulesService;
-import dev.maicra.pickclimber.rules.RuleBookApplicationResult;
-import dev.maicra.pickclimber.rules.item.ClimbingRuleBookData;
-import dev.maicra.pickclimber.rules.item.TemporaryRuleBookData;
-import dev.maicra.pickclimber.rules.TemporaryRuleBookIssuanceService;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -27,7 +24,12 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
 
-import java.util.Optional;
+import dev.maicra.pickclimber.rules.ClimbingRuleBookDefinition;
+import dev.maicra.pickclimber.rules.ClimbingRulesService;
+import dev.maicra.pickclimber.rules.RuleBookApplicationResult;
+import dev.maicra.pickclimber.rules.TemporaryRuleBookIssuanceService;
+import dev.maicra.pickclimber.rules.item.ClimbingRuleBookData;
+import dev.maicra.pickclimber.rules.item.TemporaryRuleBookData;
 
 public final class ClimbingRulesTerminalBlock extends Block {
     public static final MapCodec<ClimbingRulesTerminalBlock> CODEC = simpleCodec(ClimbingRulesTerminalBlock::new);

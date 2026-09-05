@@ -1,11 +1,13 @@
 package dev.maicra.pickclimber.rules.network;
 
-import dev.maicra.pickclimber.rules.ClimbingRuleBookDefinition;
 import io.netty.buffer.ByteBuf;
+
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+
+import dev.maicra.pickclimber.rules.ClimbingRuleBookDefinition;
 
 public final class RuleBookNetworkLimits {
     public static final int MAX_NETWORK_BYTES = ClimbingRuleBookDefinition.MAX_SERIALIZED_BYTES;

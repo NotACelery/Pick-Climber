@@ -1,14 +1,15 @@
 package dev.maicra.pickclimber.rules.network;
 
-import dev.maicra.pickclimber.rules.ClimbingRuleBookCodec;
-import dev.maicra.pickclimber.rules.ClimbingRulesClientUi;
-import dev.maicra.pickclimber.rules.item.ClimbingRuleBookData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+
+import dev.maicra.pickclimber.rules.ClimbingRuleBookCodec;
+import dev.maicra.pickclimber.rules.ClimbingRulesClientUi;
+import dev.maicra.pickclimber.rules.item.ClimbingRuleBookData;
 
 public final class ClimbingRuleBookViewerNetworking {
     private ClimbingRuleBookViewerNetworking() {

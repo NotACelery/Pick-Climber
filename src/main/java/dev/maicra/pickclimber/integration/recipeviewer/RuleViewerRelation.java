@@ -1,8 +1,9 @@
 package dev.maicra.pickclimber.integration.recipeviewer;
 
-import dev.maicra.pickclimber.PickClimber;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+
+import dev.maicra.pickclimber.PickClimber;
 
 public enum RuleViewerRelation {
     AUTHORING("authoring"),

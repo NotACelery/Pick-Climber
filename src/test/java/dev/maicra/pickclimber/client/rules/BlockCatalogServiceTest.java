@@ -1,6 +1,7 @@
 package dev.maicra.pickclimber.client.rules;
 
 import net.minecraft.world.level.block.Blocks;
+
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;

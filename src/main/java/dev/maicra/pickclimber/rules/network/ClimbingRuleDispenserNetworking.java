@@ -1,13 +1,14 @@
 package dev.maicra.pickclimber.rules.network;
 
+import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+
 import dev.maicra.pickclimber.rules.MapmakerPermissions;
 import dev.maicra.pickclimber.rules.RuleBookIssuanceResult;
 import dev.maicra.pickclimber.rules.TemporaryRuleBookIssuanceService;
 import dev.maicra.pickclimber.rules.block.ClimbingRuleDispenserBlockEntity;
 import dev.maicra.pickclimber.rules.menu.ClimbingRuleDispenserMenu;
-import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
-import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 public final class ClimbingRuleDispenserNetworking {
     private ClimbingRuleDispenserNetworking() {

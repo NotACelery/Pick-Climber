@@ -1,11 +1,12 @@
 package dev.maicra.pickclimber;
 
-import dev.maicra.pickclimber.rules.block.ClimbingRulesTableBlockEntity;
-import dev.maicra.pickclimber.rules.block.ClimbingRuleDispenserBlockEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
+
+import dev.maicra.pickclimber.rules.block.ClimbingRuleDispenserBlockEntity;
+import dev.maicra.pickclimber.rules.block.ClimbingRulesTableBlockEntity;
 
 public final class ModBlockEntities {
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(

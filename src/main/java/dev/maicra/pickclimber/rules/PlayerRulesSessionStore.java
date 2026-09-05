@@ -1,14 +1,14 @@
 package dev.maicra.pickclimber.rules;
 
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 
 public final class PlayerRulesSessionStore {
     private static final Map<UUID, Session> SESSIONS = new HashMap<>();

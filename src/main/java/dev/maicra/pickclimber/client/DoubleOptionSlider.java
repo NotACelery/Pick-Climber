@@ -2,6 +2,7 @@ package dev.maicra.pickclimber.client;
 
 import java.util.function.DoubleConsumer;
 import java.util.function.DoubleFunction;
+
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.network.chat.Component;
 
