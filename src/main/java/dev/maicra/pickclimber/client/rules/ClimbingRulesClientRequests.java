@@ -65,8 +65,14 @@ public final class ClimbingRulesClientRequests {
         PacketDistributor.sendToServer(new UpdateRuleBookPayload(position, sessionToken, definitionTag));
     }
 
-    public static void updateRuleDispenserLifetime(BlockPos position, int seconds) {
-        PacketDistributor.sendToServer(new UpdateRuleDispenserLifetimePayload(position, seconds));
+    public static void updateRuleDispenserSettings(
+            BlockPos position,
+            int seconds,
+            boolean startCounterOnPickup
+    ) {
+        PacketDistributor.sendToServer(
+                new UpdateRuleDispenserLifetimePayload(position, seconds, startCounterOnPickup)
+        );
     }
 
     public static void dispenseRuleBookTest(BlockPos position) {

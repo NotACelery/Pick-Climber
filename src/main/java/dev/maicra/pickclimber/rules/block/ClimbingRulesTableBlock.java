@@ -23,16 +23,33 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.phys.shapes.BooleanOp;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public final class ClimbingRulesTableBlock extends BaseEntityBlock {
     public static final MapCodec<ClimbingRulesTableBlock> CODEC = simpleCodec(ClimbingRulesTableBlock::new);
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final BooleanProperty HAS_BOOK = BooleanProperty.create("has_book");
+
+    private static final VoxelShape NORTH_SHAPE = buildNorthShape();
+    private static final VoxelShape EAST_SHAPE = rotateShape(NORTH_SHAPE);
+    private static final VoxelShape SOUTH_SHAPE = rotateShape(EAST_SHAPE);
+    private static final VoxelShape WEST_SHAPE = rotateShape(SOUTH_SHAPE);
+
 
     public ClimbingRulesTableBlock(BlockBehaviour.Properties properties) {
         super(properties);
-        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH));
+        registerDefaultState(
+                stateDefinition.any()
+                        .setValue(FACING, Direction.NORTH)
+                        .setValue(HAS_BOOK, false)
+        );
     }
 
     @Override
@@ -52,7 +69,9 @@ public final class ClimbingRulesTableBlock extends BaseEntityBlock {
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
+        return defaultBlockState()
+                .setValue(FACING, context.getHorizontalDirection().getOpposite())
+                .setValue(HAS_BOOK, false);
     }
 
     @Override
@@ -67,7 +86,85 @@ public final class ClimbingRulesTableBlock extends BaseEntityBlock {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING);
+        builder.add(FACING, HAS_BOOK);
+    }
+
+    @Override
+    protected VoxelShape getShape(
+            BlockState state,
+            BlockGetter level,
+            BlockPos position,
+            CollisionContext context
+    ) {
+        return shapeForFacing(state.getValue(FACING));
+    }
+
+    @Override
+    protected VoxelShape getCollisionShape(
+            BlockState state,
+            BlockGetter level,
+            BlockPos position,
+            CollisionContext context
+    ) {
+        return shapeForFacing(state.getValue(FACING));
+    }
+
+    @Override
+    protected float getShadeBrightness(BlockState state, BlockGetter level, BlockPos position) {
+        return 1.0F;
+    }
+
+    @Override
+    protected boolean propagatesSkylightDown(BlockState state, BlockGetter level, BlockPos position) {
+        return true;
+    }
+
+    private static VoxelShape shapeForFacing(Direction facing) {
+        return switch (facing) {
+            case NORTH -> NORTH_SHAPE;
+            case EAST -> EAST_SHAPE;
+            case SOUTH -> SOUTH_SHAPE;
+            case WEST -> WEST_SHAPE;
+            default -> NORTH_SHAPE;
+        };
+    }
+
+    private static VoxelShape buildNorthShape() {
+        VoxelShape shape = Shapes.empty();
+
+        // Four legs: exactly the 2x6x2 supports authored in the final Blockbench model.
+        shape = join(shape, Block.box(0, 0, 0, 2, 6, 2));
+        shape = join(shape, Block.box(14, 0, 0, 16, 6, 2));
+        shape = join(shape, Block.box(0, 0, 14, 2, 6, 16));
+        shape = join(shape, Block.box(14, 0, 14, 16, 6, 16));
+
+        // Main shelf/body and the two side walls.
+        shape = join(shape, Block.box(0, 6, 0, 16, 8, 16));
+        shape = join(shape, Block.box(0, 8, 0, 1, 14, 16));
+        shape = join(shape, Block.box(15, 8, 0, 16, 14, 16));
+        shape = join(shape, Block.box(1, 8, 1, 15, 14, 3));
+        shape = join(shape, Block.box(1, 8, 13, 15, 14, 15));
+
+        // Writing surface and both raised rails.
+        shape = join(shape, Block.box(0, 14, 1, 16, 15, 15));
+        shape = join(shape, Block.box(0, 14, 0, 16, 16, 1));
+        shape = join(shape, Block.box(0, 14, 15, 16, 16, 16));
+        return shape;
+    }
+
+    private static VoxelShape join(VoxelShape first, VoxelShape second) {
+        return Shapes.joinUnoptimized(first, second, BooleanOp.OR);
+    }
+
+    private static VoxelShape rotateShape(VoxelShape shape) {
+        VoxelShape[] rotated = {Shapes.empty()};
+        shape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) ->
+                rotated[0] = Shapes.or(
+                        rotated[0],
+                        Shapes.box(1.0D - maxZ, minY, minX, 1.0D - minZ, maxY, maxX)
+                )
+        );
+        return rotated[0];
     }
 
     @Override

@@ -1,3 +1,67 @@
+## 1.2.0-dev.50
+
+- Fixed the remaining Rule Book editor regression specific to the `ALL` tab.
+- A white-bordered block left selected/unassigned when saving is now explicitly removed from Stable/Unstable and persisted as Unclimbable.
+- This makes the visual state and saved state agree: white/unassigned in `ALL` can no longer silently keep the block's previous Pick Climber/default classification.
+- The server-side fail-closed normalization from dev.49 remains in place as a second safety layer.
+- Rules Table hitbox and lighting fixes from dev.49 are unchanged.
+
+## 1.2.0-dev.49
+
+- Rule Book saving is now fail-closed on the server as well as the editor: every currently authorable block left without an explicit Stable/Unstable classification is persisted as Unclimbable.
+- This applies to both new Rule Books and edited Rule Books, preventing a deselected block from falling back to its Pick Climber default classification after reopening the book.
+- Added an orientation-aware voxel shape for the final Climbing Rules Table model, matching its legs, shelf/body, side walls, writing surface and raised rails instead of using a full 16x16x16 selection/collision cube.
+- Empty space below/around the table can now be targeted through normally.
+- Disabled ambient occlusion on the Rules Table models and explicitly allowed skylight propagation/full shade brightness to prevent excessive darkening when neighboring blocks are placed beside the non-solid table.
+- Preserved the final dev.48 visual geometry/assets and no-occlusion behavior.
+
+## 1.2.0-dev.48
+
+- Restored vanilla block-item display transforms by making both Climbing Rules Table block models inherit `minecraft:block/block`; this fixes the oversized first-person/hand representation without changing the placed block.
+- Removed the remaining visible seam on the two upper rails by changing the geometry instead of deleting more textures: both rails now run continuously from Y=14 to Y=16.
+- Inset the upper center tabletop to Z=1..15, so it no longer sits underneath the rails.
+- Removed the temporary dev.47 helper tabletop plane and restored the center tabletop's own top face, eliminating another redundant coplanar surface.
+- Preserved the dev.47 cutout render type for the with-book model, the Book Y=15.25 offset, orientation fix, and `noOcclusion()` behavior.
+
+## 1.2.0-dev.47
+
+- Fixed the remaining Climbing Rules Table top-rail z-fighting at its actual source: the full-width top face of the upper Base no longer renders underneath the two raised rails.
+- Added a center-only tabletop face between the rails, preserving the authored geometry and appearance without coplanar hidden faces.
+- Marked the `has_book=true` table model as `minecraft:cutout`, so the real alpha channel of `climbing_rules_table_book_open.png` is respected instead of rendering transparent pixels as a black rectangle.
+- Kept the open Book at the existing Y=15.25 offset; no additional vertical movement was applied.
+- Preserved orientation and `noOcclusion()` behavior from the previous builds.
+
+## 1.2.0-dev.41
+
+- Temporary Rule Books now expire on the ground when their configured timer reaches zero.
+- The Rule Dispenser now persists a `Start counter on pickup` checkbox.
+- Default/unchecked behavior starts the timer as soon as the book is dispensed, so time spent on the ground counts.
+- Checked behavior pauses the gameplay timer while the copy is still unclaimed; the configured timer starts on first pickup.
+- Once a Temporary Rule Book has been picked up, its timer keeps running even if the player drops it again.
+- Multi-book ownership from dev.40 is preserved: each temporary copy still tracks its own independent token and expiry.
+
+## 1.2.0-dev.40
+
+- Temporary Rule Books are no longer globally limited to one active issuance per player.
+- Players may pick up and carry multiple distinct Temporary Rule Books at the same time.
+- Each Temporary Rule Book keeps its own issuance token and expiration independently.
+- Consuming or expiring one Temporary Rule Book no longer blocks or invalidates the player's other temporary books.
+- The HUD keeps the existing single timer slot and shows the nearest-expiring owned Temporary Rule Book; after it is consumed or expires, it automatically advances to the next one.
+
+## 1.2.0-dev.39
+
+- Fixed Climbing Rule Dispenser lifetime synchronization so the redstone-dispensed Temporary Rule Book uses the slider value instead of silently falling back to 30 seconds.
+- Slider now commits its final value on release and when closing the GUI, and reconciles against the server-confirmed value while idle.
+- Dispenser BlockEntity now exposes a dedicated lifetime setter that marks/synchronizes the changed value.
+
+## 1.2.0-dev.38
+
+- Reworked Climbing Rules Table visuals around a compact spruce bookshelf/writing-station design.
+- Restored a tall first bookshelf row on the front instead of the progressively shortened book strip.
+- Lower section and bottom now use stripped-spruce-style side grain, never end-ring geometry.
+- Added a `has_book` visual state: the open book exists above the tabletop only while a Book/Rule Book is stored.
+- Added a standalone Blockbench-ready model + textures bundle.
+
 ## 1.2.0-dev.37
 
 - Rule Book editor now treats every explicitly cleared classification as Unclimbable on save, including removals performed from filtered Stable/Unstable/Unclimbable tabs.
@@ -122,3 +186,8 @@
 - Rule Book JSON now defaults missing `cover_color` to White and gives specific feedback for unsupported future schemas.
 - Added filesystem roundtrip/overwrite, legacy migration, manipulated JSON, cross-platform filename and portable identity tests.
 - Terminal and Rule Dispenser now require current schema v2; legacy data must be repaired/saved through the Rules Table.
+## 1.2.0-dev.46
+
+- Removed only the lower rendered face from the two upper table rails (`Top Wall` and `Bottom Wall`) in both runtime models and the editable Blockbench models.
+- Converted the exterior-connected black background around the open-book texture to alpha 0 using an exterior flood fill; enclosed black linework remains intact.
+- Retained the dev.45 book elevation (+0.25 model units), 180-degree placement correction, and non-occluding Rules Table behavior.

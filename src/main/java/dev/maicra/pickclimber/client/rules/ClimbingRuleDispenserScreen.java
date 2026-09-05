@@ -11,8 +11,9 @@ import net.minecraft.world.entity.player.Inventory;
 
 public final class ClimbingRuleDispenserScreen extends AbstractContainerScreen<ClimbingRuleDispenserMenu> {
     private static final int PANEL_WIDTH = 236;
-    private static final int PANEL_HEIGHT = 210;
+    private static final int PANEL_HEIGHT = 226;
     private LifetimeSlider lifetimeSlider;
+    private Button pickupCounterCheckbox;
 
     public ClimbingRuleDispenserScreen(
             ClimbingRuleDispenserMenu menu,
@@ -22,7 +23,7 @@ public final class ClimbingRuleDispenserScreen extends AbstractContainerScreen<C
         super(menu, inventory, title);
         imageWidth = PANEL_WIDTH;
         imageHeight = PANEL_HEIGHT;
-        inventoryLabelY = 110;
+        inventoryLabelY = 126;
     }
 
     @Override
@@ -35,10 +36,14 @@ public final class ClimbingRuleDispenserScreen extends AbstractContainerScreen<C
                 menu.lifetimeSeconds()
         );
         addRenderableWidget(lifetimeSlider);
+        pickupCounterCheckbox = addRenderableWidget(Button.builder(
+                pickupCounterLabel(menu.startCounterOnPickup()),
+                button -> togglePickupCounter()
+        ).bounds(leftPos + 72, topPos + 70, 140, 18).build());
         addRenderableWidget(Button.builder(
                 Component.translatable("gui.pickclimber.rules.dispenser.test_copy"),
                 button -> ClimbingRulesClientRequests.dispenseRuleBookTest(menu.blockPos())
-        ).bounds(leftPos + 72, topPos + 72, 140, 20).build());
+        ).bounds(leftPos + 72, topPos + 92, 140, 20).build());
     }
 
     @Override
@@ -63,9 +68,30 @@ public final class ClimbingRuleDispenserScreen extends AbstractContainerScreen<C
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (button == 0 && lifetimeSlider != null && lifetimeSlider.dragging()) {
             lifetimeSlider.endDrag();
+            lifetimeSlider.commit();
             return true;
         }
         return super.mouseReleased(mouseX, mouseY, button);
+    }
+
+
+    @Override
+    protected void containerTick() {
+        super.containerTick();
+        if (lifetimeSlider != null && !lifetimeSlider.dragging()) {
+            lifetimeSlider.syncFromServer(menu.lifetimeSeconds());
+        }
+        if (pickupCounterCheckbox != null) {
+            pickupCounterCheckbox.setMessage(pickupCounterLabel(menu.startCounterOnPickup()));
+        }
+    }
+
+    @Override
+    public void onClose() {
+        if (lifetimeSlider != null) {
+            lifetimeSlider.commit();
+        }
+        super.onClose();
     }
 
     @Override
@@ -110,7 +136,7 @@ public final class ClimbingRuleDispenserScreen extends AbstractContainerScreen<C
                 font,
                 Component.translatable("gui.pickclimber.rules.dispenser.config_hint"),
                 8,
-                98,
+                116,
                 0xAEB4BD,
                 false
         );
@@ -123,8 +149,27 @@ public final class ClimbingRuleDispenserScreen extends AbstractContainerScreen<C
         renderTooltip(gui, mouseX, mouseY);
     }
 
+    private void togglePickupCounter() {
+        boolean updated = !menu.startCounterOnPickup();
+        pickupCounterCheckbox.setMessage(pickupCounterLabel(updated));
+        ClimbingRulesClientRequests.updateRuleDispenserSettings(
+                menu.blockPos(),
+                lifetimeSlider == null ? menu.lifetimeSeconds() : lifetimeSlider.seconds(),
+                updated
+        );
+    }
+
+    private static Component pickupCounterLabel(boolean enabled) {
+        return Component.translatable(
+                enabled
+                        ? "gui.pickclimber.rules.dispenser.start_on_pickup.checked"
+                        : "gui.pickclimber.rules.dispenser.start_on_pickup.unchecked"
+        );
+    }
+
     private final class LifetimeSlider extends AbstractSliderButton {
         private int seconds;
+        private int lastSentSeconds;
         private boolean dragging;
 
         private LifetimeSlider(int x, int y, int width, int initialSeconds) {
@@ -137,6 +182,7 @@ public final class ClimbingRuleDispenserScreen extends AbstractContainerScreen<C
                     toSliderValue(initialSeconds)
             );
             seconds = ClimbingRuleDispenserBlockEntity.clampLifetime(initialSeconds);
+            lastSentSeconds = seconds;
             updateMessage();
         }
 
@@ -152,7 +198,7 @@ public final class ClimbingRuleDispenserScreen extends AbstractContainerScreen<C
                 return;
             }
             seconds = updated;
-            ClimbingRulesClientRequests.updateRuleDispenserLifetime(menu.blockPos(), seconds);
+            sendIfChanged();
         }
 
         private int seconds() {
@@ -171,6 +217,37 @@ public final class ClimbingRuleDispenserScreen extends AbstractContainerScreen<C
 
         private void endDrag() {
             dragging = false;
+        }
+
+        private void commit() {
+            ClimbingRulesClientRequests.updateRuleDispenserSettings(
+                    menu.blockPos(),
+                    seconds,
+                    menu.startCounterOnPickup()
+            );
+            lastSentSeconds = seconds;
+        }
+
+        private void sendIfChanged() {
+            if (seconds == lastSentSeconds) {
+                return;
+            }
+            ClimbingRulesClientRequests.updateRuleDispenserSettings(
+                    menu.blockPos(),
+                    seconds,
+                    menu.startCounterOnPickup()
+            );
+            lastSentSeconds = seconds;
+        }
+
+        private void syncFromServer(int serverSeconds) {
+            int clamped = ClimbingRuleDispenserBlockEntity.clampLifetime(serverSeconds);
+            if (clamped == seconds) {
+                return;
+            }
+            seconds = clamped;
+            lastSentSeconds = clamped;
+            value = toSliderValue(clamped);
         }
 
         private boolean dragging() {
@@ -201,11 +278,11 @@ public final class ClimbingRuleDispenserScreen extends AbstractContainerScreen<C
     private void drawPlayerInventorySlots(GuiGraphics gui) {
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 9; column++) {
-                drawInventorySlot(gui, leftPos + 36 + column * 18, topPos + 122 + row * 18);
+                drawInventorySlot(gui, leftPos + 36 + column * 18, topPos + 138 + row * 18);
             }
         }
         for (int column = 0; column < 9; column++) {
-            drawInventorySlot(gui, leftPos + 36 + column * 18, topPos + 180);
+            drawInventorySlot(gui, leftPos + 36 + column * 18, topPos + 196);
         }
     }
 }

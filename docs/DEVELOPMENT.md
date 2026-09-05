@@ -12,7 +12,7 @@
 - Mechanical profile format: `1`
 - Client config: `3`
 
-`1.2.0-dev.37` is the current materialized development cut after the Rule Definition architecture migration started during dev.22 QA. It includes full Rule Book authoring, Permanent/Temporary
+`1.2.0-dev.41` is the current materialized development cut after the Rule Definition architecture migration started during dev.22 QA. It includes full Rule Book authoring, Permanent/Temporary
 WORLD, Temporary PLAYER overlays, Climbing Rule Dispenser transport issuance, Rules/Book countdown HUD, Structural
 Geometry Safety, the read-only Viewer, portable JSON hardening, strict legacy migration, final visual assets and optional
 JEI/EMI documentation integrations. dev.22 additionally completes the contextual one-slot Rules Table, separate Clone/Dye

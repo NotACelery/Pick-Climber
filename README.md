@@ -12,7 +12,7 @@ para mantener un alcance publicable y evitar convertir una sola actualización e
 La línea 1.x continúa siendo compatible conceptualmente con el gameplay base de Pick Climber. Las nuevas capas de reglas
 no deben alterar el comportamiento normal cuando no existe una configuración de mapa activa.
 
-> **Estado de este snapshot:** el source materializado está en `1.2.0-dev.37`. Sobre la línea completa de Rule Book v2,
+> **Estado de este snapshot:** el source materializado está en `1.2.0-dev.41`. Sobre la línea completa de Rule Book v2,
 > Rules Table, Terminal, Dispenser, reglas WORLD/PLAYER, Viewer y JEI/EMI opcionales. dev.33 completa la migración
 > reference-first de Rule Books: las definiciones pesadas viven una sola vez en SavedData del mundo/server, los libros
 > normales y temporales transportan IDs + metadata liviana, y render/name/tooltips no decodifican perfiles completos.
@@ -752,5 +752,5 @@ Linux/WSL:
 ./build.sh
 ```
 
-El source materializado de este snapshot usa `mod_version=1.2.0-dev.37`. `docs/WAITLIST.md` es la fuente operativa
+El source materializado de este snapshot usa `mod_version=1.2.0-dev.41`. `docs/WAITLIST.md` es la fuente operativa
 para distinguir lo completado de lo pendiente; no se debe cambiar a `1.2.0` hasta cerrar features, build y QA.

@@ -3,7 +3,7 @@
 > **Documento vivo.**  
 > Actualizar después de cada pasada de implementación.  
 > Fecha inicial: **2026-09-02**.  
-> Estado materializado actual: **1.2.0-dev.37**.  
+> Estado materializado actual: **1.2.0-dev.41**.  
 > dev.8 fue el code floor recuperado; dev.9 reconstruyó Rule Book/Table/Terminal, dev.10 materializó authoring final +
 > Temporary WORLD, dev.11 completó Temporary PLAYER, dev.12 materializó Rule Dispenser + Temporary Rule Book
 > transport/HUD dual, dev.13 añadió Structural Geometry Safety, dev.14-dev.16 cerraron la campaña de build, dev.17

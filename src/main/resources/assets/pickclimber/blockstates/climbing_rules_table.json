@@ -1,19 +1,36 @@
 {
   "variants": {
-    "facing=north": {
-      "model": "pickclimber:block/climbing_rules_table"
-    },
-    "facing=east": {
-      "model": "pickclimber:block/climbing_rules_table",
-      "y": 90
-    },
-    "facing=south": {
+    "facing=north,has_book=false": {
       "model": "pickclimber:block/climbing_rules_table",
       "y": 180
     },
-    "facing=west": {
+    "facing=north,has_book=true": {
+      "model": "pickclimber:block/climbing_rules_table_with_book",
+      "y": 180
+    },
+    "facing=east,has_book=false": {
       "model": "pickclimber:block/climbing_rules_table",
       "y": 270
+    },
+    "facing=east,has_book=true": {
+      "model": "pickclimber:block/climbing_rules_table_with_book",
+      "y": 270
+    },
+    "facing=south,has_book=false": {
+      "model": "pickclimber:block/climbing_rules_table",
+      "y": 0
+    },
+    "facing=south,has_book=true": {
+      "model": "pickclimber:block/climbing_rules_table_with_book",
+      "y": 0
+    },
+    "facing=west,has_book=false": {
+      "model": "pickclimber:block/climbing_rules_table",
+      "y": 90
+    },
+    "facing=west,has_book=true": {
+      "model": "pickclimber:block/climbing_rules_table_with_book",
+      "y": 90
     }
   }
 }

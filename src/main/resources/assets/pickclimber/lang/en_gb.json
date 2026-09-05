@@ -233,5 +233,7 @@
   "message.pickclimber.rules.book_imported": "Rules imported into the Rule Book.",
   "gui.pickclimber.rules.dispenser.source": "Rule Book",
   "options.pickclimber.export_world_rules": "Export World Rules",
-  "message.pickclimber.anchor.unclimbable_block": "Cannot anchor: %s is unclimbable"
+  "message.pickclimber.anchor.unclimbable_block": "Cannot anchor: %s is unclimbable",
+  "gui.pickclimber.rules.dispenser.start_on_pickup.checked": "[x] Start counter on pickup",
+  "gui.pickclimber.rules.dispenser.start_on_pickup.unchecked": "[ ] Start counter on pickup"
 }

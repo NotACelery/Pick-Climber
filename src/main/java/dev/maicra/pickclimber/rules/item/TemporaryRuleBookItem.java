@@ -42,12 +42,17 @@ public final class TemporaryRuleBookItem extends Item {
 
     @Override
     public int getEntityLifespan(ItemStack stack, Level level) {
-        return TemporaryRuleBookData.readExpiry(stack)
-                .map(expiresAt -> {
-                    long remaining = expiresAt - level.getGameTime();
-                    return (int) Math.max(1L, Math.min(Integer.MAX_VALUE, remaining));
-                })
-                .orElse(1);
+        Optional<TemporaryRuleBookData.TransportData> dataOptional = TemporaryRuleBookData.readValidated(stack);
+        if (dataOptional.isEmpty()) {
+            return 1;
+        }
+        TemporaryRuleBookData.TransportData data = dataOptional.get();
+        if (data.startCounterOnPickup()
+                && TemporaryRuleBookIssuanceService.isUnclaimed(data)) {
+            return 20 * 60 * 5;
+        }
+        long remaining = data.expiresAtGameTime() - level.getGameTime();
+        return (int) Math.max(1L, Math.min(Integer.MAX_VALUE, remaining));
     }
 
     @Override

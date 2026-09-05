@@ -1,5 +1,6 @@
 package dev.maicra.pickclimber.rules.network;
 
+import dev.maicra.pickclimber.rules.UnlistedPolicy;
 import dev.maicra.pickclimber.ModItems;
 import dev.maicra.pickclimber.rules.ClimbingRuleBookCodec;
 import dev.maicra.pickclimber.rules.ClimbingRuleBookDefinition;
@@ -32,7 +33,9 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
+import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
 public final class ClimbingRulesTableNetworking {
@@ -255,7 +258,15 @@ public final class ClimbingRulesTableNetworking {
             result(player, false, validationMessageKey(validation));
             return;
         }
-        ClimbingRuleBookDefinition target = validation.normalizedDefinition();
+        ClimbingRuleBookDefinition target = completeUnclassifiedAsUnclimbable(
+                validation.normalizedDefinition()
+        );
+        ClimbingRuleBookValidationResult completedValidation = ClimbingRuleBookValidator.validateAndNormalize(target);
+        if (!completedValidation.valid()) {
+            result(player, false, validationMessageKey(completedValidation));
+            return;
+        }
+        target = completedValidation.normalizedDefinition();
         if (target.coverColor() != session.allowedCoverColor()) {
             result(player, false, "message.pickclimber.rules.dye_changed_during_edit");
             return;
@@ -446,6 +457,52 @@ public final class ClimbingRulesTableNetworking {
     private static void handleResult(RulesActionResultPayload payload, IPayloadContext context) {
         ChatFormatting color = payload.success() ? ChatFormatting.GREEN : ChatFormatting.RED;
         context.player().displayClientMessage(Component.translatable(payload.messageKey()).withStyle(color), true);
+    }
+
+    private static ClimbingRuleBookDefinition completeUnclassifiedAsUnclimbable(
+            ClimbingRuleBookDefinition definition
+    ) {
+        ClimbingRulesProfile profile = definition.profile();
+        ClimbingRulesProfile authorableBaseline = DefaultRuleProfileFactory.create(profile.profileName());
+
+        Set<net.minecraft.resources.ResourceLocation> completedUnclimbable =
+                new LinkedHashSet<>(profile.unclimbableBlocks());
+        completedUnclimbable.removeAll(profile.stableBlocks());
+        completedUnclimbable.removeAll(profile.unstableBlocks());
+
+        Set<net.minecraft.resources.ResourceLocation> authorable = new LinkedHashSet<>();
+        authorable.addAll(authorableBaseline.stableBlocks());
+        authorable.addAll(authorableBaseline.unstableBlocks());
+        authorable.addAll(authorableBaseline.unclimbableBlocks());
+
+        for (net.minecraft.resources.ResourceLocation id : authorable) {
+            if (!profile.stableBlocks().contains(id) && !profile.unstableBlocks().contains(id)) {
+                completedUnclimbable.add(id);
+            }
+        }
+
+        ClimbingRulesProfile completedProfile = new ClimbingRulesProfile(
+                profile.formatVersion(),
+                profile.profileName(),
+                profile.stableBlocks(),
+                profile.unstableBlocks(),
+                completedUnclimbable,
+                UnlistedPolicy.UNCLIMBABLE,
+                profile.pickaxeWear(),
+                profile.playerMiningEnabled(),
+                profile.unmineableTerminals()
+        );
+        return new ClimbingRuleBookDefinition(
+                definition.formatVersion(),
+                definition.bookName(),
+                definition.coverColor(),
+                completedProfile,
+                definition.activationMode(),
+                definition.scope(),
+                definition.durationSeconds(),
+                definition.authorUuid(),
+                definition.authorName()
+        );
     }
 
     private static ClimbingRuleBookDefinition withAuthorIfMissing(

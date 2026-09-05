@@ -48,7 +48,8 @@ public final class ClimbingRuleDispenserNetworking {
         }
         if (serverPlayer.level().getBlockEntity(payload.position())
                 instanceof ClimbingRuleDispenserBlockEntity blockEntity) {
-            blockEntity.set(0, payload.seconds());
+            blockEntity.setLifetimeSeconds(payload.seconds());
+            blockEntity.setStartCounterOnPickup(payload.startCounterOnPickup());
         }
     }
 }

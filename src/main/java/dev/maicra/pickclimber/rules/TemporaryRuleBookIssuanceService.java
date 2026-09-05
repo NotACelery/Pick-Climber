@@ -24,7 +24,7 @@ public final class TemporaryRuleBookIssuanceService {
     public static final UUID UNCLAIMED_OWNER = new UUID(0L, 0L);
     private static final long CLAIM_WINDOW_TICKS = 20L * 60L * 5L;
 
-    private static final Map<UUID, Issuance> BY_PLAYER = new HashMap<>();
+    private static final Map<UUID, Issuance> BY_TOKEN = new HashMap<>();
     private static final Map<UUID, UUID> OWNER_BY_TOKEN = new HashMap<>();
     private static final Map<UUID, ClaimableIssuance> CLAIMABLE_BY_TOKEN = new HashMap<>();
 
@@ -35,10 +35,6 @@ public final class TemporaryRuleBookIssuanceService {
         ServerLevel level = player.serverLevel();
         long gameTime = level.getServer().overworld().getGameTime();
         cleanupExpired(gameTime);
-        if (BY_PLAYER.containsKey(player.getUUID())) {
-            return RuleBookIssuanceResult.rejected("message.pickclimber.rules.dispenser_pending_copy");
-        }
-
         Optional<ClimbingRuleBookDefinition> source = resolveSource(level.getServer(), dispenser);
         if (source.isEmpty()) {
             return RuleBookIssuanceResult.rejected("message.pickclimber.rules.valid_book_required");
@@ -55,29 +51,47 @@ public final class TemporaryRuleBookIssuanceService {
             return RuleBookIssuanceResult.rejected("message.pickclimber.rules.invalid_profile");
         }
 
-        long expiresAt = gameTime + lifetimeSeconds * 20L;
+        boolean startOnPickup = dispenser.startCounterOnPickup();
         UUID token = UUID.randomUUID();
+        long expiresAt = startOnPickup
+                ? gameTime + CLAIM_WINDOW_TICKS
+                : gameTime + lifetimeSeconds * 20L;
+        UUID owner = startOnPickup ? UNCLAIMED_OWNER : player.getUUID();
         TemporaryRuleBookData.TransportData transport = transport(
-                player.getUUID(), token, expiresAt, level, dispenser, definitionId, definition, lifetimeSeconds
+                owner,
+                token,
+                expiresAt,
+                level,
+                dispenser,
+                definitionId,
+                definition,
+                lifetimeSeconds,
+                startOnPickup
         );
         ItemStack stack = TemporaryRuleBookData.create(transport);
         if (stack.isEmpty()) {
             return RuleBookIssuanceResult.rejected("message.pickclimber.rules.invalid_profile");
         }
 
-        registerOwned(player.getUUID(), token, expiresAt, level, dispenser);
+        if (startOnPickup) {
+            CLAIMABLE_BY_TOKEN.put(token, new ClaimableIssuance(token, expiresAt));
+        } else {
+            registerOwned(player.getUUID(), token, expiresAt, level, dispenser);
+        }
         if (!spawn(level, dispenser, player.getUUID(), stack)) {
             release(token, false, level.getServer());
             return RuleBookIssuanceResult.rejected("message.pickclimber.rules.dispenser_spawn_failed");
         }
-        TemporaryRuleBookSynchronization.send(player, expiresAt);
+        if (!startOnPickup) {
+            synchronizeOwner(player.getUUID(), level.getServer(), gameTime);
+        }
         return RuleBookIssuanceResult.issued("message.pickclimber.rules.dispenser_issued");
     }
 
     /**
-     * Redstone path: dispense an unclaimed copy. The first eligible player to pick it up becomes its owner and the
-     * configured lifetime starts at pickup time. This keeps redstone automation independent from whoever opened
-     * the GUI.
+     * Redstone path: dispense an unclaimed copy. The first eligible player to pick it up becomes its owner.
+     * The dispenser setting decides whether the configured lifetime starts immediately on dispense or only
+     * when the first player picks the copy up.
      */
     public static RuleBookIssuanceResult dispense(ServerLevel level, ClimbingRuleDispenserBlockEntity dispenser) {
         long gameTime = level.getServer().overworld().getGameTime();
@@ -95,16 +109,21 @@ public final class TemporaryRuleBookIssuanceService {
         }
 
         UUID token = UUID.randomUUID();
-        long claimDeadline = gameTime + CLAIM_WINDOW_TICKS;
+        boolean startOnPickup = dispenser.startCounterOnPickup();
+        long expiresAt = startOnPickup
+                ? gameTime + CLAIM_WINDOW_TICKS
+                : gameTime + lifetimeSeconds * 20L;
+        long claimDeadline = expiresAt;
         TemporaryRuleBookData.TransportData transport = transport(
                 UNCLAIMED_OWNER,
                 token,
-                claimDeadline,
+                expiresAt,
                 level,
                 dispenser,
                 definitionId,
                 definition,
-                lifetimeSeconds
+                lifetimeSeconds,
+                startOnPickup
         );
         ItemStack stack = TemporaryRuleBookData.create(transport);
         if (stack.isEmpty()) {
@@ -133,11 +152,17 @@ public final class TemporaryRuleBookIssuanceService {
         long gameTime = server.overworld().getGameTime();
         cleanupExpired(gameTime);
         ClaimableIssuance claimable = CLAIMABLE_BY_TOKEN.get(data.issuanceToken());
-        if (claimable == null || claimable.claimDeadline() <= gameTime || BY_PLAYER.containsKey(player.getUUID())) {
+        if (claimable == null || claimable.claimDeadline() <= gameTime) {
             return false;
         }
 
-        long expiresAt = gameTime + Math.max(1, data.durationSeconds()) * 20L;
+        long expiresAt = data.startCounterOnPickup()
+                ? gameTime + Math.max(1, data.durationSeconds()) * 20L
+                : data.expiresAtGameTime();
+        if (expiresAt <= gameTime) {
+            CLAIMABLE_BY_TOKEN.remove(data.issuanceToken());
+            return false;
+        }
         TemporaryRuleBookData.TransportData claimed = new TemporaryRuleBookData.TransportData(
                 player.getUUID(),
                 data.issuanceToken(),
@@ -149,15 +174,16 @@ public final class TemporaryRuleBookIssuanceService {
                 data.coverColor(),
                 data.durationSeconds(),
                 data.authorUuid(),
-                data.authorName()
+                data.authorName(),
+                data.startCounterOnPickup()
         );
         if (!TemporaryRuleBookData.write(stack, claimed)) {
             return false;
         }
 
         CLAIMABLE_BY_TOKEN.remove(data.issuanceToken());
-        BY_PLAYER.put(
-                player.getUUID(),
+        BY_TOKEN.put(
+                data.issuanceToken(),
                 new Issuance(
                         player.getUUID(),
                         data.issuanceToken(),
@@ -167,7 +193,7 @@ public final class TemporaryRuleBookIssuanceService {
                 )
         );
         OWNER_BY_TOKEN.put(data.issuanceToken(), player.getUUID());
-        TemporaryRuleBookSynchronization.send(player, expiresAt);
+        synchronizeOwner(player.getUUID(), server, gameTime);
         return true;
     }
 
@@ -181,8 +207,10 @@ public final class TemporaryRuleBookIssuanceService {
             ClaimableIssuance claimable = CLAIMABLE_BY_TOKEN.get(token);
             return claimable != null && claimable.claimDeadline() > gameTime;
         }
-        Issuance issuance = BY_PLAYER.get(owner);
-        return issuance != null && issuance.token().equals(token) && issuance.expiresAtGameTime() > gameTime;
+        Issuance issuance = BY_TOKEN.get(token);
+        return issuance != null
+                && issuance.owner().equals(owner)
+                && issuance.expiresAtGameTime() > gameTime;
     }
 
     public static void releaseFromStack(ItemStack stack, MinecraftServer server) {
@@ -198,18 +226,12 @@ public final class TemporaryRuleBookIssuanceService {
     public static void release(UUID token, boolean synchronize, MinecraftServer server) {
         CLAIMABLE_BY_TOKEN.remove(token);
         UUID owner = OWNER_BY_TOKEN.remove(token);
+        BY_TOKEN.remove(token);
         if (owner == null) {
             return;
         }
-        Issuance issuance = BY_PLAYER.get(owner);
-        if (issuance != null && issuance.token().equals(token)) {
-            BY_PLAYER.remove(owner);
-        }
         if (synchronize) {
-            ServerPlayer player = server.getPlayerList().getPlayer(owner);
-            if (player != null) {
-                TemporaryRuleBookSynchronization.send(player, 0L);
-            }
+            synchronizeOwner(owner, server, server.overworld().getGameTime());
         }
     }
 
@@ -226,10 +248,14 @@ public final class TemporaryRuleBookIssuanceService {
                 player.getInventory().setItem(slot, ItemStack.EMPTY);
             }
         }
-        Issuance issuance = BY_PLAYER.remove(player.getUUID());
-        if (issuance != null) {
-            OWNER_BY_TOKEN.remove(issuance.token());
-        }
+        BY_TOKEN.entrySet().removeIf(entry -> {
+            Issuance issuance = entry.getValue();
+            if (!issuance.owner().equals(player.getUUID())) {
+                return false;
+            }
+            OWNER_BY_TOKEN.remove(entry.getKey());
+            return true;
+        });
         TemporaryRuleBookSynchronization.send(player, 0L);
     }
 
@@ -248,13 +274,11 @@ public final class TemporaryRuleBookIssuanceService {
         }
         long gameTime = server.overworld().getGameTime();
         cleanupExpired(gameTime);
-        Issuance issuance = BY_PLAYER.get(player.getUUID());
-        long expiresAt = issuance == null ? 0L : issuance.expiresAtGameTime();
-        TemporaryRuleBookSynchronization.send(player, expiresAt);
+        synchronizeOwner(player.getUUID(), server, gameTime);
     }
 
     public static void clear() {
-        BY_PLAYER.clear();
+        BY_TOKEN.clear();
         OWNER_BY_TOKEN.clear();
         CLAIMABLE_BY_TOKEN.clear();
     }
@@ -285,15 +309,28 @@ public final class TemporaryRuleBookIssuanceService {
     }
 
     private static void cleanupExpired(long gameTime) {
-        Iterator<Map.Entry<UUID, Issuance>> iterator = BY_PLAYER.entrySet().iterator();
+        Iterator<Map.Entry<UUID, Issuance>> iterator = BY_TOKEN.entrySet().iterator();
         while (iterator.hasNext()) {
             Map.Entry<UUID, Issuance> entry = iterator.next();
             if (entry.getValue().expiresAtGameTime() <= gameTime) {
-                OWNER_BY_TOKEN.remove(entry.getValue().token());
+                OWNER_BY_TOKEN.remove(entry.getKey());
                 iterator.remove();
             }
         }
         CLAIMABLE_BY_TOKEN.entrySet().removeIf(entry -> entry.getValue().claimDeadline() <= gameTime);
+    }
+
+    private static void synchronizeOwner(UUID owner, MinecraftServer server, long gameTime) {
+        long nextExpiry = BY_TOKEN.values().stream()
+                .filter(issuance -> issuance.owner().equals(owner))
+                .mapToLong(Issuance::expiresAtGameTime)
+                .filter(expiresAt -> expiresAt > gameTime)
+                .min()
+                .orElse(0L);
+        ServerPlayer player = server.getPlayerList().getPlayer(owner);
+        if (player != null) {
+            TemporaryRuleBookSynchronization.send(player, nextExpiry);
+        }
     }
 
     private static Optional<ClimbingRuleBookDefinition> resolveSource(
@@ -319,7 +356,8 @@ public final class TemporaryRuleBookIssuanceService {
             ClimbingRuleDispenserBlockEntity dispenser,
             String definitionId,
             ClimbingRuleBookDefinition definition,
-            int lifetimeSeconds
+            int lifetimeSeconds,
+            boolean startCounterOnPickup
     ) {
         return new TemporaryRuleBookData.TransportData(
                 owner,
@@ -332,7 +370,8 @@ public final class TemporaryRuleBookIssuanceService {
                 definition.coverColor(),
                 lifetimeSeconds,
                 definition.authorUuid(),
-                definition.authorName()
+                definition.authorName(),
+                startCounterOnPickup
         );
     }
 
@@ -350,7 +389,7 @@ public final class TemporaryRuleBookIssuanceService {
                 level.dimension().location(),
                 dispenser.getBlockPos()
         );
-        BY_PLAYER.put(owner, issuance);
+        BY_TOKEN.put(token, issuance);
         OWNER_BY_TOKEN.put(token, owner);
     }
 

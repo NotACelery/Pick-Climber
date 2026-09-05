@@ -31,6 +31,7 @@ public final class TemporaryRuleBookData {
     private static final String DURATION_SECONDS_KEY = "duration_seconds";
     private static final String AUTHOR_UUID_KEY = "author_uuid";
     private static final String AUTHOR_NAME_KEY = "author_name";
+    private static final String START_COUNTER_ON_PICKUP_KEY = "start_counter_on_pickup";
 
     private TemporaryRuleBookData() {
     }
@@ -72,7 +73,8 @@ public final class TemporaryRuleBookData {
                 dyeColor(root.getString(COVER_COLOR_KEY)),
                 durationSeconds,
                 root.getString(AUTHOR_UUID_KEY),
-                root.getString(AUTHOR_NAME_KEY)
+                root.getString(AUTHOR_NAME_KEY),
+                root.getBoolean(START_COUNTER_ON_PICKUP_KEY)
         ));
     }
 
@@ -114,6 +116,7 @@ public final class TemporaryRuleBookData {
             root.putInt(DURATION_SECONDS_KEY, Math.max(1, Math.min(60, data.durationSeconds())));
             root.putString(AUTHOR_UUID_KEY, data.authorUuid());
             root.putString(AUTHOR_NAME_KEY, data.authorName());
+            root.putBoolean(START_COUNTER_ON_PICKUP_KEY, data.startCounterOnPickup());
             custom.put(ROOT_KEY, root);
         });
         return true;
@@ -147,6 +150,11 @@ public final class TemporaryRuleBookData {
     }
 
     public static boolean isExpired(TransportData data, long gameTime) {
+        if (data.startCounterOnPickup()
+                && dev.maicra.pickclimber.rules.TemporaryRuleBookIssuanceService.UNCLAIMED_OWNER
+                .equals(data.owner())) {
+            return false;
+        }
         return data.expiresAtGameTime() <= gameTime;
     }
 
@@ -173,7 +181,8 @@ public final class TemporaryRuleBookData {
             DyeColor coverColor,
             int durationSeconds,
             String authorUuid,
-            String authorName
+            String authorName,
+            boolean startCounterOnPickup
     ) {
         public TransportData {
             definitionId = definitionId == null ? "" : definitionId;

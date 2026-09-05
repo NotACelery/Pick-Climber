@@ -1,4 +1,4 @@
-# Pick Climber 1.2.0-dev.37 — Build / Acceptance Status
+# Pick Climber 1.2.0-dev.41 — Build / Acceptance Status
 
 ## Current source
 
@@ -6,7 +6,7 @@
 Minecraft 1.21.1
 NeoForge 21.1.235
 Java 21
-mod_version 1.2.0-dev.37
+mod_version 1.2.0-dev.41
 network protocol 15
 Rule Book portable format 2
 mechanical profile format 1
@@ -268,7 +268,7 @@ This environment cannot resolve `services.gradle.org`, so dev.33 still requires 
 being promoted to build-clean. Runtime acceptance should specifically include FPS regression testing and two-player
 reference-only drop/pick/view/apply behavior.
 
-## 1.2.0-dev.37 — Rule Book edit persistence / redstone dispenser / item rendering
+## 1.2.0-dev.41 — Rule Book edit persistence / redstone dispenser / item rendering
 
 - [x] Rule Book classification saves commit a fresh reference-only ItemStack to the newly registered content ID.
 - [x] Temporary Rule Book timer moved out of the vanilla selected-item-name zone.

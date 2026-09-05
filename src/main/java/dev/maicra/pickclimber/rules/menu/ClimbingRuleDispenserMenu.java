@@ -35,7 +35,7 @@ public final class ClimbingRuleDispenserMenu extends AbstractContainerMenu {
                 inventory,
                 new SimpleContainer(ClimbingRuleDispenserBlockEntity.SLOT_COUNT),
                 ContainerLevelAccess.NULL,
-                new SimpleContainerData(1),
+                new SimpleContainerData(2),
                 buffer.readBlockPos()
         );
     }
@@ -86,6 +86,10 @@ public final class ClimbingRuleDispenserMenu extends AbstractContainerMenu {
 
     public int lifetimeSeconds() {
         return ClimbingRuleDispenserBlockEntity.clampLifetime(data.get(0));
+    }
+
+    public boolean startCounterOnPickup() {
+        return data.get(1) != 0;
     }
 
     @Override
@@ -149,11 +153,11 @@ public final class ClimbingRuleDispenserMenu extends AbstractContainerMenu {
     private void addPlayerInventory(Inventory inventory) {
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 9; column++) {
-                addSlot(new Slot(inventory, column + row * 9 + 9, 36 + column * 18, 122 + row * 18));
+                addSlot(new Slot(inventory, column + row * 9 + 9, 36 + column * 18, 138 + row * 18));
             }
         }
         for (int column = 0; column < 9; column++) {
-            addSlot(new Slot(inventory, column, 36 + column * 18, 180));
+            addSlot(new Slot(inventory, column, 36 + column * 18, 196));
         }
     }
 

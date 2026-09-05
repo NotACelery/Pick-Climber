@@ -233,5 +233,7 @@
   "message.pickclimber.rules.book_imported": "Regras importadas para o Rule Book.",
   "gui.pickclimber.rules.dispenser.source": "Livro de regras",
   "options.pickclimber.export_world_rules": "Export World Rules",
-  "message.pickclimber.anchor.unclimbable_block": "Não é possível ancorar: %s não é escalável"
+  "message.pickclimber.anchor.unclimbable_block": "Não é possível ancorar: %s não é escalável",
+  "gui.pickclimber.rules.dispenser.start_on_pickup.checked": "[x] Iniciar contador ao apanhar",
+  "gui.pickclimber.rules.dispenser.start_on_pickup.unchecked": "[ ] Iniciar contador ao apanhar"
 }

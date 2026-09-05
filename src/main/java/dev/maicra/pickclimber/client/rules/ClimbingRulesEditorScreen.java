@@ -813,19 +813,28 @@ public final class ClimbingRulesEditorScreen extends Screen {
         if (durationField != null) {
             updateDurationValue(durationField.getValue());
         }
+
+        // In the ALL tab, a white border is the editor's "left without a category" state.
+        // Selected entries must therefore not keep their previous Stable/Unstable value in the payload.
+        java.util.Set<ResourceLocation> completedStable = new java.util.HashSet<>(stable);
+        java.util.Set<ResourceLocation> completedUnstable = new java.util.HashSet<>(unstable);
+        completedStable.removeAll(selected);
+        completedUnstable.removeAll(selected);
+
         java.util.Set<ResourceLocation> completedUnclimbable = new java.util.HashSet<>(unclimbable);
         completedUnclimbable.addAll(clearedToUnclimbable);
+        completedUnclimbable.addAll(selected);
         for (BlockCatalogService.Entry entry : catalog) {
             ResourceLocation id = entry.id();
-            if (!stable.contains(id) && !unstable.contains(id)) {
+            if (!completedStable.contains(id) && !completedUnstable.contains(id)) {
                 completedUnclimbable.add(id);
             }
         }
         ClimbingRulesProfile profile = new ClimbingRulesProfile(
                 ClimbingRulesProfile.CURRENT_FORMAT_VERSION,
                 draftProfileName,
-                stable,
-                unstable,
+                completedStable,
+                completedUnstable,
                 completedUnclimbable,
                 UnlistedPolicy.UNCLIMBABLE,
                 pickaxeWear,

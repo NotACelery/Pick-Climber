@@ -27,8 +27,6 @@ public final class ClimbingRulesTableBlockEntity extends BaseContainerBlockEntit
     public ClimbingRulesTableBlockEntity(BlockPos position, BlockState state) {
         super(ModBlockEntities.CLIMBING_RULES_TABLE.get(), position, state);
     }
-
-
     @Override
     public void onLoad() {
         super.onLoad();
@@ -36,10 +34,37 @@ public final class ClimbingRulesTableBlockEntity extends BaseContainerBlockEntit
             ItemStack stack = getItem(WORK_SLOT);
             if (stack.is(ModItems.CLIMBING_RULE_BOOK.get())
                     && ClimbingRuleBookData.resolveDefinition(serverLevel.getServer(), stack).isPresent()) {
-                setChanged();
+                super.setChanged();
             }
+            syncBookVisualState();
         }
     }
+
+    @Override
+    public void setChanged() {
+        super.setChanged();
+        syncBookVisualState();
+    }
+
+    private void syncBookVisualState() {
+        if (level == null || level.isClientSide()) {
+            return;
+        }
+        BlockState state = getBlockState();
+        if (!state.hasProperty(ClimbingRulesTableBlock.HAS_BOOK)) {
+            return;
+        }
+        boolean hasBook = !getItem(WORK_SLOT).isEmpty();
+        if (state.getValue(ClimbingRulesTableBlock.HAS_BOOK) == hasBook) {
+            return;
+        }
+        level.setBlock(
+                worldPosition,
+                state.setValue(ClimbingRulesTableBlock.HAS_BOOK, hasBook),
+                net.minecraft.world.level.block.Block.UPDATE_CLIENTS
+        );
+    }
+
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);

@@ -906,6 +906,39 @@
       }
     },
     {
+      "name": "Book",
+      "from": [
+        2,
+        15.25,
+        2
+      ],
+      "to": [
+        14,
+        15.25,
+        14
+      ],
+      "rotation": {
+        "angle": 0,
+        "axis": "y",
+        "origin": [
+          9,
+          15.25,
+          9
+        ]
+      },
+      "faces": {
+        "up": {
+          "uv": [
+            4,
+            4,
+            12,
+            12
+          ],
+          "texture": "#2"
+        }
+      }
+    },
+    {
       "from": [
         7.5,
         15.2,
@@ -1092,6 +1125,7 @@
       }
     }
   ],
+  "render_type": "minecraft:cutout",
   "parent": "minecraft:block/block",
   "ambientocclusion": false
 }

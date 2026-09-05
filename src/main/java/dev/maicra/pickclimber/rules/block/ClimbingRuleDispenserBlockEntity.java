@@ -27,6 +27,7 @@ public final class ClimbingRuleDispenserBlockEntity extends BaseContainerBlockEn
 
     private NonNullList<ItemStack> items = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
     private int lifetimeSeconds = DEFAULT_LIFETIME_SECONDS;
+    private boolean startCounterOnPickup;
 
     public ClimbingRuleDispenserBlockEntity(BlockPos position, BlockState state) {
         super(ModBlockEntities.CLIMBING_RULE_DISPENSER.get(), position, state);
@@ -38,6 +39,33 @@ public final class ClimbingRuleDispenserBlockEntity extends BaseContainerBlockEn
 
     public int getLifetimeSeconds() {
         return lifetimeSeconds;
+    }
+
+    public boolean startCounterOnPickup() {
+        return startCounterOnPickup;
+    }
+
+    public void setStartCounterOnPickup(boolean value) {
+        if (startCounterOnPickup == value) {
+            return;
+        }
+        startCounterOnPickup = value;
+        setChanged();
+        if (level != null) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
+    }
+
+    public void setLifetimeSeconds(int value) {
+        int clamped = clampLifetime(value);
+        if (lifetimeSeconds == clamped) {
+            return;
+        }
+        lifetimeSeconds = clamped;
+        setChanged();
+        if (level != null) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
     }
 
 
@@ -60,6 +88,7 @@ public final class ClimbingRuleDispenserBlockEntity extends BaseContainerBlockEn
         lifetimeSeconds = tag.contains("LifetimeSeconds")
                 ? clampLifetime(tag.getInt("LifetimeSeconds"))
                 : DEFAULT_LIFETIME_SECONDS;
+        startCounterOnPickup = tag.getBoolean("StartCounterOnPickup");
     }
 
     @Override
@@ -67,6 +96,7 @@ public final class ClimbingRuleDispenserBlockEntity extends BaseContainerBlockEn
         super.saveAdditional(tag, registries);
         ContainerHelper.saveAllItems(tag, items, registries);
         tag.putInt("LifetimeSeconds", lifetimeSeconds);
+        tag.putBoolean("StartCounterOnPickup", startCounterOnPickup);
     }
 
     @Override
@@ -111,21 +141,26 @@ public final class ClimbingRuleDispenserBlockEntity extends BaseContainerBlockEn
 
     @Override
     public int get(int index) {
-        return index == 0 ? lifetimeSeconds : 0;
+        return switch (index) {
+            case 0 -> lifetimeSeconds;
+            case 1 -> startCounterOnPickup ? 1 : 0;
+            default -> 0;
+        };
     }
 
     @Override
     public void set(int index, int value) {
-        if (index != 0) {
-            return;
+        switch (index) {
+            case 0 -> setLifetimeSeconds(value);
+            case 1 -> setStartCounterOnPickup(value != 0);
+            default -> {
+            }
         }
-        lifetimeSeconds = clampLifetime(value);
-        setChanged();
     }
 
     @Override
     public int getCount() {
-        return 1;
+        return 2;
     }
 
     public static int clampLifetime(int value) {

@@ -15,6 +15,7 @@ public final class ModBlocks {
             "climbing_rules_table",
             ClimbingRulesTableBlock::new,
             BlockBehaviour.Properties.of()
+                    .noOcclusion()
                     .strength(3.5F, 6.0F)
                     .sound(SoundType.METAL)
     );
